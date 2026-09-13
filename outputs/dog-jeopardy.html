@@ -2115,6 +2115,20 @@ body.remote-phone-mode .phone-choice-btn{
   padding:12px 14px!important;
 }
 
+/* DAILY_STATIC_WAGER_V11 */
+.daily-wager-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px auto 8px;max-width:520px}
+.daily-wager-btn{margin:0!important;min-width:0;padding:13px 8px!important;border-radius:12px!important;background:#ffd166;color:#17202a;font-size:18px;font-weight:1000}
+.phone-daily-wagers{grid-template-columns:repeat(2,minmax(0,1fr));width:100%;max-width:none}
+.phone-daily-wagers .daily-wager-btn{min-height:54px;font-size:17px}
+
+/* PHONE_HORIZONTAL_GUTTER_FIX_V11 */
+body.remote-phone-mode .phone-shell,body.remote-phone-mode .join-shell{padding-right:calc(18px + var(--safe-right))!important;padding-left:calc(18px + var(--safe-left))!important}
+body.remote-phone-mode #phoneQuestionView{box-sizing:border-box!important;width:100%!important;max-width:100%!important;padding-left:4px!important;padding-right:4px!important}
+body.remote-phone-mode .phone-choice-grid,body.remote-phone-mode .phone-follow-choices{box-sizing:border-box!important;width:100%!important;max-width:100%!important;padding-left:2px;padding-right:2px}
+body.remote-phone-mode .phone-choice-btn.selected{outline:none!important;box-shadow:inset 0 0 0 3px rgba(255,255,255,.9)!important}
+body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outline:none!important;box-shadow:inset 0 0 0 3px var(--accent)!important}
+@media(max-width:380px){body.remote-phone-mode .phone-shell,body.remote-phone-mode .join-shell{padding-right:calc(14px + var(--safe-right))!important;padding-left:calc(14px + var(--safe-left))!important}}
+
 </style>
 </head>
 <body>
@@ -2273,10 +2287,17 @@ body.remote-phone-mode .phone-choice-btn{
     <p id="dailyPlayerText"></p>
     <p>Choose your wager before seeing the question.</p>
     <p id="dailyMultiplierText" style="color:#ffd166;font-weight:900"></p>
-    <input id="wagerInput" type="number" min="100" step="100" value="100">
+    <input id="wagerInput" type="hidden" value="500">
+    <div class="daily-wager-grid" id="dailyWagerChoices" aria-label="Choose Daily Double wager">
+      <button class="daily-wager-btn" onclick="confirmDailyWager(100)">100</button>
+      <button class="daily-wager-btn" onclick="confirmDailyWager(200)">200</button>
+      <button class="daily-wager-btn" onclick="confirmDailyWager(300)">300</button>
+      <button class="daily-wager-btn" onclick="confirmDailyWager(400)">400</button>
+      <button class="daily-wager-btn" onclick="confirmDailyWager(500)">500</button>
+      <button class="daily-wager-btn" onclick="confirmDailyWager(1000)">1000</button>
+    </div>
     <div class="daily-actions">
       <button class="white" onclick="cancelDailyWager()">Cancel</button>
-      <button class="gold" onclick="confirmDailyWager()">Lock Wager</button>
     </div>
   </div>
 </div>
@@ -2381,8 +2402,15 @@ body.remote-phone-mode .phone-choice-btn{
         <div class="phone-daily-title">DAILY DOUBLE</div>
         <div class="phone-question">Choose your wager before seeing the question.</div>
         <div id="phoneDailyMultiplier" class="phone-info"></div>
-        <input id="phoneWagerInput" class="phone-wager" type="number" min="100" step="100" value="100">
-        <button class="phone-action" onclick="phoneConfirmDailyWager()">Lock Wager</button>
+        <input id="phoneWagerInput" type="hidden" value="500">
+        <div class="daily-wager-grid phone-daily-wagers" id="phoneDailyWagerChoices" aria-label="Choose Daily Double wager">
+          <button class="daily-wager-btn" onclick="phoneConfirmDailyWager(100)">100</button>
+          <button class="daily-wager-btn" onclick="phoneConfirmDailyWager(200)">200</button>
+          <button class="daily-wager-btn" onclick="phoneConfirmDailyWager(300)">300</button>
+          <button class="daily-wager-btn" onclick="phoneConfirmDailyWager(400)">400</button>
+          <button class="daily-wager-btn" onclick="phoneConfirmDailyWager(500)">500</button>
+          <button class="daily-wager-btn" onclick="phoneConfirmDailyWager(1000)">1000</button>
+        </div>
       </div>
     </div>
 
@@ -2444,39 +2472,39 @@ body.remote-phone-mode .phone-choice-btn{
 <script>
 const categories=[
 {name:"Technology",clues:[
-{q:"Which happened first: Amazon was founded, or eBay launched?",h:"Both began during the first big wave of consumer internet companies, but one started the year before the other.",a:"Amazon was founded first",choices:["Amazon was founded","eBay launched"]},
-{q:"Which happened first: the first Android phone released, or the first iPad released?",h:"Think about which product category reached consumers first: modern Android smartphones or Apple tablets.",a:"The first Android phone released first",choices:["the first Android phone released","the first iPad released"]},
-{q:"Which happened first: Gmail launched, or Reddit launched?",h:"One arrived while social media was still very early; the other followed about a year later.",a:"Gmail launched first",choices:["Gmail launched","Reddit launched"]},
-{q:"Which happened first: Windows 95 released, or the original Pokémon games released in Japan?",h:"They are close, but Microsoft's famous Start-menu era began just before Pokémon's debut.",a:"Windows 95 released first",choices:["Windows 95 released","the original Pokémon games released in Japan"]},
-{q:"Which happened first: Spotify launched, or Uber was founded?",h:"Music streaming became established just before app-based ride sharing started taking off.",a:"Spotify launched first",choices:["Spotify launched","Uber was founded"],special:true,fq:"About how many years apart were these milestones?",fa:"About one year — Spotify launched in 2008 and Uber was founded in 2009.",fchoices:["About 1 year","About 2 years","About 3 years","About 5 years"],fcorrect:"About 1 year"}
+{q:"Which happened first: Amazon was founded, or eBay launched?",h:"Both milestones landed in the mid-1990s web boom and were separated by roughly one year.",a:"Amazon was founded first",choices:["Amazon was founded","eBay launched"]},
+{q:"Which happened first: the first Android phone released, or the first iPad released?",h:"The two consumer-device launches were about two years apart around the end of the 2000s.",a:"The first Android phone released first",choices:["the first Android phone released","the first iPad released"]},
+{q:"Which happened first: Gmail launched, or Reddit launched?",h:"Both emerged during the mid-2000s Web 2.0 era, roughly a year apart.",a:"Gmail launched first",choices:["Gmail launched","Reddit launched"]},
+{q:"Which happened first: Windows 95 released, or the original Pokémon games released in Japan?",h:"These mid-1990s releases happened within about half a year of each other.",a:"Windows 95 released first",choices:["Windows 95 released","the original Pokémon games released in Japan"]},
+{q:"Which happened first: Spotify launched, or Uber was founded?",h:"Both milestones belong to the late 2000s and happened about a year apart.",a:"Spotify launched first",choices:["Spotify launched","Uber was founded"],special:true,fq:"About how many years apart were these milestones?",fa:"About one year — Spotify launched in 2008 and Uber was founded in 2009.",fchoices:["About 1 year","About 2 years","About 3 years","About 5 years"],fcorrect:"About 1 year"}
 ]},
 {name:"History",clues:[
-{q:"Which happened first: the first powered Wright brothers flight, or the Titanic was launched?",h:"Early aviation achieved its breakthrough several years before the famous ocean liner entered the water.",a:"The first powered Wright brothers flight first",choices:["the first powered Wright brothers flight","the Titanic was launched"]},
-{q:"Which happened first: the U.S. Civil War ended, or Canada became a country?",h:"These happened only a couple of years apart, with the war ending shortly before Canadian Confederation.",a:"The U.S. Civil War ended first",choices:["the U.S. Civil War ended","Canada became a country"]},
-{q:"Which happened first: the printing press was developed in Europe, or Columbus reached the Americas?",h:"The invention that transformed European publishing predates the Atlantic voyage by several decades.",a:"The printing press was developed in Europe first",choices:["the printing press was developed in Europe","Columbus reached the Americas"]},
-{q:"Which happened first: the first photograph was made, or the first telegraph message was sent?",h:"Photography's earliest successful experiments came well before Morse's famous demonstration.",a:"The first photograph was made first",choices:["the first photograph was made","the first telegraph message was sent"]},
-{q:"Which happened first: the Eiffel Tower opened, or the first modern Olympic Games were held?",h:"The Paris landmark was already standing when the modern Olympics returned a few years later.",a:"The Eiffel Tower opened first",choices:["the Eiffel Tower opened","the first modern Olympic Games were held"],special:true,fq:"In which decade did the earlier event happen?",fa:"The 1880s — the Eiffel Tower opened in 1889.",fchoices:["1870s","1880s","1890s","1900s"],fcorrect:"1880s"}
+{q:"Which happened first: the first powered Wright brothers flight, or the Titanic was launched?",h:"These early-20th-century milestones were separated by roughly eight years.",a:"The first powered Wright brothers flight first",choices:["the first powered Wright brothers flight","the Titanic was launched"]},
+{q:"Which happened first: the U.S. Civil War ended, or Canada became a country?",h:"These North American milestones happened only about two years apart in the 1860s.",a:"The U.S. Civil War ended first",choices:["the U.S. Civil War ended","Canada became a country"]},
+{q:"Which happened first: the printing press was developed in Europe, or Columbus reached the Americas?",h:"Both are 15th-century milestones separated by several decades.",a:"The printing press was developed in Europe first",choices:["the printing press was developed in Europe","Columbus reached the Americas"]},
+{q:"Which happened first: the first photograph was made, or the first telegraph message was sent?",h:"Both breakthroughs arrived in the first half of the 1800s, less than two decades apart.",a:"The first photograph was made first",choices:["the first photograph was made","the first telegraph message was sent"]},
+{q:"Which happened first: the Eiffel Tower opened, or the first modern Olympic Games were held?",h:"These milestones happened near the turn of the 1890s, less than a decade apart.",a:"The Eiffel Tower opened first",choices:["the Eiffel Tower opened","the first modern Olympic Games were held"],special:true,fq:"In which decade did the earlier event happen?",fa:"The 1880s — the Eiffel Tower opened in 1889.",fchoices:["1870s","1880s","1890s","1900s"],fcorrect:"1880s"}
 ]},
 {name:"Pop Culture",clues:[
-{q:"Which happened first: Toy Story premiered, or the Nintendo 64 released?",h:"Pixar's first feature film reached theaters shortly before Nintendo's 64-bit console arrived.",a:"Toy Story premiered first",choices:["Toy Story premiered","the Nintendo 64 released"]},
-{q:"Which happened first: Friends premiered, or the first PlayStation released in Japan?",h:"These are both 1994 milestones, but the sitcom arrived a little earlier in the year.",a:"Friends premiered first",choices:["Friends premiered","the first PlayStation released in Japan"]},
-{q:"Which happened first: The Office (U.S.) premiered, or YouTube launched?",h:"Both happened in 2005, but the video website technically came first.",a:"YouTube launched first",choices:["The Office (U.S.) premiered","YouTube launched"]},
-{q:"Which happened first: Iron Man released, or Breaking Bad premiered?",h:"Both are 2008 landmarks, but the TV series began several months before the Marvel film.",a:"Breaking Bad premiered first",choices:["Iron Man released","Breaking Bad premiered"]},
-{q:"Which happened first: Fortnite Battle Royale released, or Disney+ launched?",h:"The battle royale boom was already underway before Disney entered the streaming wars.",a:"Fortnite Battle Royale released first",choices:["Fortnite Battle Royale released","Disney+ launched"],special:true,fq:"How many years apart were these launches?",fa:"Two years — Fortnite Battle Royale released in 2017 and Disney+ launched in 2019.",fchoices:["1 year","2 years","3 years","5 years"],fcorrect:"2 years"}
+{q:"Which happened first: Toy Story premiered, or the Nintendo 64 released?",h:"These entertainment milestones were released within about a year of each other in the mid-1990s.",a:"Toy Story premiered first",choices:["Toy Story premiered","the Nintendo 64 released"]},
+{q:"Which happened first: Friends premiered, or the first PlayStation released in Japan?",h:"Both happened in 1994, just a few months apart.",a:"Friends premiered first",choices:["Friends premiered","the first PlayStation released in Japan"]},
+{q:"Which happened first: The Office (U.S.) premiered, or YouTube launched?",h:"Both debuted in 2005, only a few weeks apart.",a:"YouTube launched first",choices:["The Office (U.S.) premiered","YouTube launched"]},
+{q:"Which happened first: Iron Man released, or Breaking Bad premiered?",h:"Both debuted in 2008, separated by only a few months.",a:"Breaking Bad premiered first",choices:["Iron Man released","Breaking Bad premiered"]},
+{q:"Which happened first: Fortnite Battle Royale released, or Disney+ launched?",h:"These launches occurred near the end of the 2010s, about two years apart.",a:"Fortnite Battle Royale released first",choices:["Fortnite Battle Royale released","Disney+ launched"],special:true,fq:"How many years apart were these launches?",fa:"Two years — Fortnite Battle Royale released in 2017 and Disney+ launched in 2019.",fchoices:["1 year","2 years","3 years","5 years"],fcorrect:"2 years"}
 ]},
 {name:"Science",clues:[
-{q:"Which happened first: Neptune was discovered, or Darwin published On the Origin of Species?",h:"Astronomers found the planet more than a decade before Darwin published his famous book.",a:"Neptune was discovered first",choices:["Neptune was discovered","Darwin published On the Origin of Species"]},
-{q:"Which happened first: X-rays were discovered, or radioactivity was discovered?",h:"These two discoveries came in back-to-back years at the end of the 1800s.",a:"X-rays were discovered first",choices:["X-rays were discovered","radioactivity was discovered"]},
-{q:"Which happened first: the first human entered space, or the first woman entered space?",h:"The first woman followed the first man into space only a couple of years later.",a:"The first human entered space first",choices:["the first human entered space","the first woman entered space"]},
-{q:"Which happened first: the first test-tube baby was born, or the first Space Shuttle launch?",h:"The medical milestone happened in the late 1970s; the shuttle era began in the early 1980s.",a:"The first test-tube baby was born first",choices:["the first test-tube baby was born","the first Space Shuttle launch"]},
-{q:"Which happened first: the Hubble Space Telescope launched, or the first website went online?",h:"These both happened around 1990, with the telescope reaching orbit slightly earlier.",a:"The Hubble Space Telescope launched first",choices:["the Hubble Space Telescope launched","the first website went online"],special:true,fq:"In what year did Hubble launch?",fa:"1990.",fchoices:["1988","1990","1992","1994"],fcorrect:"1990"}
+{q:"Which happened first: Neptune was discovered, or Darwin published On the Origin of Species?",h:"Both are 19th-century science milestones separated by a little over a decade.",a:"Neptune was discovered first",choices:["Neptune was discovered","Darwin published On the Origin of Species"]},
+{q:"Which happened first: X-rays were discovered, or radioactivity was discovered?",h:"These discoveries occurred in consecutive years in the mid-1890s.",a:"X-rays were discovered first",choices:["X-rays were discovered","radioactivity was discovered"]},
+{q:"Which happened first: the first human entered space, or the first woman entered space?",h:"These spaceflight milestones happened only about two years apart in the early 1960s.",a:"The first human entered space first",choices:["the first human entered space","the first woman entered space"]},
+{q:"Which happened first: the first test-tube baby was born, or the first Space Shuttle launch?",h:"Both milestones occurred around the turn from the 1970s to the 1980s, about three years apart.",a:"The first test-tube baby was born first",choices:["the first test-tube baby was born","the first Space Shuttle launch"]},
+{q:"Which happened first: the Hubble Space Telescope launched, or the first website went online?",h:"Both milestones happened around 1990, less than a year apart.",a:"The Hubble Space Telescope launched first",choices:["the Hubble Space Telescope launched","the first website went online"],special:true,fq:"In what year did Hubble launch?",fa:"1990.",fchoices:["1988","1990","1992","1994"],fcorrect:"1990"}
 ]},
 {name:"Sports",clues:[
-{q:"Which happened first: the NBA held its first game, or the first Formula 1 World Championship season began?",h:"Professional basketball's league era was underway several years before Formula 1's official championship.",a:"The NBA held its first game first",choices:["the NBA held its first game","the first Formula 1 World Championship season began"]},
-{q:"Which happened first: the first Super Bowl was played, or the first Earth Day was held?",h:"The championship game began in the late 1960s; Earth Day followed a few years later.",a:"The first Super Bowl was played first",choices:["the first Super Bowl was played","the first Earth Day was held"]},
-{q:"Which happened first: Serena Williams won her first Grand Slam singles title, or Tiger Woods completed the career Grand Slam?",h:"Serena's first major came just before Tiger completed that four-major milestone.",a:"Serena Williams won her first Grand Slam singles title first",choices:["Serena Williams won her first Grand Slam singles title","Tiger Woods completed the career Grand Slam"]},
-{q:"Which happened first: LeBron James was drafted into the NBA, or Lionel Messi made his official Barcelona first-team debut?",h:"The NBA draft came first, with Messi's senior debut arriving the following year.",a:"LeBron James was drafted into the NBA first",choices:["LeBron James was drafted into the NBA","Lionel Messi made his official Barcelona first-team debut"]},
-{q:"Which happened first: Usain Bolt set the 9.58-second 100m world record, or Spain won the FIFA World Cup?",h:"Bolt's famous Berlin record came the year before Spain's World Cup victory.",a:"Usain Bolt set the 9.58-second 100m world record first",choices:["Usain Bolt set the 9.58-second 100m world record","Spain won the FIFA World Cup"],special:true,fq:"How many years apart were these achievements?",fa:"One year — Bolt set the record in 2009 and Spain won the World Cup in 2010.",fchoices:["1 year","2 years","3 years","4 years"],fcorrect:"1 year"}
+{q:"Which happened first: the NBA held its first game, or the first Formula 1 World Championship season began?",h:"These postwar sports milestones happened only a few years apart around the late 1940s and 1950.",a:"The NBA held its first game first",choices:["the NBA held its first game","the first Formula 1 World Championship season began"]},
+{q:"Which happened first: the first Super Bowl was played, or the first Earth Day was held?",h:"Both U.S. milestones began within a few years of each other around the turn of the 1970s.",a:"The first Super Bowl was played first",choices:["the first Super Bowl was played","the first Earth Day was held"]},
+{q:"Which happened first: Serena Williams won her first Grand Slam singles title, or Tiger Woods completed the career Grand Slam?",h:"These achievements happened around the turn of the millennium, less than a year apart.",a:"Serena Williams won her first Grand Slam singles title first",choices:["Serena Williams won her first Grand Slam singles title","Tiger Woods completed the career Grand Slam"]},
+{q:"Which happened first: LeBron James was drafted into the NBA, or Lionel Messi made his official Barcelona first-team debut?",h:"These career milestones occurred in consecutive years in the early 2000s.",a:"LeBron James was drafted into the NBA first",choices:["LeBron James was drafted into the NBA","Lionel Messi made his official Barcelona first-team debut"]},
+{q:"Which happened first: Usain Bolt set the 9.58-second 100m world record, or Spain won the FIFA World Cup?",h:"These famous sports achievements happened in consecutive years around 2010.",a:"Usain Bolt set the 9.58-second 100m world record first",choices:["Usain Bolt set the 9.58-second 100m world record","Spain won the FIFA World Cup"],special:true,fq:"How many years apart were these achievements?",fa:"One year — Bolt set the record in 2009 and Spain won the World Cup in 2010.",fchoices:["1 year","2 years","3 years","4 years"],fcorrect:"1 year"}
 ]}
 ];
 
@@ -2764,9 +2792,8 @@ function handleRemoteAction(entry,msg){
     phoneSelectQuestion(msg.key,categories[col].clues[row],(row+1)*100);
   }else if(action==="wager"){
     if(i!==activePlayer||!pendingDaily)return;
-    const max=Math.max(100,Math.max(players[i].score,1000));
-    const wager=Math.max(100,Math.min(max,Math.round(Number(msg.wager||100)/100)*100));
-    document.getElementById("wagerInput").value=wager;confirmDailyWager();
+    const wager=normalizeDailyWager(msg.wager);
+    const wagerInput=document.getElementById("wagerInput");if(wagerInput)wagerInput.value=wager;confirmDailyWager(wager);
   }else if(action==="choose"){
     if(i===activePlayer&&current&&!choiceLocked&&current.item.choices.includes(msg.choice))chooseAnswer(msg.choice);
   }else if(action==="submit"){
@@ -3521,7 +3548,7 @@ function phoneSelectQuestion(key,item,base){
     // Keep desktop host in a Daily Double state too.
     const dWager=document.getElementById("wagerInput");
     if(dWager){dWager.max=maxWager;dWager.value=Math.min(500,maxWager);}
-    document.getElementById("dailyPlayerText").textContent=`${players[activePlayer].name}, wager between 100 and ${maxWager} points.`;
+    document.getElementById("dailyPlayerText").textContent=`${players[activePlayer].name}, choose 100, 200, 300, 400, 500, or 1000 points.`;
     document.getElementById("dailyMultiplierText").textContent=phaseMult>1
       ? `STACKS WITH ${phaseMult}× PHASE: your wager will be worth ${phaseMult}×.`
       : "Normal phase: wager pays at 1×.";
@@ -3536,13 +3563,15 @@ function phoneSelectQuestion(key,item,base){
   syncPhoneQuestionView();
 }
 
-function phoneConfirmDailyWager(){
+const DAILY_WAGER_OPTIONS=[100,200,300,400,500,1000];
+function normalizeDailyWager(value){const n=Number(value);return DAILY_WAGER_OPTIONS.includes(n)?n:500}
+
+function phoneConfirmDailyWager(wagerOverride){
   if(!pendingDaily)return;
   haptic([22,35,22]);
-  const maxWager=Math.max(100,Math.max(players[activePlayer].score,1000));
   const phoneInput=document.getElementById("phoneWagerInput");
-  let wager=Math.round(Number(phoneInput?.value||100)/100)*100;
-  wager=Math.max(100,Math.min(maxWager,wager));
+  const wager=normalizeDailyWager(wagerOverride ?? phoneInput?.value);
+  if(phoneInput)phoneInput.value=wager;
 
   if(remotePhoneMode){sendRemoteAction("wager",{wager});return}
 
@@ -3766,7 +3795,7 @@ function handleTileClick(key,item,base,isReview){
     const inp=document.getElementById("wagerInput");
     inp.max=maxWager; inp.value=Math.min(500,maxWager);
     const phaseMult=currentMultiplier();
-    document.getElementById("dailyPlayerText").textContent=`${players[activePlayer].name}, wager between 100 and ${maxWager} points.`;
+    document.getElementById("dailyPlayerText").textContent=`${players[activePlayer].name}, choose 100, 200, 300, 400, 500, or 1000 points.`;
     document.getElementById("dailyMultiplierText").textContent=phaseMult>1
       ? `STACKS WITH ${phaseMult}× PHASE: your wager will be worth ${phaseMult}×.`
       : "Normal phase: wager pays at 1×.";
@@ -3777,11 +3806,10 @@ function handleTileClick(key,item,base,isReview){
   openClue(key,item,base,false);
 }
 
-function confirmDailyWager(){
+function confirmDailyWager(wagerOverride){
   if(!pendingDaily)return;
-  const maxWager=Math.max(100,Math.max(players[activePlayer].score,1000));
-  let wager=Math.round(Number(document.getElementById("wagerInput").value||100)/100)*100;
-  wager=Math.max(100,Math.min(maxWager,wager));
+  const wager=normalizeDailyWager(wagerOverride ?? document.getElementById("wagerInput")?.value);
+  const hostWagerInput=document.getElementById("wagerInput");if(hostWagerInput)hostWagerInput.value=wager;
   document.getElementById("dailyModal").classList.remove("showing");
   const {key,item,base,devForced}=pendingDaily;
   pendingDaily=null;
