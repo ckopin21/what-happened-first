@@ -54,6 +54,7 @@ const specials=categories.flatMap((category)=>category.clues.map((clue,row)=>({c
 if(specials.length!==5||specials.some(x=>x.row!==4||!x.clue.fq||!x.clue.fa)) throw new Error("Expected five playable 500-point follow-up clues");
 if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!html.includes("AVATAR_CROP_V5")) throw new Error("Randomized follow-up/avatar framing fix missing");
 if(!html.includes("shuffledPrimaryChoices")||!html.includes("primaryChoicesForCurrent")||!html.includes("choiceOrder:Array.isArray(current.choiceOrder)")||!html.includes('broadcastGameState(true);\n      showToast("Primary answer correct"')) throw new Error("Primary choice shuffle or follow-up broadcast fix missing");
+if(!html.includes("PHONE_SCROLL_CHOICE_FIX_V7")||!html.includes("primaryCorrectSideBag")||!html.includes("buildPrimaryChoiceOrder")||!html.includes("nextPrimaryCorrectSide")) throw new Error("Phone scrolling or balanced primary answer-side randomization missing");
 
 const results = {
   syntax: "pass",

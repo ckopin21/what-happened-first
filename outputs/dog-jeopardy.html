@@ -2004,6 +2004,56 @@ body.remote-phone-mode .join-shell{
   .remote-room-card{justify-content:center;text-align:center}
   .remote-room-info{flex-basis:100%}
 }
+
+
+/* PHONE_SCROLL_CHOICE_FIX_V7 */
+body.remote-phone-mode .controller-preview{
+  overflow:hidden!important;
+}
+body.remote-phone-mode .phone-shell{
+  height:100%!important;
+  max-height:100%!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+body.remote-phone-mode #phoneQuestionView,
+body.remote-phone-mode #phoneFollowView{
+  overflow:visible!important;
+  min-height:min-content;
+}
+.phone-choice-btn,
+.phone-follow-choices .phone-action{
+  box-sizing:border-box!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:64px!important;
+  padding:14px 12px!important;
+  white-space:normal!important;
+  overflow:visible!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  line-height:1.22!important;
+  font-size:clamp(14px,4vw,19px)!important;
+  text-align:center;
+}
+.phone-follow-choices .phone-action{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+@media(max-width:390px){
+  .phone-choice-btn,
+  .phone-follow-choices .phone-action{
+    min-height:58px!important;
+    padding:12px 10px!important;
+    font-size:clamp(13px,3.8vw,17px)!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3116,15 +3166,38 @@ function syncPhoneQuestionView(){
 
 
 
+let primaryCorrectSideBag=[];
 function shuffledPrimaryChoices(values){
   const out=Array.isArray(values)?values.slice():[];
   for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]]}
   return out;
 }
+function correctChoiceForItem(item){
+  if(!item?.choices?.length)return null;
+  const target=normalizeChoiceText(item.a);
+  return item.choices.find(c=>{
+    const n=normalizeChoiceText(c);
+    return target===n || target.includes(n) || n.includes(target);
+  }) || item.choices[0];
+}
+function nextPrimaryCorrectSide(){
+  if(!primaryCorrectSideBag.length){
+    primaryCorrectSideBag=Math.random()<.5?[0,1]:[1,0];
+  }
+  return primaryCorrectSideBag.shift();
+}
+function buildPrimaryChoiceOrder(item,values){
+  const out=Array.isArray(values)?values.slice():[];
+  if(out.length!==2)return shuffledPrimaryChoices(out);
+  const correct=correctChoiceForItem(item);
+  const other=out.find(x=>normalizeChoiceText(x)!==normalizeChoiceText(correct));
+  if(!correct||other===undefined)return shuffledPrimaryChoices(out);
+  return nextPrimaryCorrectSide()===0?[correct,other]:[other,correct];
+}
 function primaryChoicesForCurrent(){
   if(!current)return[];
   const base=Array.isArray(current.item?.choices)?current.item.choices:[];
-  if(!Array.isArray(current.choiceOrder)||current.choiceOrder.length!==base.length)current.choiceOrder=shuffledPrimaryChoices(base);
+  if(!Array.isArray(current.choiceOrder)||current.choiceOrder.length!==base.length)current.choiceOrder=buildPrimaryChoiceOrder(current.item,base);
   return current.choiceOrder;
 }
 function normalizeChoiceText(text){
@@ -3588,7 +3661,7 @@ function openClue(key,item,base,isReview){
   const baseChoices=Array.isArray(item.choices)?item.choices.slice():[];
   const choiceOrder=isReview&&Array.isArray(item.playedChoiceOrder)&&item.playedChoiceOrder.length===baseChoices.length
     ? item.playedChoiceOrder.slice()
-    : shuffledPrimaryChoices(baseChoices);
+    : buildPrimaryChoiceOrder(item,baseChoices);
   current={key,item,base,mult,value:base*mult*lcMult,lastChanceMult:lcMult,forcedMultiplier,choiceOrder};
   if(!isReview && devForcedMultiplier){
     devForcedMultiplier=0;
