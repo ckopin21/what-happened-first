@@ -1,0 +1,33 @@
+name: Apply requested game fixes
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-mobile-turn-qr-fixes.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply requested fixes
+        run: node work/apply-mobile-turn-qr-fixes.js
+      - name: Audit game
+        run: node work/audit-game.js outputs/dog-jeopardy.html
+      - name: Commit game update and remove one-time patch files
+        run: |
+          rm -f work/apply-mobile-turn-qr-fixes.js .github/workflows/apply-mobile-turn-qr-fixes.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix inactive phone controls, mobile viewport, and QR join"
+          git push
