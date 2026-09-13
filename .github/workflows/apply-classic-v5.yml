@@ -28,7 +28,13 @@ jobs:
           p.write_text(s.replace(old,new,1),encoding='utf-8')
           PY
       - name: Apply Classic engine patch
-        run: python work/apply-classic-v5-runtime.py
+        run: python work/apply-classic-v5-runtime.py 2>&1 | tee /tmp/classic-v5.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: classic-v5-log
+          path: /tmp/classic-v5.txt
+          if-no-files-found: ignore
       - name: Audit both modes
         run: |
           node work/audit-game.js outputs/dog-jeopardy.html
