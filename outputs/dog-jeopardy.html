@@ -232,10 +232,38 @@ button:active{transform:scale(.93)}
 }
 .follow-box.visible{display:block;animation:fadeIn .25s ease}
 .review-note{color:#cfe7f6;font-size:14px;margin-top:12px}
-/* AVATAR_CROP_V5: zoom embedded art slightly so source-edge bleed never appears. */
-.join-avatar,.host-avatar{min-width:0!important;width:100%!important;max-width:100%!important;margin:0!important;overflow:hidden!important;contain:paint;isolation:isolate}
-.join-avatar img,.host-avatar img{width:100%!important;height:100%!important;min-width:0!important;max-width:100%!important;object-fit:cover!important;object-position:50% 50%!important;display:block!important;transform:scale(1.075)!important;transform-origin:50% 50%!important}
-.phone-player-avatar,.player-avatar{object-fit:cover!important;object-position:50% 50%!important;background:#0a2d45;clip-path:circle(47% at 50% 50%);transform:scale(1.04)!important}
+/* AVATAR_CENTERING_V12: preserve the complete source art and center it consistently. */
+.join-avatar,.host-avatar{
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0!important;
+  overflow:hidden!important;
+  contain:paint;
+  isolation:isolate;
+}
+.join-avatar img,.host-avatar img{
+  width:100%!important;
+  height:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  display:block!important;
+  transform:none!important;
+  transform-origin:center center!important;
+  margin:auto!important;
+}
+.join-avatar img{border-radius:50%!important}
+.host-avatar img{border-radius:10px!important}
+.phone-player-avatar,.player-avatar{
+  object-fit:contain!important;
+  object-position:center center!important;
+  background:#0a2d45;
+  clip-path:none!important;
+  transform:none!important;
+  border-radius:50%!important;
+}
 .follow-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px auto 10px;max-width:680px}
 .follow-choice-grid .choice-btn{width:100%;min-height:58px;margin:0}
 .phone-follow-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:15px 0}
