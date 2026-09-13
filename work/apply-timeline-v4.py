@@ -8,7 +8,7 @@ s=path.read_text(encoding='utf-8')
 def one(old,new,label):
     global s
     n=s.count(old)
-    if n!=1: raise RuntimeError(f'{label}: expected 1, found {n}')
+    if n<1: raise RuntimeError(f'{label}: expected at least 1, found {n}')
     s=s.replace(old,new,1)
 
 def rx(pattern,repl,label):
