@@ -1971,10 +1971,10 @@ body.remote-phone-mode .join-shell{
 }
 
 /* Host QR join */
-.remote-room-qr{
-  width:108px;
-  height:108px;
-  flex:0 0 108px;
+ .remote-room-qr{
+  width:280px;
+  height:280px;
+  flex:0 0 280px;
   display:none;
   align-items:center;
   justify-content:center;
@@ -1985,8 +1985,8 @@ body.remote-phone-mode .join-shell{
 }
 .remote-room-qr img,
 .remote-room-qr canvas{
-  width:94px!important;
-  height:94px!important;
+  width:258px!important;
+  height:258px!important;
   display:block;
 }
 @media(max-width:680px){
@@ -2518,8 +2518,8 @@ function renderJoinQr(){
   box.style.display="flex";
   new QRCode(box,{
     text:getJoinUrl(),
-    width:94,
-    height:94,
+    width:258,
+    height:258,
     colorDark:"#061725",
     colorLight:"#ffffff",
     correctLevel:QRCode.CorrectLevel.M
