@@ -103,10 +103,10 @@ function devPreview(kind){
   if(kind==="double"||kind==="triple"){
     devForcedMultiplier=kind==="double"?2:3;
     const label=devForcedMultiplier===2?"DOUBLE POINTS":"TRIPLE POINTS";
-    setDevArmed(`DEV: ${label} ARMED • SELECT A QUESTION`);showPhaseOverlay(label);renderHost();toast(`${label} armed`,"");return;
+    setDevArmed("DEV: "+label+" ARMED • SELECT A QUESTION");showPhaseOverlay(label);renderHost();toast(label+" armed","");return;
   }
-  if(kind==="fire"){const i=ensureDevPlayer();players[i].correctStreak=3;players[i].wrongStreak=0;renderHost();flashPlayer(i,"good");toast(`${players[i].name} is ON FIRE`,"good");return}
-  if(kind==="cold"){const i=ensureDevPlayer();players[i].correctStreak=0;players[i].wrongStreak=3;renderHost();flashPlayer(i,"bad");toast(`${players[i].name} is on a COLD STREAK`,"bad");return}
+  if(kind==="fire"){const i=ensureDevPlayer();players[i].correctStreak=3;players[i].wrongStreak=0;renderHost();flashPlayer(i,"good");toast(players[i].name+" is ON FIRE","good");return}
+  if(kind==="cold"){const i=ensureDevPlayer();players[i].correctStreak=0;players[i].wrongStreak=3;renderHost();flashPlayer(i,"bad");toast(players[i].name+" is on a COLD STREAK","bad");return}
   if(kind==="correct"){const i=ensureDevPlayer();flashPlayer(i,"good");toast("CORRECT!","good");return}
   if(kind==="incorrect"){const i=ensureDevPlayer();flashPlayer(i,"bad");toast("INCORRECT","bad");return}
   if(kind==="finale"){
