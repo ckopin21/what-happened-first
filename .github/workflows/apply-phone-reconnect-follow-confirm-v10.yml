@@ -15,6 +15,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Remove obsolete lifecycle anchor from one-time patch
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='work/apply-phone-reconnect-follow-confirm-v10.js';
+          let s=fs.readFileSync(p,'utf8');
+          const start=s.indexOf('// Keep pending local choice only until the host commits it or the follow-up view closes.');
+          const end=s.indexOf("if(!s.includes('phoneConfirmFollowup')",start);
+          if(start>=0&&end>start)s=s.slice(0,start)+s.slice(end);
+          else throw new Error('Could not trim obsolete lifecycle patch');
+          fs.writeFileSync(p,s);
+          NODE
       - name: Apply phone reconnect and confirmation fix
         run: node work/apply-phone-reconnect-follow-confirm-v10.js
       - name: Audit timeline mode
