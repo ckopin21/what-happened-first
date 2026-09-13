@@ -232,8 +232,10 @@ button:active{transform:scale(.93)}
 }
 .follow-box.visible{display:block;animation:fadeIn .25s ease}
 .review-note{color:#cfe7f6;font-size:14px;margin-top:12px}
-/* AVATAR_CROP_V2: top-biased framing avoids clipping faces/heads in square and circular crops. */
-.join-avatar img,.phone-player-avatar,.player-avatar,.host-avatar img{object-position:50% 32%!important}
+/* AVATAR_CROP_V4: constrain every avatar to its own grid cell and show the full artwork. */
+.join-avatar,.host-avatar{min-width:0!important;width:100%!important;max-width:100%!important;margin:0!important;overflow:hidden!important;contain:paint;isolation:isolate}
+.join-avatar img,.host-avatar img{width:100%!important;height:100%!important;min-width:0!important;max-width:100%!important;object-fit:contain!important;object-position:center!important;display:block!important;transform:none!important}
+.phone-player-avatar,.player-avatar{object-fit:contain!important;object-position:center!important;transform:none!important;background:#0a2d45}
 .follow-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px auto 10px;max-width:680px}
 .follow-choice-grid .choice-btn{width:100%;min-height:58px;margin:0}
 .phone-follow-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:15px 0}
@@ -2334,35 +2336,35 @@ const categories=[
 {q:"Which happened first: the first Android phone released, or the first iPad released?",h:"Think about which product category reached consumers first: modern Android smartphones or Apple tablets.",a:"The first Android phone released first",choices:["the first Android phone released","the first iPad released"]},
 {q:"Which happened first: Gmail launched, or Reddit launched?",h:"One arrived while social media was still very early; the other followed about a year later.",a:"Gmail launched first",choices:["Gmail launched","Reddit launched"]},
 {q:"Which happened first: Windows 95 released, or the original Pokémon games released in Japan?",h:"They are close, but Microsoft's famous Start-menu era began just before Pokémon's debut.",a:"Windows 95 released first",choices:["Windows 95 released","the original Pokémon games released in Japan"]},
-{q:"Which happened first: Spotify launched, or Uber was founded?",h:"Music streaming became established just before app-based ride sharing started taking off.",a:"Spotify launched first",choices:["Spotify launched","Uber was founded"],special:true,fq:"About how many years apart were these milestones?",fa:"About one year — Spotify launched in 2008 and Uber was founded in 2009."}
+{q:"Which happened first: Spotify launched, or Uber was founded?",h:"Music streaming became established just before app-based ride sharing started taking off.",a:"Spotify launched first",choices:["Spotify launched","Uber was founded"],special:true,fq:"About how many years apart were these milestones?",fa:"About one year — Spotify launched in 2008 and Uber was founded in 2009.",fchoices:["About 1 year","About 2 years","About 3 years","About 5 years"],fcorrect:"About 1 year"}
 ]},
 {name:"History",clues:[
 {q:"Which happened first: the first powered Wright brothers flight, or the Titanic was launched?",h:"Early aviation achieved its breakthrough several years before the famous ocean liner entered the water.",a:"The first powered Wright brothers flight first",choices:["the first powered Wright brothers flight","the Titanic was launched"]},
 {q:"Which happened first: the U.S. Civil War ended, or Canada became a country?",h:"These happened only a couple of years apart, with the war ending shortly before Canadian Confederation.",a:"The U.S. Civil War ended first",choices:["the U.S. Civil War ended","Canada became a country"]},
 {q:"Which happened first: the printing press was developed in Europe, or Columbus reached the Americas?",h:"The invention that transformed European publishing predates the Atlantic voyage by several decades.",a:"The printing press was developed in Europe first",choices:["the printing press was developed in Europe","Columbus reached the Americas"]},
 {q:"Which happened first: the first photograph was made, or the first telegraph message was sent?",h:"Photography's earliest successful experiments came well before Morse's famous demonstration.",a:"The first photograph was made first",choices:["the first photograph was made","the first telegraph message was sent"]},
-{q:"Which happened first: the Eiffel Tower opened, or the first modern Olympic Games were held?",h:"The Paris landmark was already standing when the modern Olympics returned a few years later.",a:"The Eiffel Tower opened first",choices:["the Eiffel Tower opened","the first modern Olympic Games were held"],special:true,fq:"In which decade did the earlier event happen?",fa:"The 1880s — the Eiffel Tower opened in 1889."}
+{q:"Which happened first: the Eiffel Tower opened, or the first modern Olympic Games were held?",h:"The Paris landmark was already standing when the modern Olympics returned a few years later.",a:"The Eiffel Tower opened first",choices:["the Eiffel Tower opened","the first modern Olympic Games were held"],special:true,fq:"In which decade did the earlier event happen?",fa:"The 1880s — the Eiffel Tower opened in 1889.",fchoices:["1870s","1880s","1890s","1900s"],fcorrect:"1880s"}
 ]},
 {name:"Pop Culture",clues:[
 {q:"Which happened first: Toy Story premiered, or the Nintendo 64 released?",h:"Pixar's first feature film reached theaters shortly before Nintendo's 64-bit console arrived.",a:"Toy Story premiered first",choices:["Toy Story premiered","the Nintendo 64 released"]},
 {q:"Which happened first: Friends premiered, or the first PlayStation released in Japan?",h:"These are both 1994 milestones, but the sitcom arrived a little earlier in the year.",a:"Friends premiered first",choices:["Friends premiered","the first PlayStation released in Japan"]},
 {q:"Which happened first: The Office (U.S.) premiered, or YouTube launched?",h:"Both happened in 2005, but the video website technically came first.",a:"YouTube launched first",choices:["The Office (U.S.) premiered","YouTube launched"]},
 {q:"Which happened first: Iron Man released, or Breaking Bad premiered?",h:"Both are 2008 landmarks, but the TV series began several months before the Marvel film.",a:"Breaking Bad premiered first",choices:["Iron Man released","Breaking Bad premiered"]},
-{q:"Which happened first: Fortnite Battle Royale released, or Disney+ launched?",h:"The battle royale boom was already underway before Disney entered the streaming wars.",a:"Fortnite Battle Royale released first",choices:["Fortnite Battle Royale released","Disney+ launched"],special:true,fq:"How many years apart were these launches?",fa:"Two years — Fortnite Battle Royale released in 2017 and Disney+ launched in 2019."}
+{q:"Which happened first: Fortnite Battle Royale released, or Disney+ launched?",h:"The battle royale boom was already underway before Disney entered the streaming wars.",a:"Fortnite Battle Royale released first",choices:["Fortnite Battle Royale released","Disney+ launched"],special:true,fq:"How many years apart were these launches?",fa:"Two years — Fortnite Battle Royale released in 2017 and Disney+ launched in 2019.",fchoices:["1 year","2 years","3 years","5 years"],fcorrect:"2 years"}
 ]},
 {name:"Science",clues:[
 {q:"Which happened first: Neptune was discovered, or Darwin published On the Origin of Species?",h:"Astronomers found the planet more than a decade before Darwin published his famous book.",a:"Neptune was discovered first",choices:["Neptune was discovered","Darwin published On the Origin of Species"]},
 {q:"Which happened first: X-rays were discovered, or radioactivity was discovered?",h:"These two discoveries came in back-to-back years at the end of the 1800s.",a:"X-rays were discovered first",choices:["X-rays were discovered","radioactivity was discovered"]},
 {q:"Which happened first: the first human entered space, or the first woman entered space?",h:"The first woman followed the first man into space only a couple of years later.",a:"The first human entered space first",choices:["the first human entered space","the first woman entered space"]},
 {q:"Which happened first: the first test-tube baby was born, or the first Space Shuttle launch?",h:"The medical milestone happened in the late 1970s; the shuttle era began in the early 1980s.",a:"The first test-tube baby was born first",choices:["the first test-tube baby was born","the first Space Shuttle launch"]},
-{q:"Which happened first: the Hubble Space Telescope launched, or the first website went online?",h:"These both happened around 1990, with the telescope reaching orbit slightly earlier.",a:"The Hubble Space Telescope launched first",choices:["the Hubble Space Telescope launched","the first website went online"],special:true,fq:"In what year did Hubble launch?",fa:"1990."}
+{q:"Which happened first: the Hubble Space Telescope launched, or the first website went online?",h:"These both happened around 1990, with the telescope reaching orbit slightly earlier.",a:"The Hubble Space Telescope launched first",choices:["the Hubble Space Telescope launched","the first website went online"],special:true,fq:"In what year did Hubble launch?",fa:"1990.",fchoices:["1988","1990","1992","1994"],fcorrect:"1990"}
 ]},
 {name:"Sports",clues:[
 {q:"Which happened first: the NBA held its first game, or the first Formula 1 World Championship season began?",h:"Professional basketball's league era was underway several years before Formula 1's official championship.",a:"The NBA held its first game first",choices:["the NBA held its first game","the first Formula 1 World Championship season began"]},
 {q:"Which happened first: the first Super Bowl was played, or the first Earth Day was held?",h:"The championship game began in the late 1960s; Earth Day followed a few years later.",a:"The first Super Bowl was played first",choices:["the first Super Bowl was played","the first Earth Day was held"]},
 {q:"Which happened first: Serena Williams won her first Grand Slam singles title, or Tiger Woods completed the career Grand Slam?",h:"Serena's first major came just before Tiger completed that four-major milestone.",a:"Serena Williams won her first Grand Slam singles title first",choices:["Serena Williams won her first Grand Slam singles title","Tiger Woods completed the career Grand Slam"]},
 {q:"Which happened first: LeBron James was drafted into the NBA, or Lionel Messi made his official Barcelona first-team debut?",h:"The NBA draft came first, with Messi's senior debut arriving the following year.",a:"LeBron James was drafted into the NBA first",choices:["LeBron James was drafted into the NBA","Lionel Messi made his official Barcelona first-team debut"]},
-{q:"Which happened first: Usain Bolt set the 9.58-second 100m world record, or Spain won the FIFA World Cup?",h:"Bolt's famous Berlin record came the year before Spain's World Cup victory.",a:"Usain Bolt set the 9.58-second 100m world record first",choices:["Usain Bolt set the 9.58-second 100m world record","Spain won the FIFA World Cup"],special:true,fq:"How many years apart were these achievements?",fa:"One year — Bolt set the record in 2009 and Spain won the World Cup in 2010."}
+{q:"Which happened first: Usain Bolt set the 9.58-second 100m world record, or Spain won the FIFA World Cup?",h:"Bolt's famous Berlin record came the year before Spain's World Cup victory.",a:"Usain Bolt set the 9.58-second 100m world record first",choices:["Usain Bolt set the 9.58-second 100m world record","Spain won the FIFA World Cup"],special:true,fq:"How many years apart were these achievements?",fa:"One year — Bolt set the record in 2009 and Spain won the World Cup in 2010.",fchoices:["1 year","2 years","3 years","4 years"],fcorrect:"1 year"}
 ]}
 ];
 
@@ -2566,7 +2568,7 @@ function makeNetworkSnapshot(){
     selectedChoice,submittedChoice,choiceLocked,lastChancePending,lastChancePlayerIndex,
     multiplier:currentMultiplier(),modalShowing:!!document.getElementById("modal")?.classList.contains("showing"),
     players:players.slice(0,playerCount).map(p=>({name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatarIndex:avatarIndexFor(p.avatar)})),
-    current:current?{key:current.key,base:current.base,mult:current.mult,value:current.value,lastChanceMult:current.lastChanceMult,isDaily:!!current.isDaily,item:{q:current.item.q,h:current.item.h,a:current.item.a,choices:current.item.choices,special:!!current.item.special,fq:current.item.fq,fa:current.item.fa,fc:followupChoicesFor(current.item)},followChoice:Number.isInteger(current.followChoice)?current.followChoice:null}:null,
+    current:current?{key:current.key,base:current.base,mult:current.mult,value:current.value,lastChanceMult:current.lastChanceMult,isDaily:!!current.isDaily,item:{q:current.item.q,h:current.item.h,a:current.item.a,choices:current.item.choices,special:!!current.item.special,fq:current.item.fq,fa:current.item.fa,fchoices:current.item.fchoices,fcorrect:current.item.fcorrect,fc:Array.isArray(current.followOrder)?current.followOrder:followupChoicesFor(current.item)},followChoice:Number.isInteger(current.followChoice)?current.followChoice:null,followOrder:Array.isArray(current.followOrder)?current.followOrder:null}:null,
     pendingDaily:pendingDaily?{key:pendingDaily.key,maxWager:Math.max(100,Math.max(players[activePlayer]?.score||0,1000)),phaseMult:currentMultiplier()}:null,
     followOffer,followVisible,followAnswerVisible,
     tie:{active:tieActive,resolved:tieResolved,questionIndex:tieQuestionIndex,players:tiePlayers.map(x=>x.i),answered:[...tieAnswered],winner:tieWinnerIndex}
@@ -3687,30 +3689,29 @@ function bankPrimary(){
   finalizeQuestion(current.value,true,"banked");
 }
 
-function followupChoicesFor(item){
-  const q=String(item?.fq||"").toLowerCase();
-  const a=String(item?.fa||"");
-  if(q.includes("4gb iphone")||a==="$499")return ["$399","$499","$599","$699"];
-  if(q.includes("prohibition")||a.toLowerCase()==="december")return ["October","November","December","January"];
-  if(q.includes("stranger things")||a.toLowerCase().includes("hawkins"))return ["Hawkins, Indiana","Derry, Maine","Sunnydale, California","Stars Hollow, Connecticut"];
-  if(q.includes("second person")&&q.includes("moon")||a.toLowerCase().includes("buzz aldrin"))return ["Michael Collins","Buzz Aldrin","Alan Shepard","John Glenn"];
-  if(q.includes("first modern olympic")||a.toLowerCase()==="athens")return ["Paris","Athens","London","Rome"];
-  return [a,"None of these","All of these","Not enough information"];
+function shuffledFollowupChoices(values){
+  const out=Array.isArray(values)?values.slice():[];
+  for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]]}
+  return out;
 }
+function followupChoicesFor(item){return Array.isArray(item?.fchoices)?item.fchoices.slice():[]}
+function followupCorrectFor(item){return String(item?.fcorrect||"")}
+function ensureFollowupOrder(){if(!current)return[];const base=followupChoicesFor(current.item);if(!Array.isArray(current.followOrder)||current.followOrder.length!==base.length)current.followOrder=shuffledFollowupChoices(base);return current.followOrder}
 function renderFollowupChoices(){
   if(!current)return;
-  const choices=followupChoicesFor(current.item),selected=Number.isInteger(current.followChoice)?current.followChoice:null;
+  const choices=ensureFollowupOrder(),selected=Number.isInteger(current.followChoice)?current.followChoice:null;
   const box=document.getElementById("followChoices");if(!box)return;box.innerHTML="";
-  choices.forEach((label,i)=>{const b=document.createElement("button");b.className="choice-btn";b.textContent=label;b.disabled=selected!==null;b.onclick=()=>chooseFollowup(i);if(selected!==null){if(label===current.item.fa)b.classList.add("follow-choice-correct");else if(i===selected)b.classList.add("follow-choice-wrong")}box.appendChild(b)});
+  choices.forEach((label,i)=>{const b=document.createElement("button");b.className="choice-btn";b.textContent=label;b.disabled=selected!==null;b.onclick=()=>chooseFollowup(i);if(selected!==null){if(label===followupCorrectFor(current.item))b.classList.add("follow-choice-correct");else if(i===selected)b.classList.add("follow-choice-wrong")}box.appendChild(b)});
 }
 function renderPhoneFollowupChoices(){
-  if(!current)return;const box=document.getElementById("phoneFollowChoices");if(!box)return;const choices=current.item.fc||followupChoicesFor(current.item),selected=Number.isInteger(current.followChoice)?current.followChoice:null;box.innerHTML="";
-  choices.forEach((label,i)=>{const b=document.createElement("button");b.className="phone-action";b.textContent=label;b.disabled=selected!==null;b.onclick=()=>phoneChooseFollowup(i);if(selected!==null){if(label===current.item.fa)b.classList.add("follow-choice-correct");else if(i===selected)b.classList.add("follow-choice-wrong")}box.appendChild(b)});
+  if(!current)return;const box=document.getElementById("phoneFollowChoices");if(!box)return;const choices=current.followOrder||current.item.fc||followupChoicesFor(current.item),selected=Number.isInteger(current.followChoice)?current.followChoice:null;box.innerHTML="";
+  choices.forEach((label,i)=>{const b=document.createElement("button");b.className="phone-action";b.textContent=label;b.disabled=selected!==null;b.onclick=()=>phoneChooseFollowup(i);if(selected!==null){if(label===followupCorrectFor(current.item))b.classList.add("follow-choice-correct");else if(i===selected)b.classList.add("follow-choice-wrong")}box.appendChild(b)});
 }
 function startFollowup(){
   document.getElementById("followOffer").classList.remove("visible");
   document.getElementById("followBox").classList.add("visible");
   current.followChoice=null;
+  current.followOrder=shuffledFollowupChoices(followupChoicesFor(current.item));
   document.getElementById("followQuestion").textContent=current.item.fq;
   document.getElementById("followAnswer").textContent=current.item.fa;
   document.getElementById("followAnswer").classList.remove("visible");
@@ -3719,8 +3720,8 @@ function startFollowup(){
 }
 function chooseFollowup(index){
   if(!current||!document.getElementById("followBox")?.classList.contains("visible")||Number.isInteger(current.followChoice))return;
-  const choices=followupChoicesFor(current.item);if(!Number.isInteger(index)||index<0||index>=choices.length)return;
-  current.followChoice=index;const correct=choices[index]===current.item.fa;
+  const choices=ensureFollowupOrder();if(!Number.isInteger(index)||index<0||index>=choices.length)return;
+  current.followChoice=index;const correct=choices[index]===followupCorrectFor(current.item);
   document.getElementById("followAnswer").classList.add("visible");renderFollowupChoices();syncPhoneQuestionView();broadcastGameState(true);
   audioPop(correct?760:180,.09,correct?"sine":"sawtooth",.04);setTimeout(()=>followResult(correct),650);
 }
