@@ -242,6 +242,7 @@ button:active{transform:scale(.93)}
 .phone-follow-choices .phone-action{margin:0!important;min-height:56px}
 .follow-choice-correct{background:var(--good)!important;color:#fff!important;border-color:#baf5ce!important}
 .follow-choice-wrong{background:var(--bad)!important;color:#fff!important;border-color:#ffd0d0!important}
+.phone-follow-choices .phone-action.selected-choice{outline:3px solid var(--accent)!important;box-shadow:0 0 0 3px rgba(255,209,102,.22)!important;filter:brightness(1.08)}
 @media(max-width:560px){.follow-choice-grid,.phone-follow-choices{grid-template-columns:1fr}}
 
 .toast{
@@ -2418,6 +2419,7 @@ body.remote-phone-mode .phone-choice-btn{
         <div id="phoneFollowView" class="phone-follow" style="display:none">
           <div class="phone-question" id="phoneFollowQuestion"></div>
           <div class="phone-follow-choices" id="phoneFollowChoices"></div>
+          <button class="phone-action submit-action" id="phoneFollowConfirmBtn" onclick="phoneConfirmFollowup()" disabled>Confirm Choice</button>
           <div class="phone-answer" id="phoneFollowAnswer" style="display:none"></div>
         </div>
       </div>
@@ -2584,6 +2586,7 @@ let phoneSelectedKey=null;
 let selectedChoice=null;
 let submittedChoice=null;
 let choiceLocked=false;
+let pendingPhoneFollowChoice=null;
 
 // Remote phones connect directly to the host browser through PeerJS/WebRTC.
 // The host remains authoritative: phones send intents, never scores or game state.
@@ -2601,11 +2604,22 @@ let remotePhaseMultiplier=1;
 const remoteClientToken=(()=>{
   try{
     const key="whf-phone-token";
-    let token=sessionStorage.getItem(key);
-    if(!token){token=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`);sessionStorage.setItem(key,token)}
+    let token=localStorage.getItem(key)||sessionStorage.getItem(key);
+    if(!token) token=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`);
+    localStorage.setItem(key,token);
+    sessionStorage.setItem(key,token);
     return token;
   }catch(e){return `${Date.now()}-${Math.random()}`}
 })();
+function remoteProfileKey(){return `whf-phone-profile:${phoneRoomParam}`}
+function loadRemotePhoneProfile(){
+  if(!remotePhoneMode)return null;
+  try{const raw=localStorage.getItem(remoteProfileKey());return raw?JSON.parse(raw):null}catch(e){return null}
+}
+function saveRemotePhoneProfile(name,avatarIndex){
+  if(!remotePhoneMode||!name)return;
+  try{localStorage.setItem(remoteProfileKey(),JSON.stringify({name:String(name).slice(0,18),avatarIndex:Number(avatarIndex)||0,token:remoteClientToken}))}catch(e){}
+}
 
 function peerRoomId(code){return `what-happened-first-${String(code).toLowerCase()}`}
 
@@ -2701,10 +2715,11 @@ function broadcastGameState(force=false){
 function sendRemoteAction(action,data={}){
   if(!remotePhoneMode||!hostConnection?.open){
     setNetworkStatus("Connection lost. Reconnecting…",true);
+    if(remoteRecoveryReady)scheduleRemotePhoneReload();
     return false;
   }
-  hostConnection.send({type:"action",action,...data});
-  return true;
+  try{hostConnection.send({type:"action",action,...data});return true}
+  catch(e){if(remoteRecoveryReady)scheduleRemotePhoneReload();return false}
 }
 
 function safeRemotePlayer(entry){
@@ -2736,6 +2751,11 @@ function handleRemoteAction(entry,msg){
   }
   if(!safeRemotePlayer(entry))return;
   const i=entry.playerIndex;
+  if(action==="resume"){
+    try{entry.conn.send({type:"resume-ok",playerIndex:i})}catch(e){}
+    broadcastGameState(true);
+    return;
+  }
   if(action==="select"){
     if(i!==activePlayer||current||pendingDaily||gameFinished)return;
     const match=/^([0-4])-([0-4])$/.exec(String(msg.key||""));
@@ -2817,34 +2837,74 @@ function startHostNetwork(){
   });
 }
 
+let remoteRecoveryReady=false;
+let remoteResumeTimer=null;
+let remoteReloadScheduled=false;
+function scheduleRemotePhoneReload(){
+  if(!remotePhoneMode||!remoteRecoveryReady||remoteReloadScheduled)return;
+  if(document.visibilityState==="hidden")return;
+  remoteReloadScheduled=true;
+  setNetworkStatus("Connection interrupted • rejoining…");
+  setTimeout(()=>location.reload(),450);
+}
+function verifyRemotePhoneConnection(){
+  if(!remotePhoneMode||!remoteRecoveryReady||document.visibilityState==="hidden")return;
+  clearTimeout(remoteResumeTimer);
+  if(!hostConnection?.open){scheduleRemotePhoneReload();return}
+  if(!sendRemoteAction("resume")){scheduleRemotePhoneReload();return}
+  remoteResumeTimer=setTimeout(scheduleRemotePhoneReload,2200);
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(verifyRemotePhoneConnection,180)});
+window.addEventListener("pageshow",()=>{if(remoteRecoveryReady)setTimeout(verifyRemotePhoneConnection,220)});
+window.addEventListener("online",()=>{if(remoteRecoveryReady)setTimeout(verifyRemotePhoneConnection,120)});
+
 function startRemotePhone(){
   document.body.classList.add("remote-phone-mode");
   const help=document.getElementById("phoneConnectionHelp");
-  if(help)help.textContent="Live phone controller • keep this page open during the game.";
+  if(help)help.textContent="Live phone controller • you can briefly switch apps and return to the game.";
   roomCode=phoneRoomParam;
   document.getElementById("phoneRoomCode").textContent=roomCode;
   openJoinScreen("remote");
-  setNetworkStatus("Connecting to the host…");
+  const savedProfile=loadRemotePhoneProfile();
+  if(savedProfile?.name){
+    const input=document.getElementById("joinName");if(input)input.value=savedProfile.name;
+    selectedJoinAvatar=Math.max(0,Math.min(avatarOptions.length-1,Number(savedProfile.avatarIndex)||0));
+    renderJoinAvatars();
+  }
+  setNetworkStatus(savedProfile?.name?"Reconnecting to the host…":"Connecting to the host…");
   if(typeof Peer!=="function"){setNetworkStatus("Could not load phone service. Check your internet connection.",true);return}
   networkPeer=new Peer(undefined,{debug:0});
   networkPeer.on("open",()=>{
     hostConnection=networkPeer.connect(peerRoomId(roomCode),{reliable:true,serialization:"json",metadata:{role:"phone"}});
-    hostConnection.on("open",()=>setNetworkStatus("Connected • enter your name to join"));
+    hostConnection.on("open",()=>{
+      const saved=loadRemotePhoneProfile();
+      if(saved?.name){
+        setNetworkStatus("Rejoining your player…");
+        sendRemoteAction("join",{name:saved.name,avatarIndex:Number(saved.avatarIndex)||0,token:remoteClientToken});
+      }else setNetworkStatus("Connected • enter your name to join");
+    });
     hostConnection.on("data",msg=>{
       if(msg?.type==="joined"){
         joinedPhonePlayerIndex=msg.playerIndex;
+        remoteRecoveryReady=true;remoteReloadScheduled=false;clearTimeout(remoteResumeTimer);
+        const saved=loadRemotePhoneProfile();if(saved?.name)saveRemotePhoneProfile(saved.name,saved.avatarIndex);
         document.getElementById("phoneJoin").classList.remove("showing");
         document.getElementById("controllerPreview").classList.add("showing");
         document.body.classList.add("phone-preview-open");
         setNetworkStatus("Connected to host");
+      }else if(msg?.type==="resume-ok"){
+        clearTimeout(remoteResumeTimer);remoteReloadScheduled=false;setNetworkStatus("Connected to host");
       }else if(msg?.type==="join-error"){
         document.getElementById("joinNote").textContent=msg.message||"Unable to join.";
       }else applyRemoteSnapshot(msg);
     });
-    hostConnection.on("close",()=>setNetworkStatus("Host disconnected. Refresh to reconnect.",true));
-    hostConnection.on("error",()=>setNetworkStatus("Could not connect to this room. Check the code and host screen.",true));
+    hostConnection.on("close",()=>{setNetworkStatus("Connection interrupted • rejoining…");scheduleRemotePhoneReload()});
+    hostConnection.on("error",()=>{setNetworkStatus("Connection interrupted • rejoining…");scheduleRemotePhoneReload()});
   });
-  networkPeer.on("error",()=>setNetworkStatus("Could not connect to this room. Check the link and try again.",true));
+  networkPeer.on("error",()=>{
+    if(remoteRecoveryReady)scheduleRemotePhoneReload();
+    else setNetworkStatus("Could not connect to this room. Check the link and try again.",true);
+  });
 }
 
 
@@ -2973,6 +3033,7 @@ function joinPhoneGame(){
       return;
     }
     if(note)note.textContent="Joining…";
+    saveRemotePhoneProfile(name,selectedJoinAvatar);
     sendRemoteAction("join",{name,avatarIndex:selectedJoinAvatar,token:remoteClientToken});
     return;
   }
@@ -3531,8 +3592,25 @@ function phoneStartFollowup(){
 }
 
 function phoneChooseFollowup(index){
+  if(!current||Number.isInteger(current.followChoice))return;
+  const choices=current.followOrder||current.item.fc||followupChoicesFor(current.item);
+  if(!Number.isInteger(index)||index<0||index>=choices.length)return;
   haptic(12);
-  if(remotePhoneMode){sendRemoteAction("follow-choice",{choice:index});return}
+  pendingPhoneFollowChoice=index;
+  renderPhoneFollowupChoices();
+  const confirm=document.getElementById("phoneFollowConfirmBtn");
+  requestAnimationFrame(()=>confirm?.scrollIntoView({behavior:"smooth",block:"nearest"}));
+}
+function phoneConfirmFollowup(){
+  if(!current||Number.isInteger(current.followChoice)||!Number.isInteger(pendingPhoneFollowChoice))return;
+  const index=pendingPhoneFollowChoice;
+  const confirm=document.getElementById("phoneFollowConfirmBtn");
+  if(confirm){confirm.disabled=true;confirm.textContent="Submitting…"}
+  haptic(18);
+  if(remotePhoneMode){
+    if(!sendRemoteAction("follow-choice",{choice:index})&&confirm){confirm.disabled=false;confirm.textContent="Confirm Choice"}
+    return;
+  }
   chooseFollowup(index);
 }
 
@@ -3868,10 +3946,30 @@ function renderFollowupChoices(){
   choices.forEach((label,i)=>{const b=document.createElement("button");b.className="choice-btn";b.textContent=label;b.disabled=selected!==null;b.onclick=()=>chooseFollowup(i);if(selected!==null){if(label===followupCorrectFor(current.item))b.classList.add("follow-choice-correct");else if(i===selected)b.classList.add("follow-choice-wrong")}box.appendChild(b)});
 }
 function renderPhoneFollowupChoices(){
-  if(!current)return;const box=document.getElementById("phoneFollowChoices");if(!box)return;const choices=current.followOrder||current.item.fc||followupChoicesFor(current.item),selected=Number.isInteger(current.followChoice)?current.followChoice:null;box.innerHTML="";
-  choices.forEach((label,i)=>{const b=document.createElement("button");b.className="phone-action";b.textContent=label;b.disabled=selected!==null;b.onclick=()=>phoneChooseFollowup(i);if(selected!==null){if(label===followupCorrectFor(current.item))b.classList.add("follow-choice-correct");else if(i===selected)b.classList.add("follow-choice-wrong")}box.appendChild(b)});
+  if(!current)return;
+  const box=document.getElementById("phoneFollowChoices");if(!box)return;
+  const choices=current.followOrder||current.item.fc||followupChoicesFor(current.item);
+  const committed=Number.isInteger(current.followChoice)?current.followChoice:null;
+  const selected=committed!==null?committed:(Number.isInteger(pendingPhoneFollowChoice)?pendingPhoneFollowChoice:null);
+  box.innerHTML="";
+  choices.forEach((label,i)=>{
+    const b=document.createElement("button");
+    b.className="phone-action";b.textContent=label;b.disabled=committed!==null;b.onclick=()=>phoneChooseFollowup(i);
+    if(committed!==null){
+      if(label===followupCorrectFor(current.item))b.classList.add("follow-choice-correct");
+      else if(i===committed)b.classList.add("follow-choice-wrong");
+    }else if(i===selected)b.classList.add("selected-choice");
+    box.appendChild(b);
+  });
+  const confirm=document.getElementById("phoneFollowConfirmBtn");
+  if(confirm){
+    confirm.style.display=committed!==null?"none":"block";
+    confirm.disabled=committed!==null||!Number.isInteger(pendingPhoneFollowChoice);
+    if(committed===null)confirm.textContent="Confirm Choice";
+  }
 }
 function startFollowup(){
+  pendingPhoneFollowChoice=null;
   document.getElementById("followOffer").classList.remove("visible");
   document.getElementById("followBox").classList.add("visible");
   current.followChoice=null;
