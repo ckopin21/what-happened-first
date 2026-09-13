@@ -18,7 +18,21 @@ jobs:
       - name: Apply timeline patch
         run: python work/apply-timeline-v4.py
       - name: Audit timeline
-        run: node work/audit-game.js outputs/dog-jeopardy.html
+        id: audit
+        run: |
+          set +e
+          node work/audit-game.js outputs/dog-jeopardy.html > /tmp/timeline-audit.txt 2>&1
+          status=$?
+          cat /tmp/timeline-audit.txt
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: timeline-audit-v4
+          path: /tmp/timeline-audit.txt
+      - name: Stop on audit failure
+        if: steps.audit.outputs.status != '0'
+        run: exit 1
       - name: Commit finished timeline fixes
         run: |
           rm -f work/apply-timeline-v4.py .github/workflows/apply-timeline-v4.yml
