@@ -1,0 +1,29 @@
+name: Enlarge join QR
+
+on:
+  push:
+    paths:
+      - '.github/workflows/enlarge-join-qr.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node work/enlarge-join-qr.js
+      - run: node work/audit-game.js outputs/dog-jeopardy.html
+      - name: Commit update and remove one-time files
+        run: |
+          rm -f work/enlarge-join-qr.js .github/workflows/enlarge-join-qr.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Enlarge phone join QR code"
+          git push
