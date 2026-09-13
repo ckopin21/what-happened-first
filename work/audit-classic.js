@@ -27,7 +27,8 @@ const required=[
   '../packs/classic/current.js','Confirm & Submit','Reveal Now','fuzzyMatch','setJudgement',
   'applyScores','allSubmitted','classic-jeopardy-','QRCode','Peer','usedWinners','reviewClue',
   'showFinale','phaseMultiplier','Use Hint','New Game','Reset Game','toggleFullscreen',
-  'Developer Mode','devPreview','devPanel','fullscreenExitBtn','devForcedMultiplier','CLASSIC_DEVTOOLS_V1'
+  'Developer Mode','devPreview','devPanel','fullscreenExitBtn','devForcedMultiplier','CLASSIC_DEVTOOLS_V1',
+  'Add Player','Player Phone Preview','volumeSlider','setVolume','classicPhonePreview','CLASSIC_PARITY_V2'
 ];
 for(const needle of required){if(!html.includes(needle))throw new Error(`Missing required feature marker: ${needle}`)}
 if(!/if\(allSubmitted\(\)\)revealQuestion\(false\)/.test(html))throw new Error('Automatic reveal guard not found');
@@ -35,5 +36,9 @@ if(!/playerIndex!==activePlayer/.test(html))throw new Error('Chooser validation 
 if(!/action\.type==="submit-answer"/.test(html))throw new Error('Remote answer validation not found');
 if(!/action\.type==="use-hint"/.test(html))throw new Error('Per-player hint validation not found');
 if(!/function toggleFullscreen\(\)\{if\(!document\.fullscreenElement\)document\.documentElement\.requestFullscreen/.test(html))throw new Error('Fullscreen toggle entry missing');
+if(!html.includes('Choose the next question. Everyone will answer it.'))throw new Error('Player-facing question wording missing');
+if(!/phoneAnswerInput[\s\S]*phoneHintAction[\s\S]*phone-submit/.test(html))throw new Error('Phone answer/hint/submit order is incorrect');
+if(!html.includes('join-avatar{width:100%!important;min-width:0!important'))throw new Error('Phone avatar overflow fix missing');
+// CLASSIC_PARITY_V2_AUDIT
 // CLASSIC_DEVTOOLS_AUDIT
 console.log(`Classic Jeopardy audit passed: ${pack.genre||pack.id}, ${pack.categories.length} categories`);
