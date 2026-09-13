@@ -19,6 +19,7 @@ const normalize = (text) => String(text || "")
   .trim();
 
 const questionIssues = [];
+const followupIssues = [];
 for (const category of categories) {
   category.clues.forEach((clue, row) => {
     const matches = (clue.choices || []).filter((choice) => {
@@ -28,6 +29,13 @@ for (const category of categories) {
     });
     if ((clue.choices || []).length !== 2 || matches.length !== 1 || !clue.h) {
       questionIssues.push({ category: category.name, row: row + 1, matches: matches.length });
+    }
+    if (clue.special) {
+      const options = clue.fchoices || [];
+      const banned = /^(all|none|not enough|cannot determine)/i;
+      if (options.length !== 4 || !clue.fcorrect || !options.includes(clue.fcorrect) || options.some(x => banned.test(String(x)))) {
+        followupIssues.push({ category: category.name, row: row + 1 });
+      }
     }
   });
 }
@@ -42,17 +50,18 @@ const definedFunctions = new Set([...script.matchAll(/function\s+([A-Za-z_$][\w$
 const handlers = [...html.matchAll(/\sonclick="([A-Za-z_$][\w$]*)\s*\(/g)].map((match) => match[1]);
 const missingHandlers = [...new Set(handlers.filter((handler) => !definedFunctions.has(handler)))];
 
-if(!html.includes("followupChoicesFor")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!html.includes("AVATAR_CROP_V2")) throw new Error("Follow-up multiple choice/avatar crop fix missing");
+if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!html.includes("AVATAR_CROP_V4")) throw new Error("Randomized follow-up/avatar framing fix missing");
 
 const results = {
   syntax: "pass",
   categories: categories.length,
   questions: categories.reduce((count, category) => count + category.clues.length, 0),
   questionIssues,
+  followupIssues,
   duplicateIds,
   missingIds,
   missingHandlers,
 };
 
 console.log(JSON.stringify(results, null, 2));
-if (questionIssues.length || duplicateIds.length || missingIds.length || missingHandlers.length) process.exitCode = 1;
+if (questionIssues.length || followupIssues.length || duplicateIds.length || missingIds.length || missingHandlers.length) process.exitCode = 1;
