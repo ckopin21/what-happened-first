@@ -28,7 +28,13 @@ jobs:
           p.write_text(s.replace(old,new,1),encoding='utf-8')
           PY
       - name: Apply Classic patch
-        run: python work/apply-classic-v4.py
+        run: python work/apply-classic-v4.py 2>&1 | tee /tmp/classic-patch.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: classic-v4-log
+          path: /tmp/classic-patch.txt
+          if-no-files-found: ignore
       - name: Audit timeline mode
         run: node work/audit-game.js outputs/dog-jeopardy.html
       - name: Audit Classic mode
