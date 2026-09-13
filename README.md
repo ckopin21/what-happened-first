@@ -1,30 +1,45 @@
-# What Happened First?
+# Jeopardy Game Collection
 
-A host-led, 1–5 player timeline trivia game. The host runs the board on a laptop or TV, and players join from their phones using the room link shown on the host screen.
+A host-led, 1–5 player trivia collection. The host runs the board on a laptop or TV and players join from phones using the room link or QR code.
 
-## Play
+## Game modes
 
-1. Open the hosted game on the host device.
+- **What Happened First?** — timeline trivia where the active player chooses and answers between two events.
+- **Classic Jeopardy** — the active player chooses the clue, then every player types and submits an open-ended answer at the same time.
+
+Open `index.html` (or the GitHub Pages root) to choose a mode.
+
+## Classic question packs
+
+Classic Jeopardy keeps its questions separate from the game engine. The current genre/question set is:
+
+`packs/classic/current.js`
+
+That means a genre change can be done without rewriting the multiplayer game. For example, ask ChatGPT:
+
+> Replace the Classic Jeopardy question pack with a Disney theme. Keep 5 categories × 5 clues, values 100–500, hints, accepted aliases, and leave the game engine unchanged.
+
+See `packs/classic/README.md` for the pack schema.
+
+## Phone play
+
+1. Open the desired game on the host device.
 2. Keep the host page open for the entire game.
-3. Copy the phone link shown beside the four-character room code and send it to each player.
-4. Each player opens the link, enters a name, picks an avatar, and joins.
-5. The active player chooses and answers from their phone. The host remains authoritative for turns, scoring, timers, and tie-breakers.
+3. Players scan the large QR code or open the displayed phone link.
+4. Each player enters a name, chooses an avatar, and joins.
+5. The host remains authoritative for game state and scoring.
 
-The game supports local host-created players and the built-in Player Phone Preview too.
+## Development
 
-## Continue development on another device
+Read `PROJECT_CONTEXT.md` and `AGENTS.md` before making changes. Run both audits after relevant edits:
 
-1. Clone this repository.
-2. Open the cloned folder as a Codex project.
-3. Ask Codex to read `PROJECT_CONTEXT.md` and `AGENTS.md` before making changes.
-4. Run `node work/audit-game.js outputs/dog-jeopardy.html` after edits.
+```text
+node work/audit-game.js outputs/dog-jeopardy.html
+node work/audit-classic.js
+```
 
-No build step is required. The game is a static HTML app. For local testing, serve the repository over HTTP rather than opening it with `file://`; real phone connections also need internet access to reach the PeerJS signaling service.
-
-## Hosting
-
-GitHub Pages can publish the repository root. `index.html` forwards to the current game file while preserving the phone-room query string.
+No build step is required. The games are static HTML/JavaScript apps. For local networking tests, serve the repository over HTTP/HTTPS rather than `file://`.
 
 ## Networking
 
-Phone controllers use PeerJS/WebRTC. Game state travels directly between the host browser and phones; the public PeerJS cloud service is used for connection signaling. No player names or scores are stored by this repository. Some restrictive school, corporate, carrier, or guest networks may block peer-to-peer connections; a self-hosted signaling/TURN deployment would be the production-grade fallback.
+Phone controllers use PeerJS/WebRTC. Game state travels directly between the host browser and phones; the public PeerJS cloud service handles connection signaling. Some restrictive networks may block peer-to-peer connections, in which case dedicated signaling/TURN infrastructure would be the production-grade fallback.
