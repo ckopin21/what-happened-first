@@ -2568,7 +2568,7 @@ function makeNetworkSnapshot(){
     selectedChoice,submittedChoice,choiceLocked,lastChancePending,lastChancePlayerIndex,
     multiplier:currentMultiplier(),modalShowing:!!document.getElementById("modal")?.classList.contains("showing"),
     players:players.slice(0,playerCount).map(p=>({name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatarIndex:avatarIndexFor(p.avatar)})),
-    current:current?{key:current.key,base:current.base,mult:current.mult,value:current.value,lastChanceMult:current.lastChanceMult,isDaily:!!current.isDaily,item:{q:current.item.q,h:current.item.h,a:current.item.a,choices:current.item.choices,special:!!current.item.special,fq:current.item.fq,fa:current.item.fa,fchoices:current.item.fchoices,fcorrect:current.item.fcorrect,fc:Array.isArray(current.followOrder)?current.followOrder:followupChoicesFor(current.item)},followChoice:Number.isInteger(current.followChoice)?current.followChoice:null,followOrder:Array.isArray(current.followOrder)?current.followOrder:null}:null,
+    current:current?{key:current.key,base:current.base,mult:current.mult,value:current.value,lastChanceMult:current.lastChanceMult,isDaily:!!current.isDaily,choiceOrder:Array.isArray(current.choiceOrder)?current.choiceOrder.slice():[],item:{q:current.item.q,h:current.item.h,a:current.item.a,choices:current.item.choices,special:!!current.item.special,fq:current.item.fq,fa:current.item.fa,fchoices:current.item.fchoices,fcorrect:current.item.fcorrect,fc:Array.isArray(current.followOrder)?current.followOrder:followupChoicesFor(current.item)},followChoice:Number.isInteger(current.followChoice)?current.followChoice:null,followOrder:Array.isArray(current.followOrder)?current.followOrder:null}:null,
     pendingDaily:pendingDaily?{key:pendingDaily.key,maxWager:Math.max(100,Math.max(players[activePlayer]?.score||0,1000)),phaseMult:currentMultiplier()}:null,
     followOffer,followVisible,followAnswerVisible,
     tie:{active:tieActive,resolved:tieResolved,questionIndex:tieQuestionIndex,players:tiePlayers.map(x=>x.i),answered:[...tieAnswered],winner:tieWinnerIndex}
@@ -3116,6 +3116,17 @@ function syncPhoneQuestionView(){
 
 
 
+function shuffledPrimaryChoices(values){
+  const out=Array.isArray(values)?values.slice():[];
+  for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]]}
+  return out;
+}
+function primaryChoicesForCurrent(){
+  if(!current)return[];
+  const base=Array.isArray(current.item?.choices)?current.item.choices:[];
+  if(!Array.isArray(current.choiceOrder)||current.choiceOrder.length!==base.length)current.choiceOrder=shuffledPrimaryChoices(base);
+  return current.choiceOrder;
+}
 function normalizeChoiceText(text){
   return String(text||"")
     .toLowerCase()
@@ -3153,7 +3164,7 @@ function renderHostChoices(){
   const wrap=document.getElementById("hostChoiceButtons");
   if(!wrap)return;
   wrap.innerHTML="";
-  const choices=current?.item?.choices||[];
+  const choices=primaryChoicesForCurrent();
   const correct=getCorrectChoice();
   choices.forEach(choice=>{
     const b=document.createElement("button");
@@ -3187,7 +3198,7 @@ function renderPhoneChoices(){
   const wrap=document.getElementById("phoneChoiceButtons");
   if(!wrap)return;
   wrap.innerHTML="";
-  const choices=current?.item?.choices||[];
+  const choices=primaryChoicesForCurrent();
   const correct=getCorrectChoice();
   choices.forEach(choice=>{
     const b=document.createElement("button");
@@ -3574,7 +3585,11 @@ function openClue(key,item,base,isReview){
   const mult=isReview ? (item.playedMult||1) : currentMultiplier();
   const lcMult=lastChanceMultiplierForPlayer(activePlayer);
   const forcedMultiplier=!isReview ? devForcedMultiplier : 0;
-  current={key,item,base,mult,value:base*mult*lcMult,lastChanceMult:lcMult,forcedMultiplier};
+  const baseChoices=Array.isArray(item.choices)?item.choices.slice():[];
+  const choiceOrder=isReview&&Array.isArray(item.playedChoiceOrder)&&item.playedChoiceOrder.length===baseChoices.length
+    ? item.playedChoiceOrder.slice()
+    : shuffledPrimaryChoices(baseChoices);
+  current={key,item,base,mult,value:base*mult*lcMult,lastChanceMult:lcMult,forcedMultiplier,choiceOrder};
   if(!isReview && devForcedMultiplier){
     devForcedMultiplier=0;
     setDevArmed("");
@@ -3673,6 +3688,7 @@ function primaryResult(correct){
       document.getElementById("normalControls").style.display="none";
       document.getElementById("followOffer").classList.add("visible");
       syncPhoneQuestionView();
+      broadcastGameState(true);
       showToast("Primary answer correct","good");
       audioPop(760,.07,"sine",.04);
     }else{
@@ -3758,6 +3774,7 @@ function finalizeQuestion(delta,wasCorrect,outcome){
   }
 
   current.item.playedMult=current.mult;
+  current.item.playedChoiceOrder=Array.isArray(current.choiceOrder)?current.choiceOrder.slice():[];
   current.item.outcome=outcome;
   current.item.player=activePlayer;
   current.item.winnerName = wasCorrect ? p.name : "No winner";
