@@ -42,6 +42,8 @@ const definedFunctions = new Set([...script.matchAll(/function\s+([A-Za-z_$][\w$
 const handlers = [...html.matchAll(/\sonclick="([A-Za-z_$][\w$]*)\s*\(/g)].map((match) => match[1]);
 const missingHandlers = [...new Set(handlers.filter((handler) => !definedFunctions.has(handler)))];
 
+if(!html.includes("followupChoicesFor")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!html.includes("AVATAR_CROP_V2")) throw new Error("Follow-up multiple choice/avatar crop fix missing");
+
 const results = {
   syntax: "pass",
   categories: categories.length,
