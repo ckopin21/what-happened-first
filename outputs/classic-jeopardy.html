@@ -25,6 +25,15 @@ body.fullscreen-game .setup,body.fullscreen-game>header,body.fullscreen-game .ti
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes dropIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}@keyframes popIn{from{opacity:0;transform:scale(.8) translateY(25px)}to{opacity:1;transform:none}}@keyframes scoreFlash{0%{opacity:1;transform:scale(.92)}55%{opacity:.75;transform:scale(1.12)}100%{opacity:0;transform:scale(1.22)}}@keyframes firePulse{from{transform:translateY(0);filter:brightness(1)}to{transform:translateY(-3px);filter:brightness(1.13)}}@keyframes softPulse{from{transform:scale(1)}to{transform:scale(1.035)}}@keyframes phaseBurst{0%{opacity:0;transform:scale(.5)}35%,75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.3)}}@keyframes toastPop{0%{opacity:0;transform:translate(-50%,-18px) scale(.8)}20%,75%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-8px) scale(.9)}}@keyframes rankReveal{to{opacity:1;transform:translateY(0) scale(1)}}@keyframes fall{to{transform:translate(var(--drift),110vh) rotate(720deg);opacity:.15}}
 @media(max-width:820px){.scores{gap:6px}.player{min-height:103px}.player-name{font-size:14px}.score{font-size:22px}.board{gap:4px}.category,.clue{min-height:72px;padding:5px;border-radius:8px}.category{font-size:9px}.clue{font-size:19px}.remote-room-card{text-align:center}.remote-room-info{flex-basis:100%}.answer-row{grid-template-columns:1fr}.judge{width:100%}}
 @media(max-width:520px){.remote-room-qr{width:240px;height:240px;flex-basis:240px}.remote-room-qr img,.remote-room-qr canvas{width:218px!important;height:218px!important}.ranking{align-items:stretch}.rank-card{width:45%;min-width:130px}.phone-root{padding-top:calc(10px + var(--safe-top))}}
+
+/* CLASSIC_DEVTOOLS_V1 */
+.dev-toggle-wrap{display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:11px;background:#0a2d45;border:1px solid rgba(255,255,255,.13);font-weight:900}.dev-toggle-wrap input{accent-color:var(--accent)}
+.dev-fab{position:fixed;right:16px;bottom:16px;z-index:320;display:none}.dev-fab-btn{width:62px;height:62px;border-radius:50%;margin:0;background:var(--accent);color:#18212a;font-size:16px;font-weight:1000;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+body.dev-mode #devFab{display:block!important}.dev-panel{position:fixed;right:16px;bottom:88px;width:min(390px,calc(100vw - 24px));max-height:min(70dvh,640px);overflow:auto;z-index:321;background:linear-gradient(160deg,#176b9e,#0b304b);border:3px solid rgba(255,255,255,.9);border-radius:20px;padding:14px;box-shadow:0 24px 60px rgba(0,0,0,.55);text-align:left}.dev-panel-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.dev-kicker{font-size:10px;letter-spacing:.16em;color:#bfe1f4;font-weight:1000}.dev-title{font-size:21px;color:var(--accent);font-weight:1000}.dev-close{padding:5px 10px!important;margin:0!important;box-shadow:none!important;background:#fff;color:#173047}.dev-panel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.dev-panel-grid button{margin:0;border-radius:12px;padding:10px 8px;font-size:12px}.dev-note{margin-top:10px;color:#c9dfec;font-size:11px;line-height:1.35}.dev-armed-banner{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:319;padding:9px 14px;border-radius:999px;background:#7a5100;color:#fff0b5;border:1px solid #ffd166;font-size:12px;font-weight:1000;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.dev-preview-overlay{position:fixed;inset:0;z-index:322;background:rgba(1,7,12,.88);display:none;align-items:center;justify-content:center;padding:20px}.dev-preview-card{width:min(520px,94vw);background:linear-gradient(160deg,#176b9e,#0b304b);border:4px solid rgba(255,255,255,.92);border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 30px 70px rgba(0,0,0,.55)}.dev-preview-icon{font-size:64px}.dev-preview-title{font-size:34px;font-weight:1000;color:var(--accent);margin:8px 0}.dev-preview-sub{font-size:15px;color:#d7ebf7;font-weight:800;line-height:1.4;margin-bottom:14px}
+.fullscreen-exit{display:none;position:fixed;right:12px;top:12px;z-index:330;margin:0!important}.fullscreen-game .fullscreen-exit{display:block}.phone-mode .fullscreen-exit{display:none!important}.fullscreen-game.dev-mode #devFab{display:block!important}
+@media(max-width:560px){.dev-panel-grid{grid-template-columns:1fr}.dev-panel{right:8px;bottom:78px;width:calc(100vw - 16px)}}
+
 </style>
 </head>
 <body>
@@ -34,6 +43,7 @@ body.fullscreen-game .setup,body.fullscreen-game>header,body.fullscreen-game .ti
     <div class="setup-row">
       <div class="host-player-count"><b>Players:</b> <span id="hostPlayerCount">0 / 5</span></div>
       <a class="mode-link" href="../index.html">Game Modes</a>
+      <label class="dev-toggle-wrap"><input id="developerToggle" type="checkbox" onchange="setDeveloperMode(this.checked)"><span>Developer Mode</span></label>
       <button class="blue" id="fullscreenBtn" onclick="toggleFullscreen()">Fullscreen</button>
       <button class="gold" onclick="newGame()">New Game</button>
       <button class="red" onclick="resetGame()">Reset Game</button>
@@ -57,6 +67,30 @@ body.fullscreen-game .setup,body.fullscreen-game>header,body.fullscreen-game .ti
 <section class="overlay" id="revealOverlay"><div class="modal-card"><div class="badges"><span class="badge" id="rCategory"></span><span class="badge secondary" id="rValue"></span></div><div class="question" id="revealQuestionText"></div><div class="correct-answer">Correct answer: <span id="correctAnswer"></span></div><div class="answer-list" id="answerList"></div><div class="rule-note" id="judgeNote">Close spelling and accepted aliases are judged automatically. The host can override any result before scoring.</div><button class="green" id="applyScoresBtn" onclick="applyScores()">Apply Scores & Continue</button><button class="white" id="closeReviewBtn" style="display:none" onclick="closeReview()">Close Review</button></div></section>
 <div class="phase-overlay" id="phaseOverlay"><div class="phase-text" id="phaseText"></div></div><div class="toast" id="toast"></div>
 <section class="finale" id="finale"><div class="finale-inner"><h2>FINAL RANKING</h2><div class="ranking" id="ranking"></div><button class="gold" onclick="newGame()">Play Again</button><button class="white" onclick="document.getElementById('finale').classList.remove('showing')">View Board</button></div></section>
+
+<button class="blue fullscreen-exit" id="fullscreenExitBtn" onclick="toggleFullscreen()">Exit Fullscreen</button>
+<div class="dev-armed-banner" id="devArmedBanner" style="display:none"></div>
+<div class="dev-fab" id="devFab"><button class="dev-fab-btn" onclick="toggleDevPanel()">DEV</button></div>
+<div class="dev-panel" id="devPanel" style="display:none">
+  <div class="dev-panel-header"><div><div class="dev-kicker">DEVELOPER PREVIEW</div><div class="dev-title">Modifiers & Animations</div></div><button class="dev-close" onclick="toggleDevPanel(false)">×</button></div>
+  <div class="dev-panel-grid">
+    <button onclick="devPreview('daily')">Daily Double</button>
+    <button onclick="devPreview('double')">Double Points</button>
+    <button onclick="devPreview('triple')">Triple Points</button>
+    <button onclick="devPreview('lastchance')">Last Chance</button>
+    <button onclick="devPreview('fire')">On Fire</button>
+    <button onclick="devPreview('cold')">Cold Streak</button>
+    <button onclick="devPreview('comeback')">Comeback</button>
+    <button onclick="devPreview('correct')">Correct Result</button>
+    <button onclick="devPreview('incorrect')">Incorrect Result</button>
+    <button onclick="devPreview('followup')">Two-Part Follow-Up</button>
+    <button onclick="devPreview('tiebreaker')">Tie-Breaker</button>
+    <button onclick="devPreview('finale')">Winner Celebration</button>
+  </div>
+  <div class="dev-note">Classic keeps its everyone-answers format. Double/Triple can arm the next real clue; the other controls preview the corresponding presentation states without changing normal scoring.</div>
+</div>
+<div class="dev-preview-overlay" id="devPreviewOverlay"><div class="dev-preview-card"><div class="dev-preview-icon" id="devPreviewIcon"></div><div class="dev-preview-title" id="devPreviewTitle"></div><div class="dev-preview-sub" id="devPreviewSub"></div><button class="white" onclick="closeDevPreview()">Close Preview</button></div></div>
+
 <section class="phone-root" id="phoneRoot"><div class="phone-shell"><div class="phone-brand"><h2 id="phoneTitle">CLASSIC JEOPARDY</h2><p id="phoneRoomLabel">Connecting…</p></div><div class="phone-card" id="joinCard"><h2>Join the game</h2><input class="phone-input" id="nameInput" maxlength="24" placeholder="Your name" autocomplete="name"><div class="phone-small" style="margin-top:12px;font-weight:900">Choose an avatar</div><div class="join-avatar-grid" id="joinAvatarGrid"></div><button class="blue phone-btn" onclick="joinGame()">Join Game</button><div class="phone-status" id="joinStatus"></div></div><div class="phone-card" id="gameCard" style="display:none"><div class="phone-player"><div class="phone-player-main"><div class="phone-avatar" id="phoneAvatar">🐶</div><div><div class="phone-name" id="phoneName">Player</div><div class="phone-meta" id="phoneMeta"></div></div></div><div class="phone-score" id="phoneScore">$0</div></div><div id="phoneView"></div></div></div></section>
 <script>
 const PACK=window.CLASSIC_JEOPARDY_PACK;
@@ -65,6 +99,7 @@ const MAX_PLAYERS=5,GAME_VERSION="classic-2";
 const AVATARS=[{name:"Corgi",icon:"🐶"},{name:"Cat",icon:"🐱"},{name:"Panda",icon:"🐼"},{name:"Penguin",icon:"🐧"},{name:"Fox",icon:"🦊"},{name:"Frog",icon:"🐸"},{name:"Shark",icon:"🦈"},{name:"Duck",icon:"🦆"}];
 const categories=PACK.categories,totalQuestions=categories.reduce((n,c)=>n+c.clues.length,0);
 let players=[],used=new Set(),history=new Map(),activePlayer=0,current=null,submissions=new Map(),judgements=new Map(),hintsUsed=new Set(),questionRevealed=false,questionResolved=false,reviewRecord=null,finalShown=false;
+let developerMode=false,devForcedMultiplier=0;
 let roomCode="",hostPeer=null,phonePeer=null,phoneConn=null,phoneState=null,phoneSelectedAvatar=0;
 const remoteContexts=new Map(),PHONE_TOKEN_KEY="classic-jeopardy-phone-token";
 
@@ -77,7 +112,7 @@ document.getElementById("phoneTitle").textContent=PACK.title||"CLASSIC JEOPARDY"
 function money(n){const sign=n<0?"−":"";return `${sign}$${Math.abs(n).toLocaleString()}`}
 function clueId(ci,qi){return `${ci}:${qi}`}
 function questionsRemaining(){return totalQuestions-used.size}
-function phaseMultiplier(){const left=questionsRemaining();if(left<=3&&left>0)return 3;if(left<=6&&left>3)return 2;return 1}
+function phaseMultiplier(){if(devForcedMultiplier===2||devForcedMultiplier===3)return devForcedMultiplier;const left=questionsRemaining();if(left<=3&&left>0)return 3;if(left<=6&&left>3)return 2;return 1}
 function phaseText(){const m=phaseMultiplier();return m===3?"TRIPLE POINTS":m===2?"DOUBLE POINTS":"1× POINTS"}
 function avatarIcon(i){return AVATARS[Number.isInteger(i)&&AVATARS[i]?i:0].icon}
 function connectedForPlayer(index){for(const ctx of remoteContexts.values())if(ctx.playerIndex===index&&ctx.conn&&ctx.conn.open)return true;return false}
@@ -113,6 +148,7 @@ function openClue(ci,qi,playerIndex){
   if(current||!players.length)return false;if(Number.isInteger(playerIndex)&&playerIndex!==activePlayer)return false;
   const clue=categories[ci]?.clues?.[qi],id=clueId(ci,qi);if(!clue||used.has(id))return false;
   const mult=phaseMultiplier();current={id,ci,qi,category:categories[ci].name,base:clue.value,mult,effective:clue.value*mult,question:clue.question,answer:clue.answer,aliases:Array.isArray(clue.aliases)&&clue.aliases.length?clue.aliases:[clue.answer],hint:clue.hint||"No hint available."};
+  if(devForcedMultiplier){devForcedMultiplier=0;setDevArmed("");}
   submissions=new Map();judgements=new Map();hintsUsed=new Set();questionRevealed=false;questionResolved=false;reviewRecord=null;
   showQuestionHost();renderHost();broadcastState();return true;
 }
@@ -203,6 +239,60 @@ function renderPhone(){
   if(phoneState.mode==="final"){const top=phoneState.ranking?.[0]?.score;view.innerHTML=`<div class="waiting"><div class="big">FINAL RANKING</div>${(phoneState.ranking||[]).map((p,i)=>`<div style="margin:8px 0;font-weight:1000;color:${p.score===top?'#ffd166':'#fff'}">#${i+1} ${avatarIcon(p.avatar)} ${escapeHtml(p.name)} — ${money(p.score)}</div>`).join("")}</div>`;return}
 }
 function initPhone(room){document.body.classList.add("phone-mode");document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connecting…`;initAvatarPicker();if(typeof Peer==="undefined"){document.getElementById("joinStatus").textContent="Phone networking failed to load.";return}phonePeer=new Peer(undefined,{debug:0});phonePeer.on("open",()=>{phoneConn=phonePeer.connect(hostPeerId(room),{reliable:true});phoneConn.on("open",()=>{document.getElementById("joinStatus").textContent="Connected.";const token=sessionStorage.getItem(PHONE_TOKEN_KEY);if(token)phoneConn.send({type:"rejoin",token})});phoneConn.on("data",msg=>{if(msg?.type==="state"){phoneState=msg;renderPhone()}else if(msg?.type==="joined"){if(msg.token)sessionStorage.setItem(PHONE_TOKEN_KEY,msg.token)}else if(msg?.type==="join-error")document.getElementById("joinStatus").textContent=msg.message||"Could not join."});phoneConn.on("close",()=>{document.getElementById("joinStatus").textContent="Disconnected. Reload to reconnect."})});phonePeer.on("error",()=>{document.getElementById("joinStatus").textContent="Could not connect to the host."})}
+
+
+function setDeveloperMode(enabled){
+  developerMode=!!enabled;
+  document.body.classList.toggle("dev-mode",developerMode);
+  const fab=document.getElementById("devFab");
+  if(fab)fab.style.display=developerMode?"block":"none";
+  if(!developerMode){toggleDevPanel(false);closeDevPreview();devForcedMultiplier=0;setDevArmed("");renderHost()}
+  toast(developerMode?"Developer Mode enabled":"Developer Mode disabled","");
+}
+function toggleDevPanel(force){
+  if(!developerMode)return;
+  const panel=document.getElementById("devPanel");if(!panel)return;
+  const show=typeof force==="boolean"?force:panel.style.display==="none";
+  panel.style.display=show?"block":"none";
+}
+function setDevArmed(text){const el=document.getElementById("devArmedBanner");if(!el)return;el.textContent=text||"";el.style.display=text?"block":"none"}
+function closeDevPreview(){const el=document.getElementById("devPreviewOverlay");if(el)el.style.display="none"}
+function devGenericPreview(icon,title,sub){
+  document.getElementById("devPreviewIcon").textContent=icon;
+  document.getElementById("devPreviewTitle").textContent=title;
+  document.getElementById("devPreviewSub").textContent=sub;
+  document.getElementById("devPreviewOverlay").style.display="flex";
+}
+function ensureDevPlayer(){
+  if(players.length)return Math.min(activePlayer,players.length-1);
+  players.push({name:"Dev Player",score:0,token:"dev-local",avatar:0,correctStreak:0,wrongStreak:0});
+  activePlayer=0;renderHost();return 0;
+}
+function devPreview(kind){
+  if(!developerMode)return;
+  toggleDevPanel(false);closeDevPreview();
+  if(kind==="double"||kind==="triple"){
+    devForcedMultiplier=kind==="double"?2:3;
+    const label=devForcedMultiplier===2?"DOUBLE POINTS":"TRIPLE POINTS";
+    setDevArmed("DEV: "+label+" ARMED • SELECT A QUESTION");showPhaseOverlay(label);renderHost();toast(label+" armed","");return;
+  }
+  if(kind==="fire"){const i=ensureDevPlayer();players[i].correctStreak=3;players[i].wrongStreak=0;renderHost();flashPlayer(i,"good");toast(players[i].name+" is ON FIRE","good");return}
+  if(kind==="cold"){const i=ensureDevPlayer();players[i].correctStreak=0;players[i].wrongStreak=3;renderHost();flashPlayer(i,"bad");toast(players[i].name+" is on a COLD STREAK","bad");return}
+  if(kind==="correct"){const i=ensureDevPlayer();flashPlayer(i,"good");toast("CORRECT!","good");return}
+  if(kind==="incorrect"){const i=ensureDevPlayer();flashPlayer(i,"bad");toast("INCORRECT","bad");return}
+  if(kind==="finale"){
+    if(!players.length){players.push({name:"Winner",score:1200,token:"dev-winner",avatar:0,correctStreak:0,wrongStreak:0},{name:"Runner Up",score:800,token:"dev-runner",avatar:1,correctStreak:0,wrongStreak:0});renderHost()}
+    showFinale();return;
+  }
+  const previews={
+    daily:["⚡","DAILY DOUBLE","Presentation preview for the Daily Double state. Classic still keeps everyone answering the clue."],
+    lastchance:["🎯","LAST CHANCE","Preview of the comeback / Last Chance presentation state."],
+    comeback:["🚀","COMEBACK","Preview of the comeback animation and messaging."],
+    followup:["➕","TWO-PART FOLLOW-UP","Preview of the second-part question presentation."],
+    tiebreaker:["⚔️","TIE-BREAKER","Preview of the tie-breaker presentation state."]
+  };
+  const p=previews[kind]||["🧪","DEV PREVIEW",String(kind||"").toUpperCase()];devGenericPreview(...p);
+}
 
 function toggleFullscreen(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()}
 document.addEventListener("fullscreenchange",()=>{document.body.classList.toggle("fullscreen-game",!!document.fullscreenElement);document.getElementById("fullscreenBtn").textContent=document.fullscreenElement?"Exit Fullscreen":"Fullscreen";renderHost()});

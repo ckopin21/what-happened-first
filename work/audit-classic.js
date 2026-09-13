@@ -26,11 +26,14 @@ for(const category of pack.categories){
 const required=[
   '../packs/classic/current.js','Confirm & Submit','Reveal Now','fuzzyMatch','setJudgement',
   'applyScores','allSubmitted','classic-jeopardy-','QRCode','Peer','usedWinners','reviewClue',
-  'showFinale','phaseMultiplier','Use Hint','New Game','Reset Game','toggleFullscreen'
+  'showFinale','phaseMultiplier','Use Hint','New Game','Reset Game','toggleFullscreen',
+  'Developer Mode','devPreview','devPanel','fullscreenExitBtn','devForcedMultiplier','CLASSIC_DEVTOOLS_V1'
 ];
 for(const needle of required){if(!html.includes(needle))throw new Error(`Missing required feature marker: ${needle}`)}
 if(!/if\(allSubmitted\(\)\)revealQuestion\(false\)/.test(html))throw new Error('Automatic reveal guard not found');
 if(!/playerIndex!==activePlayer/.test(html))throw new Error('Chooser validation not found');
 if(!/action\.type==="submit-answer"/.test(html))throw new Error('Remote answer validation not found');
 if(!/action\.type==="use-hint"/.test(html))throw new Error('Per-player hint validation not found');
+if(!/function toggleFullscreen\(\)\{if\(!document\.fullscreenElement\)document\.documentElement\.requestFullscreen/.test(html))throw new Error('Fullscreen toggle entry missing');
+// CLASSIC_DEVTOOLS_AUDIT
 console.log(`Classic Jeopardy audit passed: ${pack.genre||pack.id}, ${pack.categories.length} categories`);
