@@ -1,0 +1,39 @@
+name: Apply Classic specials v6
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'work/apply-classic-specials-v6.py'
+      - '.github/workflows/apply-classic-specials-v6.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply fixes
+        run: python work/apply-classic-specials-v6.py
+      - name: Audit timeline mode
+        run: node work/audit-game.js outputs/dog-jeopardy.html
+      - name: Audit Classic mode
+        run: node work/audit-classic.js
+      - name: Verify changed game files
+        run: |
+          git diff --exit-code -- outputs/classic-jeopardy.html && { echo 'Classic engine did not change'; exit 1; } || true
+          grep -q 'CLASSIC_DAILY_DOUBLE_V2' outputs/classic-jeopardy.html
+          grep -q 'AVATAR_CROP_V5' outputs/dog-jeopardy.html
+      - name: Commit finished fixes
+        run: |
+          rm -f work/apply-classic-specials-v6.py .github/workflows/apply-classic-specials-v6.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix timeline avatars and Classic specials joining" || exit 0
+          git push
