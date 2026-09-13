@@ -44,21 +44,17 @@ function normalizeChoiceText(text){
 ''',
 'primary shuffle helpers')
 
-# Both host and phone must render the same shuffled order.
-one('''  const choices=current?.item?.choices||[];
+# Both host and phone use the same helper. There are exactly two renderers.
+old_render='''  const choices=current?.item?.choices||[];
   const correct=getCorrectChoice();
-  choices.forEach(choice=>{''',
-    '''  const choices=primaryChoicesForCurrent();
+  choices.forEach(choice=>{'''
+new_render='''  const choices=primaryChoicesForCurrent();
   const correct=getCorrectChoice();
-  choices.forEach(choice=>{''',
-    'host primary rendering')
-one('''  const choices=current?.item?.choices||[];
-  const correct=getCorrectChoice();
-  choices.forEach(choice=>{''',
-    '''  const choices=primaryChoicesForCurrent();
-  const correct=getCorrectChoice();
-  choices.forEach(choice=>{''',
-    'phone primary rendering')
+  choices.forEach(choice=>{'''
+render_matches=s.count(old_render)
+if render_matches!=2:
+    raise RuntimeError(f'primary rendering: expected exactly 2 matches, found {render_matches}')
+s=s.replace(old_render,new_render,2)
 
 # Preserve the played order for used-clue review.
 one(
