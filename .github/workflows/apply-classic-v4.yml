@@ -16,21 +16,7 @@ jobs:
         with:
           node-version: '22'
       - name: Apply Classic patch
-        id: patch
-        run: |
-          set +e
-          python work/apply-classic-v4.py > /tmp/classic-patch.txt 2>&1
-          status=$?
-          cat /tmp/classic-patch.txt
-          echo "status=$status" >> "$GITHUB_OUTPUT"
-          exit 0
-      - uses: actions/upload-artifact@v4
-        with:
-          name: classic-v4-diagnostics
-          path: /tmp/classic-patch.txt
-      - name: Stop on patch failure
-        if: steps.patch.outputs.status != '0'
-        run: exit 1
+        run: python work/apply-classic-v4.py
       - name: Audit timeline mode
         run: node work/audit-game.js outputs/dog-jeopardy.html
       - name: Audit Classic mode
