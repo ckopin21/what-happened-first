@@ -50,7 +50,7 @@ const definedFunctions = new Set([...script.matchAll(/function\s+([A-Za-z_$][\w$
 const handlers = [...html.matchAll(/\sonclick="([A-Za-z_$][\w$]*)\s*\(/g)].map((match) => match[1]);
 const missingHandlers = [...new Set(handlers.filter((handler) => !definedFunctions.has(handler)))];
 
-if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!html.includes("AVATAR_CROP_V4")) throw new Error("Randomized follow-up/avatar framing fix missing");
+if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!html.includes("AVATAR_CROP_V5")) throw new Error("Randomized follow-up/avatar framing fix missing");
 
 const results = {
   syntax: "pass",

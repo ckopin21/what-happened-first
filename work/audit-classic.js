@@ -22,13 +22,16 @@ for(const category of pack.categories){
     if(!Number.isFinite(clue.value)||!clue.question||!clue.answer||!Array.isArray(clue.aliases)||!clue.aliases.length)throw new Error(`Invalid clue in ${category.name}`);
   }
 }
+const twoPartCount=pack.categories.flatMap(category=>category.clues).filter(clue=>clue.followup).length;
+if(twoPartCount<5)throw new Error('Classic pack must include at least five two-part clues');
 
 const required=[
   '../packs/classic/current.js','Confirm & Submit','Reveal Now','fuzzyMatch','setJudgement',
   'applyScores','allSubmitted','classic-jeopardy-','QRCode','Peer','usedWinners','reviewClue',
   'showFinale','phaseMultiplier','Use Hint','New Game','Reset Game','toggleFullscreen',
   'Developer Mode','devPreview','devPanel','fullscreenExitBtn','devForcedMultiplier','CLASSIC_DEVTOOLS_V1',
-  'Add Player','Player Phone Preview','volumeSlider','setVolume','classicPhonePreview','CLASSIC_PARITY_V2'
+  'Add Player','Player Phone Preview','volumeSlider','setVolume','classicPhonePreview','CLASSIC_PARITY_V2',
+  'CLASSIC_DAILY_DOUBLE_V2','pendingDaily','dailyDoubleIds','daily-wager','classic-3','searchParams.set(\"mode\",\"classic\")','connectPhoneToHost'
 ];
 for(const needle of required){if(!html.includes(needle))throw new Error(`Missing required feature marker: ${needle}`)}
 if(!/if\(allSubmitted\(\)\)revealQuestion\(false\)/.test(html))throw new Error('Automatic reveal guard not found');
