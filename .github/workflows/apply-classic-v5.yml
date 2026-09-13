@@ -1,0 +1,46 @@
+name: Apply Classic v5 fixes
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-classic-v5.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Restore verified patch script
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/ckopin21/what-happened-first/57e92133f3ea9d9ac6814295402d860915fd363a/work/apply-classic-v4.py -o work/apply-classic-v5-runtime.py
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('work/apply-classic-v5-runtime.py')
+          s=p.read_text(encoding='utf-8')
+          old="rx(r'function initPhone\\(room\\)\\{.*?\\n\\}\\n\\n\\nfunction setDeveloperMode',"
+          new="rx(r'function initPhone\\(room\\)\\{.*?\\n\\}\\s*function setDeveloperMode',"
+          if old not in s:
+              raise SystemExit('initPhone matcher not found')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          PY
+      - name: Apply Classic engine patch
+        run: python work/apply-classic-v5-runtime.py
+      - name: Audit both modes
+        run: |
+          node work/audit-game.js outputs/dog-jeopardy.html
+          node work/audit-classic.js
+      - name: Commit only verified game changes
+        run: |
+          rm -f work/apply-classic-v5-runtime.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f outputs/classic-jeopardy.html work/audit-classic.js
+          git rm .github/workflows/apply-classic-v5.yml
+          git diff --cached --stat
+          git diff --cached --quiet && exit 1 || true
+          git commit -m "Apply Classic daily double and two-part engine fixes"
+          git push
