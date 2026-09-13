@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Jeopardy Game Modes</title>
 <script>
-if(new URLSearchParams(location.search).has("phone")){
-  location.replace("outputs/dog-jeopardy.html"+location.search+location.hash);
+const phoneParams=new URLSearchParams(location.search);
+if(phoneParams.has("phone")){
+  const target=phoneParams.get("mode")==="classic"?"outputs/classic-jeopardy.html":"outputs/dog-jeopardy.html";
+  location.replace(target+location.search+location.hash);
 }
 </script>
 <style>
