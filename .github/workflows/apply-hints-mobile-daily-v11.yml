@@ -15,6 +15,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Repair one-time patch syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('work/apply-hints-mobile-daily-v11.js')
+          s=p.read_text()
+          start=s.index('aonce(`if(!html.includes("PHONE_SCROLL_CHOICE_FIX_V7")')
+          end=s.index("\naonce('  followupIssues,'", start)
+          replacement="""aonce('if(!html.includes(\"PHONE_SCROLL_CHOICE_FIX_V7\")||!html.includes(\"primaryCorrectSideBag\")||!html.includes(\"buildPrimaryChoiceOrder\")||!html.includes(\"nextPrimaryCorrectSide\")) throw new Error(\"Phone scrolling or balanced primary answer-side randomization missing\");', 'if(!html.includes(\"PHONE_SCROLL_CHOICE_FIX_V7\")||!html.includes(\"primaryCorrectSideBag\")||!html.includes(\"buildPrimaryChoiceOrder\")||!html.includes(\"nextPrimaryCorrectSide\")) throw new Error(\"Phone scrolling or balanced primary answer-side randomization missing\");\\nif(!html.includes(\"DAILY_STATIC_WAGER_V11\")||!html.includes(\"PHONE_HORIZONTAL_GUTTER_FIX_V11\")) throw new Error(\"Static Daily Double wager or mobile gutter fix missing\");\\nfor(const amount of [100,200,300,400,500,1000]){if(!html.includes(\"confirmDailyWager(\"+amount+\")\")||!html.includes(\"phoneConfirmDailyWager(\"+amount+\")\"))throw new Error(\"Missing static Daily Double wager \"+amount)}\\nif(/id=\\\"(?:phone)?wagerInput\\\"[^>]*type=\\\"number\\\"/.test(html)) throw new Error(\"Manual Daily Double number input still present\");', 'v11 audit markers');"""
+          p.write_text(s[:start]+replacement+s[end:])
+          PY
       - name: Apply v11 game fixes
         run: node work/apply-hints-mobile-daily-v11.js
       - name: Audit timeline mode
