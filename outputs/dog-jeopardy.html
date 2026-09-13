@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>What Happened First?</title>
 <style>
 *{box-sizing:border-box}
@@ -725,7 +725,7 @@ body.fullscreen-game .player.on-cold:before{
   .controller-preview{padding:0;background:#061725}
   .phone-shell{
     width:100%;
-    height:100vh;
+    height:100dvh;
     max-height:none;
     border:0;
     border-radius:0;
@@ -1216,7 +1216,7 @@ button:disabled{
   .phone-join{padding:0}
   .join-shell{
     width:100%;
-    height:100vh;
+    height:100dvh;
     max-height:none;
     border:0;
     border-radius:0;
@@ -1295,6 +1295,8 @@ button:disabled{
 
 /* Robust phone responsiveness for iPhone + Android */
 :root{
+  --phone-visual-top: 0px;
+  --phone-visual-height: 100dvh;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -1947,6 +1949,50 @@ body.remote-phone-mode .controller-preview,
 body.remote-phone-mode .phone-join{padding:0;z-index:20000}
 body.remote-phone-mode .controller-preview .phone-close{display:none}
 .remote-connection-note{font-size:12px;font-weight:800;color:#b9d8ec;margin-top:8px;text-align:center}
+/* Dynamic mobile browser viewport guard */
+body.remote-phone-mode .controller-preview,
+body.remote-phone-mode .phone-join{
+  top:var(--phone-visual-top)!important;
+  bottom:auto!important;
+  height:var(--phone-visual-height)!important;
+  min-height:0!important;
+}
+body.remote-phone-mode .phone-shell,
+body.remote-phone-mode .join-shell{
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding-top:calc(14px + var(--safe-top))!important;
+  padding-right:calc(14px + var(--safe-right))!important;
+  padding-bottom:calc(18px + var(--safe-bottom))!important;
+  padding-left:calc(14px + var(--safe-left))!important;
+}
+
+/* Host QR join */
+.remote-room-qr{
+  width:108px;
+  height:108px;
+  flex:0 0 108px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:7px;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 5px 16px rgba(0,0,0,.3);
+}
+.remote-room-qr img,
+.remote-room-qr canvas{
+  width:94px!important;
+  height:94px!important;
+  display:block;
+}
+@media(max-width:680px){
+  .remote-room-card{justify-content:center;text-align:center}
+  .remote-room-info{flex-basis:100%}
+}
 </style>
 </head>
 <body>
@@ -1981,6 +2027,7 @@ body.remote-phone-mode .controller-preview .phone-close{display:none}
       <div class="remote-room-link" id="joinUrl">Preparing phone link…</div>
       <div class="remote-room-status" id="networkStatus">Starting secure phone connections…</div>
     </div>
+    <div class="remote-room-qr" id="joinQr" aria-label="QR code to join the game"></div>
     <button class="blue" id="copyJoinBtn" onclick="copyJoinLink()">Copy Phone Link</button>
   </div>
   <div class="small-note" style="color:#ffd166;font-weight:900">TIP: Using a hint halves the points you can gain for that question.</div>
@@ -2275,6 +2322,7 @@ body.remote-phone-mode .controller-preview .phone-close{display:none}
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 const categories=[
 {name:"Technology",clues:[
@@ -2425,6 +2473,8 @@ let choiceLocked=false;
 // The host remains authoritative: phones send intents, never scores or game state.
 const phoneRoomParam=(new URLSearchParams(location.search).get("phone")||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
 const remotePhoneMode=!!phoneRoomParam;
+queueMicrotask(()=>syncPhoneVisualViewport());
+setTimeout(syncPhoneVisualViewport,120);
 let networkPeer=null;
 let hostConnection=null;
 let remoteConnections=new Map();
@@ -2457,12 +2507,32 @@ function getJoinUrl(){
   return url.href;
 }
 
+function renderJoinQr(){
+  const box=document.getElementById("joinQr");
+  if(!box)return;
+  box.innerHTML="";
+  if(location.protocol==="file:" || typeof QRCode==="undefined"){
+    box.style.display="none";
+    return;
+  }
+  box.style.display="flex";
+  new QRCode(box,{
+    text:getJoinUrl(),
+    width:94,
+    height:94,
+    colorDark:"#061725",
+    colorLight:"#ffffff",
+    correctLevel:QRCode.CorrectLevel.M
+  });
+}
+
 function updateJoinLink(){
   const el=document.getElementById("joinUrl");
   if(!el)return;
   el.textContent=location.protocol==="file:"
     ? "Publish/open the hosted page to create a shareable phone link."
     : getJoinUrl();
+  renderJoinQr();
 }
 
 async function copyJoinLink(){
@@ -2843,6 +2913,21 @@ function leavePhoneController(){
   openPhoneJoin();
 }
 
+function syncPhoneVisualViewport(){
+  if(!remotePhoneMode)return;
+  const vv=window.visualViewport;
+  const top=Math.max(0,Math.round(vv?.offsetTop||0));
+  const height=Math.max(320,Math.round(vv?.height||window.innerHeight));
+  document.documentElement.style.setProperty("--phone-visual-top",top+"px");
+  document.documentElement.style.setProperty("--phone-visual-height",height+"px");
+}
+window.addEventListener("resize",syncPhoneVisualViewport,{passive:true});
+window.addEventListener("orientationchange",()=>setTimeout(syncPhoneVisualViewport,80),{passive:true});
+if(window.visualViewport){
+  visualViewport.addEventListener("resize",syncPhoneVisualViewport,{passive:true});
+  visualViewport.addEventListener("scroll",syncPhoneVisualViewport,{passive:true});
+}
+
 function makeRoomCode(){
   const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let out="";
@@ -2998,7 +3083,10 @@ function syncPhoneQuestionView(){
   }
 
   const hintBtn=document.getElementById("phoneHintBtn");
-  if(hintBtn) hintBtn.style.display=hintUsed||reviewMode?"none":"block";
+  if(hintBtn){
+    hintBtn.style.display=hintUsed||reviewMode?"none":"block";
+    hintBtn.disabled=!phoneCanInteract();
+  }
 
 
   const primary=document.getElementById("phonePrimaryControls");
@@ -3085,6 +3173,10 @@ function renderHostChoices(){
   }
 }
 
+function phoneCanInteract(){
+  return Number.isInteger(joinedPhonePlayerIndex) && joinedPhonePlayerIndex===activePlayer;
+}
+
 function renderPhoneChoices(){
   const wrap=document.getElementById("phoneChoiceButtons");
   if(!wrap)return;
@@ -3102,7 +3194,7 @@ function renderPhoneChoices(){
     }
     b.className=cls;
     b.textContent=choice;
-    b.disabled=choiceLocked;
+    b.disabled=choiceLocked || !phoneCanInteract();
     b.onclick=()=>chooseAnswer(choice);
     wrap.appendChild(b);
   });
@@ -3110,7 +3202,7 @@ function renderPhoneChoices(){
 
   const submit=document.getElementById("phoneSubmitChoiceBtn");
   if(submit){
-    submit.disabled=!selectedChoice || choiceLocked || reviewMode;
+    submit.disabled=!selectedChoice || choiceLocked || reviewMode || !phoneCanInteract();
     submit.style.display=reviewMode?"none":"block";
   }
 }
@@ -3252,6 +3344,7 @@ function closeControllerPreview(){
 }
 
 function phoneUseHint(){
+  if(!phoneCanInteract())return;
   haptic(10);
   if(remotePhoneMode){sendRemoteAction("hint");return}
   useHint();
