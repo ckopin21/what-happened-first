@@ -1,0 +1,33 @@
+name: Audit games
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'outputs/**'
+      - 'work/audit-game.js'
+      - 'work/audit-classic.js'
+      - '.github/workflows/audit-games.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'outputs/**'
+      - 'work/audit-game.js'
+      - 'work/audit-classic.js'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit timeline mode
+        run: node work/audit-game.js outputs/dog-jeopardy.html
+      - name: Audit classic mode
+        run: node work/audit-classic.js
