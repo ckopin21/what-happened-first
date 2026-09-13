@@ -1,0 +1,35 @@
+name: Apply phone two-part auto-scroll v9
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-phone-follow-autoscroll-v9.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply phone auto-scroll fix
+        run: node work/apply-phone-follow-autoscroll-v9.js
+      - name: Audit timeline mode
+        run: node work/audit-game.js outputs/dog-jeopardy.html
+      - name: Audit Classic mode
+        run: node work/audit-classic.js
+      - name: Verify auto-scroll markers
+        run: |
+          grep -q 'offerWasVisible' outputs/dog-jeopardy.html
+          grep -q 'followWasVisible' outputs/dog-jeopardy.html
+      - name: Commit finished fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm work/apply-phone-follow-autoscroll-v9.js .github/workflows/apply-phone-follow-autoscroll-v9.yml
+          git add outputs/dog-jeopardy.html
+          git commit -m 'Auto-scroll phone to two-part follow-up sections'
+          git push
