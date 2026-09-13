@@ -1,0 +1,34 @@
+name: Apply follow-up avatar preview fixes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'work/apply-followup-avatar-preview-fix.py'
+      - '.github/workflows/apply-followup-avatar-preview-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply patch
+        run: python work/apply-followup-avatar-preview-fix.py
+      - name: Audit timeline mode
+        run: node work/audit-game.js outputs/dog-jeopardy.html
+      - name: Audit Classic mode
+        run: node work/audit-classic.js
+      - name: Commit finished changes
+        run: |
+          rm -f work/apply-followup-avatar-preview-fix.py .github/workflows/apply-followup-avatar-preview-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix follow-up choices, avatar crops, and phone preview" || exit 0
+          git push
