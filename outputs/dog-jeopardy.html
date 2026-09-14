@@ -164,6 +164,8 @@ select,input{
 }
 .clue:hover{transform:translateY(-4px) scale(1.025);filter:brightness(1.12);box-shadow:0 10px 20px rgba(0,0,0,.3)}
 .clue:active{transform:scale(.95)}
+.clue.disabled{cursor:not-allowed;filter:saturate(.35) brightness(.72);opacity:.72}
+.clue.disabled:hover,.clue.disabled:active{transform:none;filter:saturate(.35) brightness(.72);box-shadow:none}
 .clue.used{
   background:#09263a;
   color:#7c95a8;
@@ -2169,6 +2171,7 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
 <section class="setup">
   <div class="setup-row">
     <div class="host-player-count"><b>Players:</b> <span id="hostPlayerCount">0 / 5</span></div>
+    <button class="gold" id="startGameBtn" onclick="startGame()">Start Game</button>
     <button class="blue" onclick="openComputerJoin()">Add Player</button>
     
     <button class="blue" onclick="openControllerPreview()">Player Phone Preview</button>
@@ -2495,7 +2498,7 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
   </div>
 </div>
 
-<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 const categories=[
@@ -2550,6 +2553,7 @@ let current=null;
 let primaryBanked=false;
 let reviewMode=false;
 let gameFinished=false;
+let gameStarted=false;
 let hintUsed=false;
 let questionResolved=false;
 let gameEpoch=0;
@@ -2635,14 +2639,14 @@ document.addEventListener("click",e=>{
 let roomCode="";
 /* AVATAR_NEW_VECTOR_ART_V14: standalone SVG assets for reliable mobile rendering */
 const avatarOptions=[
-{name:"Corgi",image:"../assets/avatars/corgi.svg?v=2"},
-{name:"Cat",image:"../assets/avatars/cat.svg?v=2"},
-{name:"Panda",image:"../assets/avatars/panda.svg?v=2"},
-{name:"Penguin",image:"../assets/avatars/penguin.svg?v=2"},
-{name:"Fox",image:"../assets/avatars/fox.svg?v=2"},
-{name:"Frog",image:"../assets/avatars/frog.svg?v=2"},
-{name:"Shark",image:"../assets/avatars/shark.svg?v=2"},
-{name:"Duck",image:"../assets/avatars/duck.svg?v=2"}
+{name:"Corgi",src:"../assets/avatars/corgi.svg?v=2"},
+{name:"Cat",src:"../assets/avatars/cat.svg?v=2"},
+{name:"Panda",src:"../assets/avatars/panda.svg?v=2"},
+{name:"Penguin",src:"../assets/avatars/penguin.svg?v=2"},
+{name:"Fox",src:"../assets/avatars/fox.svg?v=2"},
+{name:"Frog",src:"../assets/avatars/frog.svg?v=2"},
+{name:"Shark",src:"../assets/avatars/shark.svg?v=2"},
+{name:"Duck",src:"../assets/avatars/duck.svg?v=2"}
 ];
 let selectedJoinAvatar=0;
 let joinedPhonePlayerIndex=null;
@@ -2664,27 +2668,40 @@ let networkPeer=null;
 let hostConnection=null;
 let remoteConnections=new Map();
 let remotePlayerTokens=new Map();
+let remoteTokenConnections=new Map();
 let networkReady=false;
+let hostNetworkGeneration=0;
+let hostNetworkRestartTimer=null;
 let lastBroadcastPayload="";
 let remotePhaseMultiplier=1;
+let networkRevision=0;
+let appliedNetworkRevision=-1;
+const recentRemoteIntents=new Set();
+const remotePageId=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`);
+let remoteIntentSequence=0;
 const remoteClientToken=(()=>{
-  try{
-    const key="whf-phone-token";
-    let token=localStorage.getItem(key)||sessionStorage.getItem(key);
-    if(!token) token=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`);
-    localStorage.setItem(key,token);
-    sessionStorage.setItem(key,token);
-    return token;
-  }catch(e){return `${Date.now()}-${Math.random()}`}
+  const key="whf-phone-token";
+  let token="";
+  try{token=localStorage.getItem(key)||""}catch(e){}
+  try{token=token||sessionStorage.getItem(key)||""}catch(e){}
+  if(!token)token=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`);
+  try{localStorage.setItem(key,token)}catch(e){}
+  try{sessionStorage.setItem(key,token)}catch(e){}
+  return token;
 })();
 function remoteProfileKey(){return `whf-phone-profile:${phoneRoomParam}`}
 function loadRemotePhoneProfile(){
   if(!remotePhoneMode)return null;
-  try{const raw=localStorage.getItem(remoteProfileKey());return raw?JSON.parse(raw):null}catch(e){return null}
+  let raw="";
+  try{raw=localStorage.getItem(remoteProfileKey())||""}catch(e){}
+  try{raw=raw||sessionStorage.getItem(remoteProfileKey())||""}catch(e){}
+  try{return raw?JSON.parse(raw):null}catch(e){return null}
 }
 function saveRemotePhoneProfile(name,avatarIndex){
   if(!remotePhoneMode||!name)return;
-  try{localStorage.setItem(remoteProfileKey(),JSON.stringify({name:String(name).slice(0,18),avatarIndex:Number(avatarIndex)||0,token:remoteClientToken}))}catch(e){}
+  const value=JSON.stringify({name:String(name).slice(0,18),avatarIndex:Number(avatarIndex)||0,token:remoteClientToken});
+  try{localStorage.setItem(remoteProfileKey(),value)}catch(e){}
+  try{sessionStorage.setItem(remoteProfileKey(),value)}catch(e){}
 }
 
 function peerRoomId(code){return `what-happened-first-${String(code).toLowerCase()}`}
@@ -2754,7 +2771,7 @@ function makeNetworkSnapshot(){
   const followVisible=!!document.getElementById("followBox")?.classList.contains("visible");
   const followAnswerVisible=!!document.getElementById("followAnswer")?.classList.contains("visible");
   return {
-    type:"state",playerCount,activePlayer,used:[...used],gameFinished,hintUsed,questionResolved,
+    type:"state",revision:networkRevision,gameStarted,playerCount,activePlayer,used:[...used],gameFinished,hintUsed,questionResolved,
     selectedChoice,submittedChoice,choiceLocked,lastChancePending,lastChancePlayerIndex,
     multiplier:currentMultiplier(),modalShowing:!!document.getElementById("modal")?.classList.contains("showing"),
     players:players.slice(0,playerCount).map(p=>({name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatarIndex:avatarIndexFor(p.avatar)})),
@@ -2768,8 +2785,11 @@ function makeNetworkSnapshot(){
 function broadcastGameState(force=false){
   if(remotePhoneMode||!networkReady||!remoteConnections.size)return;
   const snapshot=makeNetworkSnapshot();
-  const payload=JSON.stringify(snapshot);
+  let payload=JSON.stringify(snapshot);
   if(!force&&payload===lastBroadcastPayload)return;
+  networkRevision++;
+  snapshot.revision=networkRevision;
+  payload=JSON.stringify(snapshot);
   lastBroadcastPayload=payload;
   remoteConnections.forEach(entry=>{
     if(entry.conn?.open){
@@ -2781,11 +2801,16 @@ function broadcastGameState(force=false){
 function sendRemoteAction(action,data={}){
   if(!remotePhoneMode||!hostConnection?.open){
     setNetworkStatus("Connection lost. Reconnecting…",true);
-    if(remoteRecoveryReady)scheduleRemotePhoneReload();
+    scheduleRemoteReconnect(true);
     return false;
   }
-  try{hostConnection.send({type:"action",action,...data});return true}
-  catch(e){if(remoteRecoveryReady)scheduleRemotePhoneReload();return false}
+  try{hostConnection.send({type:"action",action,intentId:`${remotePageId}:${++remoteIntentSequence}`,...data});return true}
+  catch(e){scheduleRemoteReconnect(true);return false}
+}
+
+function normalizeToken(value){
+  const token=String(value||"");
+  return token.length>=8&&token.length<=160&&/^[A-Za-z0-9._:-]+$/.test(token)?token:"";
 }
 
 function safeRemotePlayer(entry){
@@ -2794,19 +2819,37 @@ function safeRemotePlayer(entry){
 
 function handleRemoteAction(entry,msg){
   if(!entry||!msg||msg.type!=="action")return;
+  entry.lastSeen=Date.now();
+  const intentId=String(msg.intentId||"");
+  if(intentId){
+    if(recentRemoteIntents.has(intentId))return;
+    recentRemoteIntents.add(intentId);
+    if(recentRemoteIntents.size>500)recentRemoteIntents.delete(recentRemoteIntents.values().next().value);
+  }
   const action=String(msg.action||"");
   if(action==="join"){
     const name=String(msg.name||"").trim().slice(0,18);
     const avatarIndex=Math.max(0,Math.min(avatarOptions.length-1,Number(msg.avatarIndex)||0));
+    const token=normalizeToken(msg.token);
     if(!name){entry.conn.send({type:"join-error",message:"Enter a player name."});return}
-    let idx=remotePlayerTokens.get(String(msg.token||""));
-    if(!Number.isInteger(idx)||idx<0||idx>=playerCount){
+    if(!token){entry.conn.send({type:"join-error",message:"This browser could not create a player session. Check private-browsing settings and try again."});return}
+    let idx=remotePlayerTokens.get(token);
+    const isReclaim=Number.isInteger(idx)&&idx>=0&&idx<playerCount;
+    if(!isReclaim){
+      if(gameStarted){entry.conn.send({type:"join-error",message:"The game has already started. Only players already in the lobby can reconnect."});return}
       if(playerCount>=5){entry.conn.send({type:"join-error",message:"This room is full."});return}
       idx=playerCount++;
     }
+    const previous=remoteTokenConnections.get(token);
+    if(previous&&previous!==entry){
+      previous.superseded=true;
+      try{previous.conn.close()}catch(e){}
+    }
     entry.playerIndex=idx;
-    if(msg.token)remotePlayerTokens.set(String(msg.token),idx);
-    players[idx].name=name;players[idx].avatar=avatarOptions[avatarIndex]?.src||"";
+    entry.token=token;
+    remotePlayerTokens.set(token,idx);
+    remoteTokenConnections.set(token,entry);
+    if(!gameStarted){players[idx].name=name;players[idx].avatar=avatarOptions[avatarIndex]?.src||""}
     players[idx].score=players[idx].score||0;players[idx].streak=players[idx].streak||0;players[idx].lossStreak=players[idx].lossStreak||0;
     if(playerCount===1)activePlayer=0;
     entry.conn.send({type:"joined",playerIndex:idx,roomCode});
@@ -2823,38 +2866,41 @@ function handleRemoteAction(entry,msg){
     return;
   }
   if(action==="select"){
-    if(i!==activePlayer||current||pendingDaily||gameFinished)return;
+    if(!gameStarted||i!==activePlayer||current||pendingDaily||gameFinished)return;
     const match=/^([0-4])-([0-4])$/.exec(String(msg.key||""));
     if(!match||used.has(msg.key))return;
     const col=Number(match[1]),row=Number(match[2]);
     phoneSelectQuestion(msg.key,categories[col].clues[row],(row+1)*100);
   }else if(action==="wager"){
-    if(i!==activePlayer||!pendingDaily)return;
+    if(!gameStarted||i!==activePlayer||!pendingDaily)return;
     const wager=normalizeDailyWager(msg.wager);
     const wagerInput=document.getElementById("wagerInput");if(wagerInput)wagerInput.value=wager;confirmDailyWager(wager);
   }else if(action==="choose"){
-    if(i===activePlayer&&current&&!choiceLocked&&current.item.choices.includes(msg.choice))chooseAnswer(msg.choice);
+    if(gameStarted&&i===activePlayer&&current&&!questionResolved&&!choiceLocked&&current.item.choices.includes(msg.choice))chooseAnswer(msg.choice);
   }else if(action==="submit"){
-    if(i===activePlayer)submitSelectedChoice();
+    if(gameStarted&&i===activePlayer&&current&&!questionResolved&&!choiceLocked)submitSelectedChoice();
   }else if(action==="hint"){
-    if(i===activePlayer)useHint();
+    if(gameStarted&&i===activePlayer&&current&&!questionResolved&&!hintUsed)useHint();
   }else if(action==="bank"){
-    if(i===activePlayer&&document.getElementById("followOffer")?.classList.contains("visible"))bankPrimary();
+    if(gameStarted&&i===activePlayer&&document.getElementById("followOffer")?.classList.contains("visible"))bankPrimary();
   }else if(action==="follow-start"){
-    if(i===activePlayer&&document.getElementById("followOffer")?.classList.contains("visible"))startFollowup();
+    if(gameStarted&&i===activePlayer&&document.getElementById("followOffer")?.classList.contains("visible"))startFollowup();
   }else if(action==="follow-choice"){
-    if(i!==activePlayer||!document.getElementById("followBox")?.classList.contains("visible")||!current)return;
+    if(!gameStarted||i!==activePlayer||!document.getElementById("followBox")?.classList.contains("visible")||!current)return;
     const choice=Number(msg.choice);
     if(Number.isInteger(choice))chooseFollowup(choice);
   }else if(action==="tie"){
-    submitTieChoice(i,String(msg.choice||""),null);
+    if(gameStarted&&tieActive&&!tieResolved&&tiePlayers.some(x=>x.i===i))submitTieChoice(i,String(msg.choice||""),null);
   }
   broadcastGameState(true);
 }
 
 function applyRemoteSnapshot(s){
   if(!s||s.type!=="state")return;
-  playerCount=s.playerCount;activePlayer=s.activePlayer;used=new Set(s.used||[]);gameFinished=!!s.gameFinished;
+  const revision=Number(s.revision);
+  if(Number.isFinite(revision)&&revision<appliedNetworkRevision)return;
+  if(Number.isFinite(revision))appliedNetworkRevision=revision;
+  gameStarted=!!s.gameStarted;playerCount=s.playerCount;activePlayer=s.activePlayer;used=new Set(s.used||[]);gameFinished=!!s.gameFinished;
   hintUsed=!!s.hintUsed;questionResolved=!!s.questionResolved;selectedChoice=s.selectedChoice||null;
   submittedChoice=s.submittedChoice||null;choiceLocked=!!s.choiceLocked;lastChancePending=!!s.lastChancePending;lastChancePlayerIndex=s.lastChancePlayerIndex;
   remotePhaseMultiplier=Number(s.multiplier)||1;
@@ -2869,6 +2915,19 @@ function applyRemoteSnapshot(s){
   document.getElementById("followOffer")?.classList.toggle("visible",!!s.followOffer);
   document.getElementById("followBox")?.classList.toggle("visible",!!s.followVisible);
   document.getElementById("followAnswer")?.classList.toggle("visible",!!s.followAnswerVisible);
+  if(Number.isInteger(joinedPhonePlayerIndex)&&joinedPhonePlayerIndex>=playerCount){
+    joinedPhonePlayerIndex=null;
+    document.getElementById("controllerPreview")?.classList.remove("showing");
+    document.body.classList.remove("phone-preview-open");
+    openJoinScreen("remote");
+    const saved=loadRemotePhoneProfile();
+    if(saved?.name){
+      const input=document.getElementById("joinName");if(input)input.value=saved.name;
+      selectedJoinAvatar=Math.max(0,Math.min(avatarOptions.length-1,Number(saved.avatarIndex)||0));
+      renderJoinAvatars();
+    }
+    document.getElementById("joinNote").textContent="The host reset the roster. Join the new lobby when ready.";
+  }
   if(pendingDaily){
     const input=document.getElementById("phoneWagerInput");
     if(input){input.max=pendingDaily.maxWager;input.value=Math.min(Number(input.value)||500,pendingDaily.maxWager)}
@@ -2879,49 +2938,142 @@ function applyRemoteSnapshot(s){
 }
 
 function attachHostConnection(conn){
-  const entry={conn,playerIndex:null};
+  const entry={conn,playerIndex:null,token:null,superseded:false,connectedAt:Date.now(),lastSeen:Date.now()};
+  const existing=remoteConnections.get(conn.peer);
+  if(existing&&existing!==entry){existing.superseded=true;try{existing.conn.close()}catch(e){}}
   remoteConnections.set(conn.peer,entry);
   conn.on("data",msg=>handleRemoteAction(entry,msg));
   conn.on("open",()=>{setNetworkStatus(`${remoteConnections.size} phone${remoteConnections.size===1?"":"s"} connected`);broadcastGameState(true)});
-  conn.on("close",()=>{remoteConnections.delete(conn.peer);setNetworkStatus(`${remoteConnections.size} phone${remoteConnections.size===1?"":"s"} connected`)});
+  conn.on("close",()=>{
+    if(remoteConnections.get(conn.peer)===entry)remoteConnections.delete(conn.peer);
+    if(entry.token&&remoteTokenConnections.get(entry.token)===entry)remoteTokenConnections.delete(entry.token);
+    setNetworkStatus(`${remoteConnections.size} phone${remoteConnections.size===1?"":"s"} connected`);
+  });
   conn.on("error",()=>{});
+}
+
+function cleanupRemoteConnections(){
+  if(remotePhoneMode)return;
+  const cutoff=Date.now()-45000;
+  remoteConnections.forEach((entry,key)=>{
+    if(entry.conn?.open&&entry.lastSeen>=cutoff)return;
+    if(remoteConnections.get(key)===entry)remoteConnections.delete(key);
+    if(entry.token&&remoteTokenConnections.get(entry.token)===entry)remoteTokenConnections.delete(entry.token);
+    try{entry.conn?.close()}catch(e){}
+  });
 }
 
 function startHostNetwork(){
   if(typeof Peer!=="function"){
     setNetworkStatus("Phone service could not load. Check the host internet connection.",true);return;
   }
-  networkPeer=new Peer(peerRoomId(roomCode),{debug:0});
-  networkPeer.on("open",()=>{networkReady=true;setNetworkStatus("Ready for phones • 0 connected");updateJoinLink()});
-  networkPeer.on("connection",attachHostConnection);
-  networkPeer.on("error",err=>{
+  clearTimeout(hostNetworkRestartTimer);
+  const generation=++hostNetworkGeneration;
+  networkReady=false;
+  const peer=new Peer(peerRoomId(roomCode),{debug:0});
+  networkPeer=peer;
+  const stale=()=>generation!==hostNetworkGeneration||networkPeer!==peer;
+  const restart=()=>{
+    if(stale()||hostNetworkRestartTimer)return;
+    networkReady=false;
+    setNetworkStatus("Phone service interrupted. Retrying…",true);
+    hostNetworkRestartTimer=setTimeout(()=>{
+      hostNetworkRestartTimer=null;
+      if(stale())return;
+      try{peer.destroy()}catch(e){}
+      startHostNetwork();
+    },1800);
+  };
+  peer.on("open",()=>{if(stale())return;clearTimeout(hostNetworkRestartTimer);hostNetworkRestartTimer=null;networkReady=true;setNetworkStatus(`Ready for phones • ${remoteConnections.size} connected`);updateJoinLink()});
+  peer.on("connection",conn=>{if(!stale())attachHostConnection(conn)});
+  peer.on("disconnected",()=>{
+    if(stale())return;
+    networkReady=false;
+    setNetworkStatus("Phone service reconnecting…",true);
+    try{peer.reconnect()}catch(e){}
+    hostNetworkRestartTimer=setTimeout(()=>{hostNetworkRestartTimer=null;if(!stale()&&!networkReady)restart()},2200);
+  });
+  peer.on("close",restart);
+  peer.on("error",err=>{
+    if(stale())return;
     if(err?.type==="unavailable-id"){
-      try{networkPeer.destroy()}catch(e){}
+      try{peer.destroy()}catch(e){}
       refreshRoomCode();startHostNetwork();
-    }else setNetworkStatus("Phone service unavailable. Refresh the host page to retry.",true);
+    }else restart();
   });
 }
 
 let remoteRecoveryReady=false;
 let remoteResumeTimer=null;
-let remoteReloadScheduled=false;
-function scheduleRemotePhoneReload(){
-  if(!remotePhoneMode||!remoteRecoveryReady||remoteReloadScheduled)return;
-  if(document.visibilityState==="hidden")return;
-  remoteReloadScheduled=true;
-  setNetworkStatus("Connection interrupted • rejoining…");
-  setTimeout(()=>location.reload(),450);
+let remoteReconnectTimer=null;
+let remoteConnectGeneration=0;
+let remoteReconnectAttempt=0;
+function scheduleRemoteReconnect(immediate=false){
+  if(!remotePhoneMode||remoteReconnectTimer||document.visibilityState==="hidden"||navigator.onLine===false)return;
+  const base=immediate?0:Math.min(10000,500*Math.pow(2,Math.min(remoteReconnectAttempt++,5)));
+  const delay=base?base+Math.floor(Math.random()*250):0;
+  setNetworkStatus(delay?`Connection interrupted • retrying in ${Math.max(1,Math.ceil(delay/1000))}s…`:"Connection interrupted • rejoining…");
+  remoteReconnectTimer=setTimeout(()=>{remoteReconnectTimer=null;connectRemotePhone()},delay);
 }
 function verifyRemotePhoneConnection(){
-  if(!remotePhoneMode||!remoteRecoveryReady||document.visibilityState==="hidden")return;
+  if(!remotePhoneMode||document.visibilityState==="hidden")return;
   clearTimeout(remoteResumeTimer);
-  if(!hostConnection?.open){scheduleRemotePhoneReload();return}
-  if(!sendRemoteAction("resume")){scheduleRemotePhoneReload();return}
-  remoteResumeTimer=setTimeout(scheduleRemotePhoneReload,2200);
+  if(!hostConnection?.open){scheduleRemoteReconnect(true);return}
+  if(!sendRemoteAction("resume")){scheduleRemoteReconnect(true);return}
+  remoteResumeTimer=setTimeout(()=>scheduleRemoteReconnect(true),3500);
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(verifyRemotePhoneConnection,180)});
 window.addEventListener("pageshow",()=>{if(remoteRecoveryReady)setTimeout(verifyRemotePhoneConnection,220)});
-window.addEventListener("online",()=>{if(remoteRecoveryReady)setTimeout(verifyRemotePhoneConnection,120)});
+window.addEventListener("online",()=>setTimeout(verifyRemotePhoneConnection,120));
+window.addEventListener("offline",()=>setNetworkStatus("Phone is offline • waiting for internet…",true));
+
+function connectRemotePhone(){
+  if(!remotePhoneMode||document.visibilityState==="hidden"||navigator.onLine===false)return;
+  const generation=++remoteConnectGeneration;
+  clearTimeout(remoteResumeTimer);
+  try{hostConnection?.close()}catch(e){}
+  try{networkPeer?.destroy()}catch(e){}
+  hostConnection=null;
+  networkPeer=null;
+  setNetworkStatus(remoteRecoveryReady?"Reconnecting to the host…":"Connecting to the host…");
+  networkPeer=new Peer(undefined,{debug:0});
+  const fail=()=>{if(generation===remoteConnectGeneration)scheduleRemoteReconnect()};
+  networkPeer.on("open",()=>{
+    if(generation!==remoteConnectGeneration)return;
+    hostConnection=networkPeer.connect(peerRoomId(roomCode),{reliable:true,serialization:"json",metadata:{role:"phone"}});
+    const connection=hostConnection;
+    connection.on("open",()=>{
+      if(generation!==remoteConnectGeneration||connection!==hostConnection)return;
+      remoteReconnectAttempt=0;
+      const saved=loadRemotePhoneProfile();
+      if(saved?.name){
+        setNetworkStatus("Rejoining your player…");
+        sendRemoteAction("join",{name:saved.name,avatarIndex:Number(saved.avatarIndex)||0,token:remoteClientToken});
+      }else setNetworkStatus("Connected • enter your name to join");
+    });
+    connection.on("data",msg=>{
+      if(generation!==remoteConnectGeneration||connection!==hostConnection)return;
+      clearTimeout(remoteResumeTimer);
+      if(msg?.type==="joined"){
+        joinedPhonePlayerIndex=msg.playerIndex;
+        remoteRecoveryReady=true;remoteReconnectAttempt=0;
+        const saved=loadRemotePhoneProfile();if(saved?.name)saveRemotePhoneProfile(saved.name,saved.avatarIndex);
+        document.getElementById("phoneJoin").classList.remove("showing");
+        document.getElementById("controllerPreview").classList.add("showing");
+        document.body.classList.add("phone-preview-open");
+        setNetworkStatus("Connected to host");
+      }else if(msg?.type==="resume-ok"){
+        remoteReconnectAttempt=0;setNetworkStatus("Connected to host");
+      }else if(msg?.type==="join-error"){
+        document.getElementById("joinNote").textContent=msg.message||"Unable to join.";
+      }else applyRemoteSnapshot(msg);
+    });
+    connection.on("close",fail);
+    connection.on("error",fail);
+  });
+  networkPeer.on("disconnected",fail);
+  networkPeer.on("error",fail);
+}
 
 function startRemotePhone(){
   document.body.classList.add("remote-phone-mode");
@@ -2936,40 +3088,9 @@ function startRemotePhone(){
     selectedJoinAvatar=Math.max(0,Math.min(avatarOptions.length-1,Number(savedProfile.avatarIndex)||0));
     renderJoinAvatars();
   }
-  setNetworkStatus(savedProfile?.name?"Reconnecting to the host…":"Connecting to the host…");
   if(typeof Peer!=="function"){setNetworkStatus("Could not load phone service. Check your internet connection.",true);return}
-  networkPeer=new Peer(undefined,{debug:0});
-  networkPeer.on("open",()=>{
-    hostConnection=networkPeer.connect(peerRoomId(roomCode),{reliable:true,serialization:"json",metadata:{role:"phone"}});
-    hostConnection.on("open",()=>{
-      const saved=loadRemotePhoneProfile();
-      if(saved?.name){
-        setNetworkStatus("Rejoining your player…");
-        sendRemoteAction("join",{name:saved.name,avatarIndex:Number(saved.avatarIndex)||0,token:remoteClientToken});
-      }else setNetworkStatus("Connected • enter your name to join");
-    });
-    hostConnection.on("data",msg=>{
-      if(msg?.type==="joined"){
-        joinedPhonePlayerIndex=msg.playerIndex;
-        remoteRecoveryReady=true;remoteReloadScheduled=false;clearTimeout(remoteResumeTimer);
-        const saved=loadRemotePhoneProfile();if(saved?.name)saveRemotePhoneProfile(saved.name,saved.avatarIndex);
-        document.getElementById("phoneJoin").classList.remove("showing");
-        document.getElementById("controllerPreview").classList.add("showing");
-        document.body.classList.add("phone-preview-open");
-        setNetworkStatus("Connected to host");
-      }else if(msg?.type==="resume-ok"){
-        clearTimeout(remoteResumeTimer);remoteReloadScheduled=false;setNetworkStatus("Connected to host");
-      }else if(msg?.type==="join-error"){
-        document.getElementById("joinNote").textContent=msg.message||"Unable to join.";
-      }else applyRemoteSnapshot(msg);
-    });
-    hostConnection.on("close",()=>{setNetworkStatus("Connection interrupted • rejoining…");scheduleRemotePhoneReload()});
-    hostConnection.on("error",()=>{setNetworkStatus("Connection interrupted • rejoining…");scheduleRemotePhoneReload()});
-  });
-  networkPeer.on("error",()=>{
-    if(remoteRecoveryReady)scheduleRemotePhoneReload();
-    else setNetworkStatus("Could not connect to this room. Check the link and try again.",true);
-  });
+  connectRemotePhone();
+  setInterval(()=>{if(document.visibilityState==="visible")verifyRemotePhoneConnection()},12000);
 }
 
 
@@ -3010,6 +3131,10 @@ function renderHostAvatars(){
 }
 
 function openComputerJoin(){
+  if(gameStarted){
+    showToast("Players can only be added before the host starts the game","neutral");
+    return;
+  }
   if(playerCount>=5){
     showToast("Maximum of 5 players","bad");
     return;
@@ -3039,6 +3164,10 @@ function addComputerPlayer(){
     if(note) note.textContent="This room is full.";
     return;
   }
+  if(gameStarted){
+    if(note) note.textContent="The game has already started.";
+    return;
+  }
 
   const idx=playerCount++;
   players[idx].name=name;
@@ -3053,6 +3182,7 @@ function addComputerPlayer(){
   renderPhoneController();
   closeHostJoin();
   showToast(`${name} joined the game`,"good");
+  broadcastGameState(true);
 }
 
 function openJoinScreen(mode="phone"){
@@ -3100,6 +3230,11 @@ function joinPhoneGame(){
     if(note)note.textContent="Joining…";
     saveRemotePhoneProfile(name,selectedJoinAvatar);
     sendRemoteAction("join",{name,avatarIndex:selectedJoinAvatar,token:remoteClientToken});
+    return;
+  }
+
+  if(gameStarted){
+    if(note)note.textContent="The game has already started.";
     return;
   }
 
@@ -3465,7 +3600,7 @@ function renderHostChoices(){
 }
 
 function phoneCanInteract(){
-  return Number.isInteger(joinedPhonePlayerIndex) && joinedPhonePlayerIndex===activePlayer;
+  return gameStarted && Number.isInteger(joinedPhonePlayerIndex) && joinedPhonePlayerIndex===activePlayer;
 }
 
 function renderPhoneChoices(){
@@ -3512,8 +3647,8 @@ function renderPhoneController(){
   }
   const isTurn=phoneIndex===activePlayer;
   if(state){
-    state.textContent=isTurn?"Your turn":`${players[activePlayer]?.name||"Another player"}'s turn`;
-    state.style.background=isTurn?"var(--good)":"#3a6078";
+    state.textContent=!gameStarted?"Waiting for host to start":isTurn?"Your turn":`${players[activePlayer]?.name||"Another player"}'s turn`;
+    state.style.background=gameStarted&&isTurn?"var(--good)":"#3a6078";
   }
   updatePhoneStreakVisual();
 
@@ -3538,7 +3673,7 @@ function renderPhoneController(){
         const btn=document.createElement("button");
         btn.className="phone-tile"+(used.has(key)?" used":"");
         const phoneIndex=joinedPhonePlayerIndex ?? activePlayer;
-        btn.disabled=used.has(key) || phoneIndex!==activePlayer || !!current || !!pendingDaily || gameFinished;
+        btn.disabled=!gameStarted || used.has(key) || phoneIndex!==activePlayer || !!current || !!pendingDaily || gameFinished;
         btn.textContent=used.has(key)?"✓":base*currentMultiplier();
         btn.onclick=()=>{
           const item=categories[col].clues[row];
@@ -3562,6 +3697,10 @@ function renderPhoneController(){
 }
 
 function phoneSelectQuestion(key,item,base){
+  if(!gameStarted){
+    if(!remotePhoneMode)showToast("The host must start the game first","neutral");
+    return;
+  }
   if(remotePhoneMode){sendRemoteAction("select",{key});return}
   haptic(14);
   phoneSelectedKey=key;
@@ -3745,7 +3884,7 @@ function buildBoard(){
       const base=(row+1)*100;
       const key=`${col}-${row}`;
       const cell=document.createElement("div");
-      cell.className="clue"+(used.has(key)?" used":"");
+      cell.className="clue"+(used.has(key)?" used":"")+(!gameStarted&&!used.has(key)?" disabled":"");
       cell.id="cell-"+key;
       const boardMult=currentMultiplier();
       if(used.has(key)){
@@ -3756,6 +3895,7 @@ function buildBoard(){
       }
       cell.setAttribute("role","button");
       cell.tabIndex=0;
+      cell.setAttribute("aria-disabled",!gameStarted&&!used.has(key)?"true":"false");
       cell.setAttribute("aria-label",used.has(key)
         ? `${c.name} for ${base} points, played by ${item.winnerName||"no winner"}. Open review.`
         : `${c.name} for ${base*boardMult} points`);
@@ -3820,6 +3960,10 @@ function cancelDailyWager(){
 
 function handleTileClick(key,item,base,isReview){
   if(isReview){ openClue(key,item,base,true); return; }
+  if(!gameStarted){
+    showToast("Start the game from the host lobby first","neutral");
+    return;
+  }
   if(playerCount<1){
     showToast("Add a player before selecting a question","bad");
     return;
@@ -4519,6 +4663,7 @@ function adjustScore(i,amount){
   flashPlayer(i,amount>=0);
   showToast(`${players[i].name}: ${amount>=0?"+":""}${amount}` ,amount>=0?"good":"bad");
   renderPlayers();
+  broadcastGameState(true);
 }
 
 
@@ -4539,6 +4684,7 @@ function selectPlayer(i){
   activePlayer=i;
   renderPlayers();
   renderPhoneController();
+  broadcastGameState(true);
   audioPop(360,.045,"square",.02);
 }
 
@@ -4548,6 +4694,22 @@ function applyNames(){}
 function updateHostPlayerCount(){
   const el=document.getElementById("hostPlayerCount");
   if(el) el.textContent=`${playerCount} / 5`;
+  const start=document.getElementById("startGameBtn");
+  if(start){
+    start.disabled=gameStarted||playerCount<1;
+    start.textContent=gameStarted?"Game Started":"Start Game";
+  }
+}
+
+function startGame(){
+  if(remotePhoneMode||gameStarted)return;
+  if(playerCount<1){showToast("Add at least one player before starting","bad");return}
+  gameStarted=true;
+  updateHostPlayerCount();
+  buildBoard();
+  renderPhoneController();
+  showToast("Game started — phones are unlocked","good");
+  broadcastGameState(true);
 }
 
 function applyPlayerSetup(){
@@ -4560,6 +4722,7 @@ function applyPlayerSetup(){
 
 function resetGameState(keepPlayers){
   gameEpoch++;
+  gameStarted=false;
   used=new Set();
   gameFinished=false;
   activePlayer=0;
@@ -4581,7 +4744,12 @@ function resetGameState(keepPlayers){
     players[i].streak=0;
     players[i].lossStreak=0;
   }
-  if(!keepPlayers) playerCount=0;
+  if(!keepPlayers){
+    playerCount=0;
+    remotePlayerTokens.clear();
+    remoteTokenConnections.clear();
+    remoteConnections.forEach(entry=>{entry.playerIndex=null;entry.token=null});
+  }
   activePlayer=0;
   categories.forEach(c=>c.clues.forEach(x=>{delete x.playedMult;delete x.outcome;delete x.player;delete x.winnerName}));
   history=[]; noHintCorrect=0; categoryCorrect=[0,0,0,0,0];
@@ -4614,7 +4782,8 @@ function resetGameState(keepPlayers){
   buildBoard();
   closeFinale();
   renderPhoneController();
-  showToast(keepPlayers?"New game started — players kept":"Game fully reset","neutral");
+  broadcastGameState(true);
+  showToast(keepPlayers?"New lobby ready — players kept":"Game fully reset","neutral");
 }
 
 function newGame(){resetGameState(true)}
@@ -4715,14 +4884,26 @@ updateHostPlayerCount();
 applyPlayerSetup();
 buildBoard();
 setVolume(document.getElementById("volumeSlider")?.value ?? 70);
-if(remotePhoneMode){
-  startRemotePhone();
-}else{
-  refreshRoomCode();
-  updateJoinLink();
-  startHostNetwork();
-  setInterval(()=>broadcastGameState(false),250);
+function startWhenPeerReady(callback,attempt=0){
+  if(typeof Peer==="function"){callback();return}
+  if(attempt>=40){
+    setNetworkStatus("Phone service could not load. Check the internet connection and reload.",true);
+    return;
+  }
+  if(attempt===0)setNetworkStatus("Loading secure phone connections…");
+  setTimeout(()=>startWhenPeerReady(callback,attempt+1),250);
 }
+startWhenPeerReady(()=>{
+  if(remotePhoneMode){
+    startRemotePhone();
+  }else{
+    refreshRoomCode();
+    updateJoinLink();
+    startHostNetwork();
+    setInterval(()=>broadcastGameState(false),250);
+    setInterval(cleanupRemoteConnections,15000);
+  }
+});
 </script>
 </body>
 </html>
