@@ -2503,19 +2503,15 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
 <script src="../assets/network/peer-network.js"></script>
 <script src="../assets/ui/avatar-registry.js"></script>
+<script src="../assets/ui/player-sessions.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="../packs/timeline/manifest.js"></script>
 <script>
 let TIMELINE_PACK=window.TIMELINE_JEOPARDY_PACK;
 if(!TIMELINE_PACK||!Array.isArray(TIMELINE_PACK.categories))throw new Error("Timeline question pack failed to load.");
 let categories=JSON.parse(JSON.stringify(TIMELINE_PACK.categories));
-let players=[
-  {name:"Player 1",score:0,streak:0,lossStreak:0,avatar:""},
-  {name:"Player 2",score:0,streak:0,lossStreak:0,avatar:""},
-  {name:"Player 3",score:0,streak:0,lossStreak:0,avatar:""},
-  {name:"Player 4",score:0,streak:0,lossStreak:0,avatar:""},
-  {name:"Player 5",score:0,streak:0,lossStreak:0,avatar:""}
-];
+const makePlayer=window.JEOPARDY_PLAYERS?.player||((fields)=>fields);
+let players=[1,2,3,4,5].map(number=>makePlayer({name:`Player ${number}`,score:0,streak:0,lossStreak:0,avatar:""}));
 let playerCount=0;
 let activePlayer=0;
 let used=new Set();
@@ -2734,7 +2730,7 @@ function makeNetworkSnapshot(){
     type:"state",revision:networkRevision,gameStarted,playerCount,activePlayer,used:[...used],gameFinished,hintUsed,questionResolved,pack:{id:TIMELINE_PACK.id,name:TIMELINE_PACK.name,genre:TIMELINE_PACK.genre},
     selectedChoice,submittedChoice,choiceLocked,lastChancePending,lastChancePlayerIndex,
     multiplier:currentMultiplier(),modalShowing:!!document.getElementById("modal")?.classList.contains("showing"),
-    players:players.slice(0,playerCount).map(p=>({name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatarIndex:avatarIndexFor(p.avatar)})),
+    players:players.slice(0,playerCount).map(p=>({playerId:p.playerId,name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatarIndex:avatarIndexFor(p.avatar)})),
     current:current?{key:current.key,base:current.base,mult:current.mult,value:current.value,lastChanceMult:current.lastChanceMult,isDaily:!!current.isDaily,choiceOrder:Array.isArray(current.choiceOrder)?current.choiceOrder.slice():[],item:{q:current.item.q,h:current.item.h,a:current.item.a,choices:current.item.choices,special:!!current.item.special,fq:current.item.fq,fa:current.item.fa,fchoices:current.item.fchoices,fcorrect:current.item.fcorrect,fc:Array.isArray(current.followOrder)?current.followOrder:followupChoicesFor(current.item)},followChoice:Number.isInteger(current.followChoice)?current.followChoice:null,followOrder:Array.isArray(current.followOrder)?current.followOrder:null}:null,
     pendingDaily:pendingDaily?{key:pendingDaily.key,maxWager:Math.max(100,Math.max(players[activePlayer]?.score||0,1000)),phaseMult:currentMultiplier()}:null,
     followOffer,followVisible,followAnswerVisible,
@@ -2788,7 +2784,7 @@ function removeTimelinePlayer(index,entry){
   }
   const removed=players[index];
   for(let i=index;i<playerCount-1;i++)players[i]=players[i+1];
-  players[playerCount-1]={name:`Player ${playerCount}`,score:0,streak:0,lossStreak:0,avatar:""};
+  players[playerCount-1]=makePlayer({name:`Player ${playerCount}`,score:0,streak:0,lossStreak:0,avatar:""});
   playerCount--;
   if(lastChancePlayerIndex===index){lastChancePending=false;lastChancePlayerIndex=null}else if(lastChancePlayerIndex>index)lastChancePlayerIndex--;
   playerTempStatus.splice(index,1);playerTempStatus.push(null);
@@ -2901,7 +2897,7 @@ function applyRemoteSnapshot(s){
   hintUsed=!!s.hintUsed;questionResolved=!!s.questionResolved;selectedChoice=s.selectedChoice||null;
   submittedChoice=s.submittedChoice||null;choiceLocked=!!s.choiceLocked;lastChancePending=!!s.lastChancePending;lastChancePlayerIndex=s.lastChancePlayerIndex;
   remotePhaseMultiplier=Number(s.multiplier)||1;
-  (s.players||[]).forEach((p,i)=>{players[i]={name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatar:avatarOptions[p.avatarIndex]?.src||""}});
+  (s.players||[]).forEach((p,i)=>{players[i]=makePlayer({playerId:p.playerId,name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatar:avatarOptions[p.avatarIndex]?.src||""})});
   current=s.current?{...s.current,item:{...s.current.item}}:null;
   pendingDaily=s.pendingDaily?{...s.pendingDaily}:null;
   tieActive=!!s.tie?.active;tieResolved=!!s.tie?.resolved;tieQuestionIndex=s.tie?.questionIndex??-1;

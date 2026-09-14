@@ -7,6 +7,7 @@
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
 <script src="../assets/network/peer-network.js"></script>
 <script src="../assets/ui/avatar-registry.js"></script>
+<script src="../assets/ui/player-sessions.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="../packs/classic/manifest.js"></script>
 <style>
@@ -135,6 +136,7 @@ let PACK=window.CLASSIC_JEOPARDY_PACK;
 if(!PACK||!Array.isArray(PACK.categories))throw new Error("Classic Jeopardy question pack is missing or invalid.");
 const MAX_PLAYERS=5,GAME_VERSION="classic-3";
 const AVATARS=window.JEOPARDY_AVATARS||[];
+const makePlayer=window.JEOPARDY_PLAYERS?.player||((fields)=>fields);
 let categories=JSON.parse(JSON.stringify(PACK.categories)),totalQuestions=categories.reduce((n,c)=>n+c.clues.length,0);
 let players=[],used=new Set(),history=new Map(),activePlayer=0,current=null,submissions=new Map(),judgements=new Map(),hintsUsed=new Set(),questionRevealed=false,questionResolved=false,reviewRecord=null,finalShown=false,pendingDaily=null,dailyDoubleIds=new Set(),gameStarted=false,gameEpoch=0,actionNonce="lobby";
 let developerMode=false,devForcedMultiplier=0;
@@ -244,10 +246,10 @@ function renderRevealCurrent(){
 function setJudgement(index,isCorrect){if(!current||questionResolved||!players[index])return;judgements.set(index,!!isCorrect);renderRevealCurrent();broadcastState()}
 function applyScores(){
   if(!current||questionResolved)return;questionResolved=true;const indexes=current.isDaily?[current.dailyPlayer]:players.map((_p,i)=>i);
-  const now=indexes.map(i=>({playerToken:players[i].token,index:i,name:players[i].name,avatar:players[i].avatar,answer:submissions.get(i)||"",correct:!!judgements.get(i),hinted:hintsUsed.has(i),delta:scoreDeltaFor(i,!!judgements.get(i))}));
+  const now=indexes.map(i=>({playerId:players[i].playerId,index:i,name:players[i].name,avatar:players[i].avatar,answer:submissions.get(i)||"",correct:!!judgements.get(i),hinted:hintsUsed.has(i),delta:scoreDeltaFor(i,!!judgements.get(i))}));
   if(current.followup&&current.part===1){actionNonce=freshNonce();current.partOneResults=now;current.part=2;current.question=current.followup.question;current.answer=current.followup.answer;current.aliases=Array.isArray(current.followup.aliases)&&current.followup.aliases.length?current.followup.aliases:[current.followup.answer];current.hint=current.followup.hint||"No hint available.";submissions=new Map();judgements=new Map();hintsUsed=new Set();questionRevealed=false;questionResolved=false;document.getElementById("revealOverlay").classList.remove("showing");showQuestionHost();resetClassicQuestionScroll();renderHost();broadcastState();toast("PART 2","neutral");return}
   const oldMult=current.mult,flashes=[],prior=Array.isArray(current.partOneResults)?current.partOneResults:[],answers=[];
-  indexes.forEach(i=>{const p=players[i],a=now.find(x=>x.playerToken===p.token),b=prior.find(x=>x.playerToken===p.token),delta=(b?.delta||0)+(a?.delta||0),correct=current.followup?!!b?.correct&&!!a?.correct:!!a?.correct;p.score+=delta;if(correct){p.correctStreak=(p.correctStreak||0)+1;p.wrongStreak=0;flashes.push([i,"good"])}else{p.correctStreak=0;p.wrongStreak=(p.wrongStreak||0)+1;flashes.push([i,"bad"])}answers.push({name:p.name,avatar:p.avatar,answer:current.followup?`Part 1: ${b?.answer||"No answer"} • Part 2: ${a?.answer||"No answer"}`:(a?.answer||""),correct,hinted:!!b?.hinted||!!a?.hinted,delta})});
+  indexes.forEach(i=>{const p=players[i],a=now.find(x=>x.playerId===p.playerId),b=prior.find(x=>x.playerId===p.playerId),delta=(b?.delta||0)+(a?.delta||0),correct=current.followup?!!b?.correct&&!!a?.correct:!!a?.correct;p.score+=delta;if(correct){p.correctStreak=(p.correctStreak||0)+1;p.wrongStreak=0;flashes.push([i,"good"])}else{p.correctStreak=0;p.wrongStreak=(p.wrongStreak||0)+1;flashes.push([i,"bad"])}answers.push({name:p.name,avatar:p.avatar,answer:current.followup?`Part 1: ${b?.answer||"No answer"} • Part 2: ${a?.answer||"No answer"}`:(a?.answer||""),correct,hinted:!!b?.hinted||!!a?.hinted,delta})});
   const winners=answers.filter(a=>a.delta>0).map(a=>a.name),historyQuestion=current.followup?`Part 1: ${current.primaryQuestion} • Part 2: ${current.followup.question}`:current.question,historyAnswer=current.followup?`${current.primaryAnswer} / ${current.followup.answer}`:current.answer;history.set(current.id,{...current,question:historyQuestion,answer:historyAnswer,answers,winners});used.add(current.id);document.getElementById("revealOverlay").classList.remove("showing");document.getElementById("questionOverlay").classList.remove("showing");current=null;submissions=new Map();judgements=new Map();hintsUsed=new Set();questionRevealed=false;questionResolved=false;actionNonce=freshNonce();if(players.length)activePlayer=(activePlayer+1)%players.length;renderHost();broadcastState();flashes.forEach(([i,type])=>flashPlayer(i,type));const newMult=phaseMultiplier(),epoch=gameEpoch;if(questionsRemaining()===0){setTimeout(()=>{if(epoch===gameEpoch&&gameStarted&&questionsRemaining()===0&&!current)showFinale()},500)}else if(newMult!==oldMult&&newMult>1){showPhaseOverlay(newMult===3?"TRIPLE POINTS":"DOUBLE POINTS")}
 }
 function flashPlayer(i,type){const el=document.querySelector(`.player[data-player="${i}"]`);if(!el)return;el.classList.add(type==="good"?"flash-good":"flash-bad");setTimeout(()=>el.classList.remove("flash-good","flash-bad"),800)}
@@ -271,7 +273,7 @@ function hostPeerId(code){return `classic-jeopardy-${String(code).toLowerCase()}
 function getJoinUrl(){const url=new URL("classic-jeopardy.html",location.href);url.search="";url.hash="";url.searchParams.set("mode","classic");url.searchParams.set("phone",roomCode);return url.href}
 function renderQr(){const box=document.getElementById("joinQr");box.innerHTML="";if(location.protocol==="file:"||typeof QRCode==="undefined"){box.style.display="none";return}box.style.display="flex";new QRCode(box,{text:getJoinUrl(),width:258,height:258,colorDark:"#061725",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M})}
 async function copyJoinLink(){try{await navigator.clipboard.writeText(getJoinUrl());toast("PHONE LINK COPIED","good")}catch{prompt("Copy this phone link:",getJoinUrl())}}
-function publicPlayers(){return players.map((p,i)=>({name:p.name,score:p.score,avatar:p.avatar,correctStreak:p.correctStreak||0,wrongStreak:p.wrongStreak||0,connected:connectedForPlayer(i)}))}
+function publicPlayers(){return players.map((p,i)=>({playerId:p.playerId,name:p.name,score:p.score,avatar:p.avatar,correctStreak:p.correctStreak||0,wrongStreak:p.wrongStreak||0,connected:connectedForPlayer(i)}))}
 function boardState(){return categories.map((cat,ci)=>({name:cat.name,clues:cat.clues.map((clue,qi)=>{const id=clueId(ci,qi),rec=history.get(id);return{value:clue.value*phaseMultiplier(),used:used.has(id),winners:rec?.winners||[]}})}))}
 function hostStateForPlayer(index){
   const base={type:"state",version:GAME_VERSION,room:roomCode,gameEpoch,actionNonce,gameStarted,pack:{title:PACK.title,subtitle:PACK.subtitle,genre:PACK.genre},players:publicPlayers(),playerIndex:Number.isInteger(index)?index:null,activePlayer,phase:phaseMultiplier(),remaining:questionsRemaining(),board:boardState()};
@@ -309,7 +311,7 @@ function removeClassicPlayer(index,ctx){
 function handleRemoteAction(ctx,action){
   if(!action||typeof action!=="object")return;
   if(action.type==="rejoin"){const token=safeToken(action.token);const idx=players.findIndex(p=>p.token===token);if(idx>=0){bindContextToPlayer(ctx,idx);sendState(ctx);renderHost();broadcastState()}else sendState(ctx);return}
-  if(action.type==="join"){const name=String(action.name||"").trim().slice(0,24),token=safeToken(action.token);let idx=token?players.findIndex(p=>p.token===token):-1;if(idx<0){if(gameStarted||!name||players.length>=MAX_PLAYERS){ctx.conn.send({type:"join-error",message:gameStarted?"This game has already started.":players.length>=MAX_PLAYERS?"Game is full.":"Enter a name."});return}idx=players.length;players.push({name,score:0,token:token||crypto.randomUUID?.()||Math.random().toString(36).slice(2),avatar:Math.max(0,Math.min(AVATARS.length-1,Number(action.avatar)||0)),correctStreak:0,wrongStreak:0})}bindContextToPlayer(ctx,idx);ctx.conn.send({type:"joined",token:players[idx].token});renderHost();broadcastState();return}
+  if(action.type==="join"){const name=String(action.name||"").trim().slice(0,24),token=safeToken(action.token);let idx=token?players.findIndex(p=>p.token===token):-1;if(idx<0){if(gameStarted||!name||players.length>=MAX_PLAYERS){ctx.conn.send({type:"join-error",message:gameStarted?"This game has already started.":players.length>=MAX_PLAYERS?"Game is full.":"Enter a name."});return}idx=players.length;players.push(makePlayer({name,score:0,token:token||crypto.randomUUID?.()||Math.random().toString(36).slice(2),avatar:Math.max(0,Math.min(AVATARS.length-1,Number(action.avatar)||0)),correctStreak:0,wrongStreak:0}))}bindContextToPlayer(ctx,idx);ctx.conn.send({type:"joined",token:players[idx].token,playerId:players[idx].playerId});renderHost();broadcastState();return}
   const i=ctx.playerIndex;if(!Number.isInteger(i)||!players[i])return;
   if(action.type==="leave"){const removed=removeClassicPlayer(i,ctx);if(removed){try{ctx.conn.send({type:"left"})}catch{}setTimeout(()=>{try{ctx.conn.close()}catch{}},80);toast(`${removed.name} left the game`,"neutral")}return}
   if(!gameStarted||action.gameEpoch!==gameEpoch||action.actionNonce!==actionNonce){sendState(ctx);return}
@@ -340,7 +342,7 @@ function closeClassicAddPlayer(){document.getElementById("classicAddPlayer")?.cl
 function addClassicLocalPlayer(){
   const name=(document.getElementById("classicAddName")?.value||"").trim();const note=document.getElementById("classicAddNote");
   if(!name){if(note)note.textContent="Enter a player name.";return}if(gameStarted){if(note)note.textContent="Start a new game before changing the roster.";return}if(players.length>=MAX_PLAYERS){if(note)note.textContent="Maximum of 5 players.";return}
-  players.push({name:name.slice(0,24),score:0,token:`host-local-${Date.now()}-${Math.random().toString(36).slice(2)}`,avatar:classicHostAvatar,correctStreak:0,wrongStreak:0,local:true});
+  players.push(makePlayer({name:name.slice(0,24),score:0,token:`host-local-${Date.now()}-${Math.random().toString(36).slice(2)}`,avatar:classicHostAvatar,correctStreak:0,wrongStreak:0,local:true}));
   if(players.length===1)activePlayer=0;classicPreviewPlayerIndex=players.length-1;closeClassicAddPlayer();renderHost();broadcastState();toast(name+" added","good");
 }
 function openClassicPhonePreview(){
@@ -363,7 +365,7 @@ function classicPreviewPickAvatar(i){if(Number.isInteger(i)&&i>=0&&i<AVATARS.len
 function classicPreviewJoin(){
   const input=document.getElementById("classicPreviewJoinName"),name=(input?.value||"").trim();if(!name)return;if(players.length>=MAX_PLAYERS){toast("Maximum of 5 players","bad");return}
   if(gameStarted){toast("Game already started","bad");return}
-  players.push({name:name.slice(0,24),score:0,token:`preview-local-${Date.now()}-${Math.random().toString(36).slice(2)}`,avatar:classicPreviewJoinAvatar,correctStreak:0,wrongStreak:0,local:true});
+  players.push(makePlayer({name:name.slice(0,24),score:0,token:`preview-local-${Date.now()}-${Math.random().toString(36).slice(2)}`,avatar:classicPreviewJoinAvatar,correctStreak:0,wrongStreak:0,local:true}));
   classicPreviewPlayerIndex=players.length-1;if(players.length===1)activePlayer=0;renderHost();broadcastState();toast(name+" joined preview","good");
 }
 function renderClassicPhonePreview(){
@@ -462,7 +464,7 @@ function devGenericPreview(icon,title,sub){
 }
 function ensureDevPlayer(){
   if(players.length)return Math.min(activePlayer,players.length-1);
-  players.push({name:"Dev Player",score:0,token:"dev-local",avatar:0,correctStreak:0,wrongStreak:0});
+  players.push(makePlayer({name:"Dev Player",score:0,token:"dev-local",avatar:0,correctStreak:0,wrongStreak:0}));
   activePlayer=0;renderHost();return 0;
 }
 function devPreview(kind){
@@ -478,7 +480,7 @@ function devPreview(kind){
   if(kind==="correct"){const i=ensureDevPlayer();flashPlayer(i,"good");toast("CORRECT!","good");return}
   if(kind==="incorrect"){const i=ensureDevPlayer();flashPlayer(i,"bad");toast("INCORRECT","bad");return}
   if(kind==="finale"){
-    if(!players.length){players.push({name:"Winner",score:1200,token:"dev-winner",avatar:0,correctStreak:0,wrongStreak:0},{name:"Runner Up",score:800,token:"dev-runner",avatar:1,correctStreak:0,wrongStreak:0});renderHost()}
+  if(!players.length){players.push(makePlayer({name:"Winner",score:1200,token:"dev-winner",avatar:0,correctStreak:0,wrongStreak:0}),makePlayer({name:"Runner Up",score:800,token:"dev-runner",avatar:1,correctStreak:0,wrongStreak:0}));renderHost()}
     showFinale();return;
   }
   const previews={
