@@ -1,0 +1,39 @@
+name: Fix avatar paths
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/fix-avatar-paths.yml']
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace broken data avatars
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('outputs/dog-jeopardy.html')
+          s=p.read_text()
+          names=['Corgi','Cat','Panda','Penguin','Fox','Frog','Shark','Duck']
+          paths=['corgi','cat','panda','penguin','fox','frog','shark','duck']
+          start=s.index('function avatarSvg(')
+          end=s.index('let selectedJoinAvatar=0;', start)
+          block='const avatarOptions=[\n'+',\n'.join(f'{{name:"{n}",image:"../assets/avatars/{x}.svg?v=2"}}' for n,x in zip(names,paths))+'\n];\n'
+          s=s[:start]+block+s[end:]
+          p.write_text(s)
+          PY
+      - name: Audit
+        run: |
+          node work/audit-game.js
+          node work/audit-classic.js
+      - name: Commit
+        run: |
+          rm .github/workflows/fix-avatar-paths.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add outputs/dog-jeopardy.html .github/workflows/fix-avatar-paths.yml
+          git commit -m 'Use reliable centered avatar files'
+          git push
