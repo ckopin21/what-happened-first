@@ -137,6 +137,7 @@ if(!PACK||!Array.isArray(PACK.categories))throw new Error("Classic Jeopardy ques
 const MAX_PLAYERS=5,GAME_VERSION="classic-3";
 const AVATARS=window.JEOPARDY_AVATARS||[];
 const makePlayer=window.JEOPARDY_PLAYERS?.player||((fields)=>fields);
+const uniquePlayerName=window.JEOPARDY_PLAYERS?.uniqueName||(()=>true);
 let categories=JSON.parse(JSON.stringify(PACK.categories)),totalQuestions=categories.reduce((n,c)=>n+c.clues.length,0);
 let players=[],used=new Set(),history=new Map(),activePlayer=0,current=null,submissions=new Map(),judgements=new Map(),hintsUsed=new Set(),questionRevealed=false,questionResolved=false,reviewRecord=null,finalShown=false,pendingDaily=null,dailyDoubleIds=new Set(),gameStarted=false,gameEpoch=0,actionNonce="lobby";
 let developerMode=false,devForcedMultiplier=0;
@@ -311,7 +312,7 @@ function removeClassicPlayer(index,ctx){
 function handleRemoteAction(ctx,action){
   if(!action||typeof action!=="object")return;
   if(action.type==="rejoin"){const token=safeToken(action.token);const idx=players.findIndex(p=>p.token===token);if(idx>=0){bindContextToPlayer(ctx,idx);sendState(ctx);renderHost();broadcastState()}else sendState(ctx);return}
-  if(action.type==="join"){const name=String(action.name||"").trim().slice(0,24),token=safeToken(action.token);let idx=token?players.findIndex(p=>p.token===token):-1;if(idx<0){if(gameStarted||!name||players.length>=MAX_PLAYERS){ctx.conn.send({type:"join-error",message:gameStarted?"This game has already started.":players.length>=MAX_PLAYERS?"Game is full.":"Enter a name."});return}idx=players.length;players.push(makePlayer({name,score:0,token:token||crypto.randomUUID?.()||Math.random().toString(36).slice(2),avatar:Math.max(0,Math.min(AVATARS.length-1,Number(action.avatar)||0)),correctStreak:0,wrongStreak:0}))}bindContextToPlayer(ctx,idx);ctx.conn.send({type:"joined",token:players[idx].token,playerId:players[idx].playerId});renderHost();broadcastState();return}
+  if(action.type==="join"){const name=String(action.name||"").trim().slice(0,24),token=safeToken(action.token);let idx=token?players.findIndex(p=>p.token===token):-1;if(idx<0){if(gameStarted||!name||players.length>=MAX_PLAYERS){ctx.conn.send({type:"join-error",message:gameStarted?"This game has already started.":players.length>=MAX_PLAYERS?"Game is full.":"Enter a name."});return}if(!uniquePlayerName(players,name)){ctx.conn.send({type:"join-error",message:"That player name is already in this room."});return}idx=players.length;players.push(makePlayer({name,score:0,token:token||crypto.randomUUID?.()||Math.random().toString(36).slice(2),avatar:Math.max(0,Math.min(AVATARS.length-1,Number(action.avatar)||0)),correctStreak:0,wrongStreak:0}))}bindContextToPlayer(ctx,idx);ctx.conn.send({type:"joined",token:players[idx].token,playerId:players[idx].playerId});renderHost();broadcastState();return}
   const i=ctx.playerIndex;if(!Number.isInteger(i)||!players[i])return;
   if(action.type==="leave"){const removed=removeClassicPlayer(i,ctx);if(removed){try{ctx.conn.send({type:"left"})}catch{}setTimeout(()=>{try{ctx.conn.close()}catch{}},80);toast(`${removed.name} left the game`,"neutral")}return}
   if(!gameStarted||action.gameEpoch!==gameEpoch||action.actionNonce!==actionNonce){sendState(ctx);return}
@@ -341,7 +342,7 @@ function openClassicAddPlayer(){
 function closeClassicAddPlayer(){document.getElementById("classicAddPlayer")?.classList.remove("showing")}
 function addClassicLocalPlayer(){
   const name=(document.getElementById("classicAddName")?.value||"").trim();const note=document.getElementById("classicAddNote");
-  if(!name){if(note)note.textContent="Enter a player name.";return}if(gameStarted){if(note)note.textContent="Start a new game before changing the roster.";return}if(players.length>=MAX_PLAYERS){if(note)note.textContent="Maximum of 5 players.";return}
+  if(!name){if(note)note.textContent="Enter a player name.";return}if(!uniquePlayerName(players,name)){if(note)note.textContent="That player name is already in this room.";return}if(gameStarted){if(note)note.textContent="Start a new game before changing the roster.";return}if(players.length>=MAX_PLAYERS){if(note)note.textContent="Maximum of 5 players.";return}
   players.push(makePlayer({name:name.slice(0,24),score:0,token:`host-local-${Date.now()}-${Math.random().toString(36).slice(2)}`,avatar:classicHostAvatar,correctStreak:0,wrongStreak:0,local:true}));
   if(players.length===1)activePlayer=0;classicPreviewPlayerIndex=players.length-1;closeClassicAddPlayer();renderHost();broadcastState();toast(name+" added","good");
 }
@@ -363,7 +364,7 @@ function classicPreviewSubmit(){
 function classicPreviewDailyWager(){const i=classicPreviewPlayerIndex,input=document.getElementById("classicPreviewDailyWager");if(i!==activePlayer||connectedForPlayer(i)||!pendingDaily)return;submitDailyWager(input?.value,i)}
 function classicPreviewPickAvatar(i){if(Number.isInteger(i)&&i>=0&&i<AVATARS.length){classicPreviewJoinAvatar=i;renderClassicPhonePreview()}}
 function classicPreviewJoin(){
-  const input=document.getElementById("classicPreviewJoinName"),name=(input?.value||"").trim();if(!name)return;if(players.length>=MAX_PLAYERS){toast("Maximum of 5 players","bad");return}
+  const input=document.getElementById("classicPreviewJoinName"),name=(input?.value||"").trim();if(!name)return;if(!uniquePlayerName(players,name)){toast("That player name is already in this room.","bad");return}if(players.length>=MAX_PLAYERS){toast("Maximum of 5 players","bad");return}
   if(gameStarted){toast("Game already started","bad");return}
   players.push(makePlayer({name:name.slice(0,24),score:0,token:`preview-local-${Date.now()}-${Math.random().toString(36).slice(2)}`,avatar:classicPreviewJoinAvatar,correctStreak:0,wrongStreak:0,local:true}));
   classicPreviewPlayerIndex=players.length-1;if(players.length===1)activePlayer=0;renderHost();broadcastState();toast(name+" joined preview","good");

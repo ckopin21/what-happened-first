@@ -2511,6 +2511,7 @@ let TIMELINE_PACK=window.TIMELINE_JEOPARDY_PACK;
 if(!TIMELINE_PACK||!Array.isArray(TIMELINE_PACK.categories))throw new Error("Timeline question pack failed to load.");
 let categories=JSON.parse(JSON.stringify(TIMELINE_PACK.categories));
 const makePlayer=window.JEOPARDY_PLAYERS?.player||((fields)=>fields);
+const uniquePlayerName=window.JEOPARDY_PLAYERS?.uniqueName||(()=>true);
 let players=[1,2,3,4,5].map(number=>makePlayer({name:`Player ${number}`,score:0,streak:0,lossStreak:0,avatar:""}));
 let playerCount=0;
 let activePlayer=0;
@@ -2826,6 +2827,7 @@ function handleRemoteAction(entry,msg){
     if(!isReclaim){
       if(gameStarted){entry.conn.send({type:"join-error",message:"The game has already started. Only players already in the lobby can reconnect."});return}
       if(playerCount>=5){entry.conn.send({type:"join-error",message:"This room is full."});return}
+      if(!uniquePlayerName(players.slice(0,playerCount),name)){entry.conn.send({type:"join-error",message:"That player name is already in this room."});return}
       idx=playerCount++;
     }
     const previous=remoteTokenConnections.get(token);
@@ -3143,6 +3145,10 @@ function openComputerJoin(){
     showToast("Maximum of 5 players","bad");
     return;
   }
+  if(!uniquePlayerName(players.slice(0,playerCount),name)){
+    if(note) note.textContent="That player name is already in this room.";
+    return;
+  }
   selectedHostAvatar=0;
   const modal=document.getElementById("hostJoin");
   const name=document.getElementById("hostJoinName");
@@ -3251,6 +3257,10 @@ if(remotePhoneMode){
     if(playerCount>=5){
       if(note)note.textContent="This room is full.";
       haptic([40,40,40]);
+      return;
+    }
+    if(!uniquePlayerName(players.slice(0,playerCount),name)){
+      if(note)note.textContent="That player name is already in this room.";
       return;
     }
     idx=playerCount;
