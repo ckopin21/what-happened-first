@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "id": "general-knowledge-v4",
+  "name": "General Knowledge II",
+  "genre": "General Knowledge",
+  "answerType": "open-ended",
+  "title": "CLASSIC JEOPARDY",
+  "subtitle": "Everyone answers every clue.",
+  "rules": {
+    "wrongMultiplier": 0,
+    "hintMultiplier": 0.5
+  },
+  "categories": [
+    {
+      "name": "Books & Stories",
+      "clues": [
+        {
+          "id": "classic-v4-books-stories-100",
+          "value": 100,
+          "question": "Who wrote Charlotte's Web?",
+          "answer": "E. B. White",
+          "aliases": ["E. B. White", "EB White", "Elwyn Brooks White"],
+          "hint": "He also wrote Stuart Little."
+        },
+        {
+          "id": "classic-v4-books-stories-200",
+          "value": 200,
+          "question": "What surname do Meg, Jo, Beth, and Amy share in Little Women?",
+          "answer": "March",
+          "aliases": ["March", "March family", "The March family"],
+          "hint": "The novel follows four sisters in one Massachusetts family."
+        },
+        {
+          "id": "classic-v4-books-stories-300",
+          "value": 300,
+          "question": "Which novel begins with the line “Call me Ishmael”?",
+          "answer": "Moby-Dick",
+          "aliases": ["Moby-Dick", "Moby Dick"],
+          "hint": "Its central voyage pursues a white whale."
+        },
+        {
+          "id": "classic-v4-books-stories-400",
+          "value": 400,
+          "question": "Which author created the detective Hercule Poirot?",
+          "answer": "Agatha Christie",
+          "aliases": ["Agatha Christie", "Christie"],
+          "hint": "She also created Miss Marple."
+        },
+        {
+          "id": "classic-v4-books-stories-500",
+          "value": 500,
+          "question": "What fictional town is the central setting of One Hundred Years of Solitude?",
+          "answer": "Macondo",
+          "aliases": ["Macondo"],
+          "hint": "The Buendía family founds this isolated town.",
+          "followup": {
+            "id": "classic-v4-books-stories-500-followup",
+            "question": "Who wrote One Hundred Years of Solitude?",
+            "answer": "Gabriel García Márquez",
+            "aliases": ["Gabriel García Márquez", "Gabriel Garcia Marquez", "García Márquez", "Garcia Marquez"],
+            "hint": "The Colombian author won the 1982 Nobel Prize in Literature."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Earth & Weather",
+      "clues": [
+        {
+          "id": "classic-v4-earth-weather-100",
+          "value": 100,
+          "question": "What instrument is used to measure temperature?",
+          "answer": "Thermometer",
+          "aliases": ["Thermometer", "A thermometer"],
+          "hint": "Older versions commonly used a liquid in a glass tube."
+        },
+        {
+          "id": "classic-v4-earth-weather-200",
+          "value": 200,
+          "question": "Which layer of Earth's atmosphere contains most of the planet's weather?",
+          "answer": "Troposphere",
+          "aliases": ["Troposphere", "The troposphere"],
+          "hint": "It is the lowest major layer of the atmosphere."
+        },
+        {
+          "id": "classic-v4-earth-weather-300",
+          "value": 300,
+          "question": "What scale classifies hurricanes from Category 1 through Category 5 based on sustained wind speed?",
+          "answer": "Saffir-Simpson Hurricane Wind Scale",
+          "aliases": ["Saffir-Simpson Hurricane Wind Scale", "Saffir-Simpson scale", "Saffir Simpson scale"],
+          "hint": "Its name comes from an engineer and a meteorologist."
+        },
+        {
+          "id": "classic-v4-earth-weather-400",
+          "value": 400,
+          "question": "What is the point inside Earth where an earthquake rupture begins called?",
+          "answer": "Hypocenter",
+          "aliases": ["Hypocenter", "Focus", "Earthquake focus"],
+          "hint": "The epicenter lies directly above it at the surface."
+        },
+        {
+          "id": "classic-v4-earth-weather-500",
+          "value": 500,
+          "question": "What magnitude scale is widely used for large earthquakes because it is based on seismic moment?",
+          "answer": "Moment magnitude scale",
+          "aliases": ["Moment magnitude scale", "Moment magnitude", "Mw"],
+          "hint": "It avoids the saturation problems of older magnitude scales.",
+          "followup": {
+            "id": "classic-v4-earth-weather-500-followup",
+            "question": "What instrument records seismic waves from earthquakes?",
+            "answer": "Seismograph",
+            "aliases": ["Seismograph", "Seismometer"],
+            "hint": "It produces a record called a seismogram."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Music & Stage",
+      "clues": [
+        {
+          "id": "classic-v4-music-stage-100",
+          "value": 100,
+          "question": "How many keys are on a standard full-size modern piano?",
+          "answer": "88",
+          "aliases": ["88", "Eighty-eight", "Eighty eight"],
+          "hint": "The total includes both white and black keys."
+        },
+        {
+          "id": "classic-v4-music-stage-200",
+          "value": 200,
+          "question": "What musical term means to gradually get louder?",
+          "answer": "Crescendo",
+          "aliases": ["Crescendo"],
+          "hint": "It is often shown with a widening hairpin symbol."
+        },
+        {
+          "id": "classic-v4-music-stage-300",
+          "value": 300,
+          "question": "Which composer wrote The Four Seasons?",
+          "answer": "Antonio Vivaldi",
+          "aliases": ["Antonio Vivaldi", "Vivaldi"],
+          "hint": "He was an Italian Baroque composer known as the Red Priest."
+        },
+        {
+          "id": "classic-v4-music-stage-400",
+          "value": 400,
+          "question": "What is the highest standard female classical singing voice?",
+          "answer": "Soprano",
+          "aliases": ["Soprano"],
+          "hint": "Many leading female opera roles are written for this voice type."
+        },
+        {
+          "id": "classic-v4-music-stage-500",
+          "value": 500,
+          "question": "In Mozart's The Magic Flute, which character sings the famous aria “Der Hölle Rache”?",
+          "answer": "Queen of the Night",
+          "aliases": ["Queen of the Night", "The Queen of the Night"],
+          "hint": "The role is famous for extremely high coloratura passages.",
+          "followup": {
+            "id": "classic-v4-music-stage-500-followup",
+            "question": "The Magic Flute was originally written with a libretto in what language?",
+            "answer": "German",
+            "aliases": ["German", "German language"],
+            "hint": "Its original title is Die Zauberflöte."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ancient World",
+      "clues": [
+        {
+          "id": "classic-v4-ancient-world-100",
+          "value": 100,
+          "question": "What writing system of picture-like symbols is most associated with ancient Egypt?",
+          "answer": "Hieroglyphs",
+          "aliases": ["Hieroglyphs", "Egyptian hieroglyphs", "Hieroglyphics"],
+          "hint": "They appear on monuments and tomb walls."
+        },
+        {
+          "id": "classic-v4-ancient-world-200",
+          "value": 200,
+          "question": "What Roman city was buried by Mount Vesuvius in AD 79?",
+          "answer": "Pompeii",
+          "aliases": ["Pompeii"],
+          "hint": "Its ruins preserve streets, homes, and wall paintings near Naples."
+        },
+        {
+          "id": "classic-v4-ancient-world-300",
+          "value": 300,
+          "question": "Which philosopher tutored Alexander the Great?",
+          "answer": "Aristotle",
+          "aliases": ["Aristotle"],
+          "hint": "He was a student of Plato."
+        },
+        {
+          "id": "classic-v4-ancient-world-400",
+          "value": 400,
+          "question": "The Parthenon stands on the Acropolis of what ancient Greek city?",
+          "answer": "Athens",
+          "aliases": ["Athens"],
+          "hint": "This city-state was a major rival of Sparta."
+        },
+        {
+          "id": "classic-v4-ancient-world-500",
+          "value": 500,
+          "question": "Which Carthaginian general crossed the Alps with war elephants during the Second Punic War?",
+          "answer": "Hannibal",
+          "aliases": ["Hannibal", "Hannibal Barca"],
+          "hint": "He invaded Italy from the north in 218 BC.",
+          "followup": {
+            "id": "classic-v4-ancient-world-500-followup",
+            "question": "In what year BC did Hannibal cross the Alps into Italy?",
+            "answer": "218 BC",
+            "aliases": ["218 BC", "218 BCE", "218"],
+            "hint": "It happened near the start of the Second Punic War."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Famous Landmarks",
+      "clues": [
+        {
+          "id": "classic-v4-famous-landmarks-100",
+          "value": 100,
+          "question": "Big Ben is in what city?",
+          "answer": "London",
+          "aliases": ["London"],
+          "hint": "The famous clock tower stands beside the Palace of Westminster."
+        },
+        {
+          "id": "classic-v4-famous-landmarks-200",
+          "value": 200,
+          "question": "Christ the Redeemer overlooks what Brazilian city?",
+          "answer": "Rio de Janeiro",
+          "aliases": ["Rio de Janeiro", "Rio"],
+          "hint": "The statue stands atop Corcovado."
+        },
+        {
+          "id": "classic-v4-famous-landmarks-300",
+          "value": 300,
+          "question": "Petra is in what modern-day country?",
+          "answer": "Jordan",
+          "aliases": ["Jordan"],
+          "hint": "The rock-cut city lies in the Middle East."
+        },
+        {
+          "id": "classic-v4-famous-landmarks-400",
+          "value": 400,
+          "question": "Angkor Wat is in what modern-day country?",
+          "answer": "Cambodia",
+          "aliases": ["Cambodia"],
+          "hint": "The vast temple complex is near Siem Reap."
+        },
+        {
+          "id": "classic-v4-famous-landmarks-500",
+          "value": 500,
+          "question": "The Alhambra palace-fortress overlooks what Spanish city?",
+          "answer": "Granada",
+          "aliases": ["Granada"],
+          "hint": "It is one of the best-known monuments of Moorish Spain.",
+          "followup": {
+            "id": "classic-v4-famous-landmarks-500-followup",
+            "question": "Granada is in what autonomous community of Spain?",
+            "answer": "Andalusia",
+            "aliases": ["Andalusia", "Andalucía", "Andalucia"],
+            "hint": "This southern region also includes Seville and Córdoba."
+          }
+        }
+      ]
+    }
+  ]
+}
