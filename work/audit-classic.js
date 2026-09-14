@@ -39,6 +39,7 @@ if(!html.includes('Choose the next question. Everyone will answer it.'))throw ne
 if(!/phoneAnswerInput[\s\S]*phoneHintAction[\s\S]*phone-submit/.test(html))throw new Error('Phone answer/hint/submit order is incorrect');
 if(!html.includes('join-avatar{width:100%!important;min-width:0!important'))throw new Error('Phone avatar overflow fix missing');
 if(!html.includes('CLASSIC_FULL_PHONE_PREVIEW_V1')||!html.includes('classicPreviewJoin')||!html.includes('PHONE CONNECTED • PREVIEW ONLY'))throw new Error('Full Classic phone preview missing');
+if(!html.includes('href="../index.html"')||!html.includes('>Game Modes</a>'))throw new Error('Classic Game Modes navigation missing');
 
 const regressionIssues=[];
 const requirePattern=(name,pattern)=>{if(!pattern.test(html))regressionIssues.push(name)};

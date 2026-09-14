@@ -145,6 +145,8 @@ const specials=categories.flatMap((category)=>category.clues.map((clue,row)=>({c
 if(specials.length!==5||specials.some(x=>x.row!==4||!x.clue.fq||!x.clue.fa)) throw new Error("Expected five playable 500-point follow-up clues");
 if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!(html.includes("AVATAR_CENTERING_V12")||html.includes("AVATAR_NEW_VECTOR_ART_V14"))) throw new Error("Randomized follow-up/avatar centering fix missing");
 if(!html.includes("shuffledPrimaryChoices")||!html.includes("primaryChoicesForCurrent")||!/choiceOrder\s*:\s*Array\.isArray\(current\.choiceOrder\)/.test(html)||!/broadcastGameState\(true\)\s*;\s*showToast\(["']Primary answer correct["']/.test(html)) throw new Error("Primary choice shuffle or follow-up broadcast fix missing");
+if ((script.match(/textContent=\"Edit\"/g)||[]).length !== 1) throw new Error("Timeline must render exactly one Edit control per player");
+if (!html.includes('href="../index.html"') || !html.includes('>Game Modes</a>')) throw new Error("Timeline Game Modes navigation missing");
 if(!html.includes("PHONE_SCROLL_CHOICE_FIX_V7")||!html.includes("primaryCorrectSideBag")||!html.includes("buildPrimaryChoiceOrder")||!html.includes("nextPrimaryCorrectSide")) throw new Error("Phone scrolling or balanced primary answer-side randomization missing");
 if(!html.includes("DAILY_STATIC_WAGER_V11")||!html.includes("PHONE_HORIZONTAL_GUTTER_FIX_V11")) throw new Error("Static Daily Double wager or mobile gutter fix missing");
 for(const amount of [100,200,300,400,500,1000]){if(!html.includes("confirmDailyWager("+amount+")")||!html.includes("phoneConfirmDailyWager("+amount+")"))throw new Error("Missing static Daily Double wager "+amount)}

@@ -37,6 +37,7 @@ h1{margin:0;font-size:clamp(34px,6vw,62px);color:var(--accent);text-shadow:0 5px
   padding:12px;
 }
 .setup-row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.mode-link{color:#e2f2fb;text-decoration:none;font-weight:900;padding:9px 12px;border-radius:999px;background:#143b55;border:1px solid rgba(255,255,255,.15)}
 select,input{
   border:1px solid rgba(255,255,255,.18);
   background:#0a2d45;
@@ -2176,6 +2177,7 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
     <button class="blue" onclick="openComputerJoin()">Add Player</button>
     
     <button class="blue" onclick="openControllerPreview()">Player Phone Preview</button>
+    <a class="mode-link" href="../index.html">Game Modes</a>
     <label class="dev-toggle-wrap">
       <input id="developerToggle" type="checkbox" onchange="setDeveloperMode(this.checked)">
       <span>Developer Mode</span>
@@ -2824,7 +2826,7 @@ function editTimelinePlayer(index){
   const name=String(prompt("Player name",player.name)||"").trim().slice(0,18);if(!name)return;
   if(!uniquePlayerName(players.slice(0,playerCount),name,player.playerId)){showToast("That player name is already in this room","bad");return}
   const avatarRaw=prompt(`Avatar number (1-${avatarOptions.length})`,String(Math.max(0,avatarIndexFor(player.avatar))+1));
-  if(avatarRaw===null)return;const avatarIndex=Math.max(0,Math.min(avatarOptions.length-1,Number(avatarRaw)-1));
+  if(avatarRaw===null)return;const avatarNumber=Number(avatarRaw);if(!Number.isInteger(avatarNumber)||avatarNumber<1||avatarNumber>avatarOptions.length){showToast(`Choose an avatar number from 1 to ${avatarOptions.length}`,"bad");return}const avatarIndex=avatarNumber-1;
   player.name=name;player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);
 }
 
@@ -3915,7 +3917,6 @@ function renderPlayers(){
       </div>`;
     wrap.appendChild(p);
     if(i<playerCount){const edit=document.createElement("button");edit.className="mini blue";edit.textContent="Edit";edit.onclick=event=>{event.stopPropagation();editTimelinePlayer(i)};p.querySelector(".score-controls")?.appendChild(edit)}
-    if(i<playerCount){const edit=document.createElement("button");edit.className="mini blue";edit.textContent="Edit";edit.onclick=event=>{event.stopPropagation();editTimelinePlayer(i)};p.querySelector(".score-controls")?.appendChild(edit)}
   }
 }
 
@@ -4801,7 +4802,7 @@ function editTimelinePhoneProfile(){
   const player=players[joinedPhonePlayerIndex];if(!player)return;
   const name=String(prompt("Your name",player.name)||"").trim().slice(0,18);if(!name)return;
   const avatarRaw=prompt(`Avatar number (1-${avatarOptions.length})`,String(Math.max(0,avatarIndexFor(player.avatar))+1));if(avatarRaw===null)return;
-  const avatarIndex=Math.max(0,Math.min(avatarOptions.length-1,Number(avatarRaw)-1));
+  const avatarNumber=Number(avatarRaw);if(!Number.isInteger(avatarNumber)||avatarNumber<1||avatarNumber>avatarOptions.length){showToast(`Choose an avatar number from 1 to ${avatarOptions.length}`,"bad");return}const avatarIndex=avatarNumber-1;
   sendRemoteAction("profile-update",{name,avatarIndex});
 }
 

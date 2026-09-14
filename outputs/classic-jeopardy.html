@@ -329,7 +329,7 @@ function editClassicPlayer(index){
   const name=String(prompt("Player name",player.name)||"").trim().slice(0,24);if(!name)return;
   if(!uniquePlayerName(players,name,player.playerId)){toast("That player name is already in this room","bad");return}
   const avatarRaw=prompt(`Avatar number (1-${AVATARS.length})`,String((player.avatar||0)+1));if(avatarRaw===null)return;
-  player.name=name;player.avatar=Math.max(0,Math.min(AVATARS.length-1,Number(avatarRaw)-1));renderHost();broadcastState();
+  const avatarNumber=Number(avatarRaw);if(!Number.isInteger(avatarNumber)||avatarNumber<1||avatarNumber>AVATARS.length){toast(`Choose an avatar number from 1 to ${AVATARS.length}`,"bad");return}player.name=name;player.avatar=avatarNumber-1;renderHost();broadcastState();
 }
 function handleRemoteAction(ctx,action){
   if(!action||typeof action!=="object")return;
@@ -423,11 +423,12 @@ function clearPhoneToken(room){const key=String(room).toUpperCase();try{const sa
 function actionEnvelope(type,extra={}){return{type,gameEpoch:phoneState?.gameEpoch,actionNonce:phoneState?.actionNonce,...extra}}
 function leaveClassicGame(){if(!phoneConn?.open||!phoneState?.playerIndex&&phoneState?.playerIndex!==0)return;if(!confirm("Leave this game?"))return;phoneLeaving=true;document.getElementById("joinStatus").textContent="Leaving game…";phoneConn.send(actionEnvelope("leave"))}
 function editClassicProfile(){
-  if(!phoneConn?.open||!phoneState||phoneState.mode==="answer"||phoneState.mode==="daily-wager")return;
+  if(!phoneConn?.open||!phoneState)return;
+  if(phoneState.mode==="answer"||phoneState.mode==="daily-wager"){document.getElementById("phoneMeta").textContent="Profiles can be edited between questions.";return}
   const me=phoneState.players?.[phoneState.playerIndex];if(!me)return;
   const name=String(prompt("Your name",me.name)||"").trim().slice(0,24);if(!name)return;
   const avatarRaw=prompt(`Avatar number (1-${AVATARS.length})`,String((me.avatar||0)+1));if(avatarRaw===null)return;
-  const avatar=Math.max(0,Math.min(AVATARS.length-1,Number(avatarRaw)-1));
+  const avatarNumber=Number(avatarRaw);if(!Number.isInteger(avatarNumber)||avatarNumber<1||avatarNumber>AVATARS.length){document.getElementById("phoneMeta").textContent=`Choose an avatar number from 1 to ${AVATARS.length}.`;return}const avatar=avatarNumber-1;
   phoneConn.send(actionEnvelope("profile-update",{name,avatar}));
 }
 function joinGame(){if(!phoneConn?.open){document.getElementById("joinStatus").textContent="Still connecting…";recoverPhoneConnection(false);return}const name=document.getElementById("nameInput").value.trim();if(!name){document.getElementById("joinStatus").textContent="Enter your name.";return}let token=phoneTokenForRoom(phoneRoom);if(!token){token=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`);savePhoneToken(phoneRoom,token)}phoneConn.send({type:"join",name,avatar:phoneSelectedAvatar,token});document.getElementById("joinStatus").textContent="Joining…"}
