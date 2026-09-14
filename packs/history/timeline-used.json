@@ -9,216 +9,216 @@
       "category": "History",
       "firstUsedPack": "timeline-general-knowledge-v3"
     },
-      {
-        "id": "timeline-v1-technology-100",
-        "question": "Which happened first: Amazon was founded, or eBay launched?",
-        "answer": "Amazon was founded first",
-        "category": "Technology",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-technology-200",
-        "question": "Which happened first: the first Android phone released, or the first iPad released?",
-        "answer": "The first Android phone released first",
-        "category": "Technology",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-technology-300",
-        "question": "Which happened first: Gmail launched, or Reddit launched?",
-        "answer": "Gmail launched first",
-        "category": "Technology",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-technology-400",
-        "question": "Which happened first: Windows 95 released, or the original Pokémon games released in Japan?",
-        "answer": "Windows 95 released first",
-        "category": "Technology",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-technology-500",
-        "question": "Which happened first: Spotify launched, or Uber was founded?",
-        "answer": "Spotify launched first",
-        "category": "Technology",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-technology-500-followup",
-        "question": "About how many years apart were these milestones?",
-        "answer": "About one year — Spotify launched in 2008 and Uber was founded in 2009.",
-        "category": "Technology",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-history-100",
-        "question": "Which happened first: the first powered Wright brothers flight, or the Titanic was launched?",
-        "answer": "The first powered Wright brothers flight first",
-        "category": "History",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-history-200",
-        "question": "Which happened first: the U.S. Civil War ended, or Canada became a country?",
-        "answer": "The U.S. Civil War ended first",
-        "category": "History",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-history-300",
-        "question": "Which happened first: the printing press was developed in Europe, or Columbus reached the Americas?",
-        "answer": "The printing press was developed in Europe first",
-        "category": "History",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-history-400",
-        "question": "Which happened first: the first photograph was made, or the first telegraph message was sent?",
-        "answer": "The first photograph was made first",
-        "category": "History",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-history-500",
-        "question": "Which happened first: the Eiffel Tower opened, or the first modern Olympic Games were held?",
-        "answer": "The Eiffel Tower opened first",
-        "category": "History",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-history-500-followup",
-        "question": "In which decade did the earlier event happen?",
-        "answer": "The 1880s — the Eiffel Tower opened in 1889.",
-        "category": "History",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-pop-culture-100",
-        "question": "Which happened first: Toy Story premiered, or the Nintendo 64 released?",
-        "answer": "Toy Story premiered first",
-        "category": "Pop Culture",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-pop-culture-200",
-        "question": "Which happened first: Friends premiered, or the first PlayStation released in Japan?",
-        "answer": "Friends premiered first",
-        "category": "Pop Culture",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-pop-culture-300",
-        "question": "Which happened first: The Office (U.S.) premiered, or YouTube launched?",
-        "answer": "YouTube launched first",
-        "category": "Pop Culture",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-pop-culture-400",
-        "question": "Which happened first: Iron Man released, or Breaking Bad premiered?",
-        "answer": "Breaking Bad premiered first",
-        "category": "Pop Culture",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-pop-culture-500",
-        "question": "Which happened first: Fortnite Battle Royale released, or Disney+ launched?",
-        "answer": "Fortnite Battle Royale released first",
-        "category": "Pop Culture",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-pop-culture-500-followup",
-        "question": "How many years apart were these launches?",
-        "answer": "Two years — Fortnite Battle Royale released in 2017 and Disney+ launched in 2019.",
-        "category": "Pop Culture",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-science-100",
-        "question": "Which happened first: Neptune was discovered, or Darwin published On the Origin of Species?",
-        "answer": "Neptune was discovered first",
-        "category": "Science",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-science-200",
-        "question": "Which happened first: X-rays were discovered, or radioactivity was discovered?",
-        "answer": "X-rays were discovered first",
-        "category": "Science",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-science-300",
-        "question": "Which happened first: the first human entered space, or the first woman entered space?",
-        "answer": "The first human entered space first",
-        "category": "Science",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-science-400",
-        "question": "Which happened first: the first test-tube baby was born, or the first Space Shuttle launch?",
-        "answer": "The first test-tube baby was born first",
-        "category": "Science",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-science-500",
-        "question": "Which happened first: the Hubble Space Telescope launched, or the first website went online?",
-        "answer": "The Hubble Space Telescope launched first",
-        "category": "Science",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-science-500-followup",
-        "question": "In what year did Hubble launch?",
-        "answer": "1990.",
-        "category": "Science",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-sports-100",
-        "question": "Which happened first: the NBA held its first game, or the first Formula 1 World Championship season began?",
-        "answer": "The NBA held its first game first",
-        "category": "Sports",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-sports-200",
-        "question": "Which happened first: the first Super Bowl was played, or the first Earth Day was held?",
-        "answer": "The first Super Bowl was played first",
-        "category": "Sports",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-sports-300",
-        "question": "Which happened first: Serena Williams won her first Grand Slam singles title, or Tiger Woods completed the career Grand Slam?",
-        "answer": "Serena Williams won her first Grand Slam singles title first",
-        "category": "Sports",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-sports-400",
-        "question": "Which happened first: LeBron James was drafted into the NBA, or Lionel Messi made his official Barcelona first-team debut?",
-        "answer": "LeBron James was drafted into the NBA first",
-        "category": "Sports",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-sports-500",
-        "question": "Which happened first: Usain Bolt set the 9.58-second 100m world record, or Spain won the FIFA World Cup?",
-        "answer": "Usain Bolt set the 9.58-second 100m world record first",
-        "category": "Sports",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
-      {
-        "id": "timeline-v1-sports-500-followup",
-        "question": "How many years apart were these achievements?",
-        "answer": "One year — Bolt set the record in 2009 and Spain won the World Cup in 2010.",
-        "category": "Sports",
-        "firstUsedPack": "timeline-general-knowledge-v1"
-      },
+    {
+      "id": "timeline-v1-technology-100",
+      "question": "Which happened first: Amazon was founded, or eBay launched?",
+      "answer": "Amazon was founded first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-technology-200",
+      "question": "Which happened first: the first Android phone released, or the first iPad released?",
+      "answer": "The first Android phone released first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-technology-300",
+      "question": "Which happened first: Gmail launched, or Reddit launched?",
+      "answer": "Gmail launched first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-technology-400",
+      "question": "Which happened first: Windows 95 released, or the original Pokémon games released in Japan?",
+      "answer": "Windows 95 released first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-technology-500",
+      "question": "Which happened first: Spotify launched, or Uber was founded?",
+      "answer": "Spotify launched first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-technology-500-followup",
+      "question": "About how many years apart were these milestones?",
+      "answer": "About one year — Spotify launched in 2008 and Uber was founded in 2009.",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-history-100",
+      "question": "Which happened first: the first powered Wright brothers flight, or the Titanic was launched?",
+      "answer": "The first powered Wright brothers flight first",
+      "category": "History",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-history-200",
+      "question": "Which happened first: the U.S. Civil War ended, or Canada became a country?",
+      "answer": "The U.S. Civil War ended first",
+      "category": "History",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-history-300",
+      "question": "Which happened first: the printing press was developed in Europe, or Columbus reached the Americas?",
+      "answer": "The printing press was developed in Europe first",
+      "category": "History",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-history-400",
+      "question": "Which happened first: the first photograph was made, or the first telegraph message was sent?",
+      "answer": "The first photograph was made first",
+      "category": "History",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-history-500",
+      "question": "Which happened first: the Eiffel Tower opened, or the first modern Olympic Games were held?",
+      "answer": "The Eiffel Tower opened first",
+      "category": "History",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-history-500-followup",
+      "question": "In which decade did the earlier event happen?",
+      "answer": "The 1880s — the Eiffel Tower opened in 1889.",
+      "category": "History",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-pop-culture-100",
+      "question": "Which happened first: Toy Story premiered, or the Nintendo 64 released?",
+      "answer": "Toy Story premiered first",
+      "category": "Pop Culture",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-pop-culture-200",
+      "question": "Which happened first: Friends premiered, or the first PlayStation released in Japan?",
+      "answer": "Friends premiered first",
+      "category": "Pop Culture",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-pop-culture-300",
+      "question": "Which happened first: The Office (U.S.) premiered, or YouTube launched?",
+      "answer": "YouTube launched first",
+      "category": "Pop Culture",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-pop-culture-400",
+      "question": "Which happened first: Iron Man released, or Breaking Bad premiered?",
+      "answer": "Breaking Bad premiered first",
+      "category": "Pop Culture",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-pop-culture-500",
+      "question": "Which happened first: Fortnite Battle Royale released, or Disney+ launched?",
+      "answer": "Fortnite Battle Royale released first",
+      "category": "Pop Culture",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-pop-culture-500-followup",
+      "question": "How many years apart were these launches?",
+      "answer": "Two years — Fortnite Battle Royale released in 2017 and Disney+ launched in 2019.",
+      "category": "Pop Culture",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-science-100",
+      "question": "Which happened first: Neptune was discovered, or Darwin published On the Origin of Species?",
+      "answer": "Neptune was discovered first",
+      "category": "Science",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-science-200",
+      "question": "Which happened first: X-rays were discovered, or radioactivity was discovered?",
+      "answer": "X-rays were discovered first",
+      "category": "Science",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-science-300",
+      "question": "Which happened first: the first human entered space, or the first woman entered space?",
+      "answer": "The first human entered space first",
+      "category": "Science",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-science-400",
+      "question": "Which happened first: the first test-tube baby was born, or the first Space Shuttle launch?",
+      "answer": "The first test-tube baby was born first",
+      "category": "Science",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-science-500",
+      "question": "Which happened first: the Hubble Space Telescope launched, or the first website went online?",
+      "answer": "The Hubble Space Telescope launched first",
+      "category": "Science",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-science-500-followup",
+      "question": "In what year did Hubble launch?",
+      "answer": "1990.",
+      "category": "Science",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-sports-100",
+      "question": "Which happened first: the NBA held its first game, or the first Formula 1 World Championship season began?",
+      "answer": "The NBA held its first game first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-sports-200",
+      "question": "Which happened first: the first Super Bowl was played, or the first Earth Day was held?",
+      "answer": "The first Super Bowl was played first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-sports-300",
+      "question": "Which happened first: Serena Williams won her first Grand Slam singles title, or Tiger Woods completed the career Grand Slam?",
+      "answer": "Serena Williams won her first Grand Slam singles title first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-sports-400",
+      "question": "Which happened first: LeBron James was drafted into the NBA, or Lionel Messi made his official Barcelona first-team debut?",
+      "answer": "LeBron James was drafted into the NBA first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-sports-500",
+      "question": "Which happened first: Usain Bolt set the 9.58-second 100m world record, or Spain won the FIFA World Cup?",
+      "answer": "Usain Bolt set the 9.58-second 100m world record first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
+    {
+      "id": "timeline-v1-sports-500-followup",
+      "question": "How many years apart were these achievements?",
+      "answer": "One year — Bolt set the record in 2009 and Spain won the World Cup in 2010.",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v1"
+    },
     {
       "id": "timeline-v2-technology-100",
       "question": "Which happened first: Wikipedia launched, or the first iPod was released?",
@@ -638,6 +638,216 @@
       "answer": "1995 — the inaugural Extreme Games were held in 1995.",
       "category": "Sports",
       "firstUsedPack": "timeline-general-knowledge-v3"
+    },
+    {
+      "id": "timeline-v4-technology-100",
+      "question": "Which happened first: the original Macintosh was introduced, or Windows 1.0 was released?",
+      "answer": "the original Macintosh was introduced first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-technology-200",
+      "question": "Which happened first: Photoshop 1.0 was released, or the first Linux kernel version was released?",
+      "answer": "Photoshop 1.0 was released first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-technology-300",
+      "question": "Which happened first: Google Chrome was first released, or WhatsApp was founded?",
+      "answer": "Google Chrome was first released first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-technology-400",
+      "question": "Which happened first: GitHub officially launched, or Dropbox launched to the public?",
+      "answer": "GitHub officially launched first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-technology-500",
+      "question": "Which happened first: the Nintendo Switch launched, or Microsoft Teams became generally available?",
+      "answer": "the Nintendo Switch launched first",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-technology-500-followup",
+      "question": "On what date did the Nintendo Switch launch?",
+      "answer": "March 3, 2017 — the Nintendo Switch launched worldwide on March 3, 2017.",
+      "category": "Technology",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-world-history-100",
+      "question": "Which happened first: the Great Fire of London, or the Salem witch trials began?",
+      "answer": "the Great Fire of London first",
+      "category": "World History",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-world-history-200",
+      "question": "Which happened first: the Louisiana Purchase was completed, or the Battle of Trafalgar was fought?",
+      "answer": "the Louisiana Purchase was completed first",
+      "category": "World History",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-world-history-300",
+      "question": "Which happened first: the United States purchased Alaska from Russia, or the Meiji Restoration began in Japan?",
+      "answer": "the United States purchased Alaska from Russia first",
+      "category": "World History",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-world-history-400",
+      "question": "Which happened first: the Berlin Wall fell, or Nelson Mandela was released from prison?",
+      "answer": "the Berlin Wall fell first",
+      "category": "World History",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-world-history-500",
+      "question": "Which happened first: the Soviet Union dissolved, or the Maastricht Treaty was signed?",
+      "answer": "the Soviet Union dissolved first",
+      "category": "World History",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-world-history-500-followup",
+      "question": "In which country was the Maastricht Treaty signed?",
+      "answer": "The Netherlands — the treaty was signed in Maastricht, Netherlands.",
+      "category": "World History",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-movies-music-100",
+      "question": "Which happened first: Jaws opened in theaters, or Rocky opened in theaters?",
+      "answer": "Jaws opened in theaters first",
+      "category": "Movies & Music",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-movies-music-200",
+      "question": "Which happened first: Back to the Future opened in theaters, or Top Gun opened in theaters?",
+      "answer": "Back to the Future opened in theaters first",
+      "category": "Movies & Music",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-movies-music-300",
+      "question": "Which happened first: Nirvana released Nevermind, or Disney's Beauty and the Beast opened in U.S. theaters?",
+      "answer": "Nirvana released Nevermind first",
+      "category": "Movies & Music",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-movies-music-400",
+      "question": "Which happened first: The Sopranos premiered on HBO, or The Matrix opened in U.S. theaters?",
+      "answer": "The Sopranos premiered on HBO first",
+      "category": "Movies & Music",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-movies-music-500",
+      "question": "Which happened first: Finding Nemo opened in U.S. theaters, or Pirates of the Caribbean: The Curse of the Black Pearl opened in U.S. theaters?",
+      "answer": "Finding Nemo opened in U.S. theaters first",
+      "category": "Movies & Music",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-movies-music-500-followup",
+      "question": "Which animation studio produced Finding Nemo?",
+      "answer": "Pixar — Finding Nemo was produced by Pixar Animation Studios.",
+      "category": "Movies & Music",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-space-exploration-100",
+      "question": "Which happened first: Apollo 11 landed humans on the Moon, or Mariner 9 became the first spacecraft to orbit Mars?",
+      "answer": "Apollo 11 landed humans on the Moon first",
+      "category": "Space & Exploration",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-space-exploration-200",
+      "question": "Which happened first: Viking 1 landed on Mars, or Voyager 1 launched?",
+      "answer": "Viking 1 landed on Mars first",
+      "category": "Space & Exploration",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-space-exploration-300",
+      "question": "Which happened first: Mars Pathfinder landed on Mars, or the first module of the International Space Station was launched?",
+      "answer": "Mars Pathfinder landed on Mars first",
+      "category": "Space & Exploration",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-space-exploration-400",
+      "question": "Which happened first: Cassini entered orbit around Saturn, or the Huygens probe landed on Titan?",
+      "answer": "Cassini entered orbit around Saturn first",
+      "category": "Space & Exploration",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-space-exploration-500",
+      "question": "Which happened first: New Horizons launched toward Pluto, or Pluto was reclassified as a dwarf planet?",
+      "answer": "New Horizons launched toward Pluto first",
+      "category": "Space & Exploration",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-space-exploration-500-followup",
+      "question": "In what year did New Horizons make its historic flyby of Pluto?",
+      "answer": "2015 — New Horizons flew past Pluto in July 2015.",
+      "category": "Space & Exploration",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-sports-100",
+      "question": "Which happened first: the first Masters Tournament was held, or the first NCAA men's basketball tournament was held?",
+      "answer": "the first Masters Tournament was held first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-sports-200",
+      "question": "Which happened first: Roger Maris hit his 61st home run of the 1961 season, or Wilt Chamberlain scored 100 points in an NBA game?",
+      "answer": "Roger Maris hit his 61st home run first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-sports-300",
+      "question": "Which happened first: the Battle of the Sexes tennis match, or Hank Aaron broke Babe Ruth's career home run record?",
+      "answer": "the Battle of the Sexes tennis match first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-sports-400",
+      "question": "Which happened first: the U.S. Dream Team won Olympic basketball gold, or UFC 1 was held?",
+      "answer": "the U.S. Dream Team won Olympic basketball gold first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-sports-500",
+      "question": "Which happened first: Kobe Bryant scored 81 points in an NBA game, or Italy won the 2006 FIFA World Cup?",
+      "answer": "Kobe Bryant scored 81 points in an NBA game first",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v4"
+    },
+    {
+      "id": "timeline-v4-sports-500-followup",
+      "question": "Against which team did Kobe Bryant score 81 points?",
+      "answer": "Toronto Raptors — Bryant scored 81 against Toronto.",
+      "category": "Sports",
+      "firstUsedPack": "timeline-general-knowledge-v4"
     }
   ]
 }
