@@ -3145,10 +3145,6 @@ function openComputerJoin(){
     showToast("Maximum of 5 players","bad");
     return;
   }
-  if(!uniquePlayerName(players.slice(0,playerCount),name)){
-    if(note) note.textContent="That player name is already in this room.";
-    return;
-  }
   selectedHostAvatar=0;
   const modal=document.getElementById("hostJoin");
   const name=document.getElementById("hostJoinName");
@@ -3172,6 +3168,10 @@ function addComputerPlayer(){
   }
   if(playerCount>=5){
     if(note) note.textContent="This room is full.";
+    return;
+  }
+  if(!uniquePlayerName(players.slice(0,playerCount),name)){
+    if(note) note.textContent="That player name is already in this room.";
     return;
   }
   if(gameStarted){

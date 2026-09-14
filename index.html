@@ -7,8 +7,10 @@
 <script>
 const phoneParams=new URLSearchParams(location.search);
 if(phoneParams.has("phone")){
-  const target=phoneParams.get("mode")==="classic"?"outputs/classic-jeopardy.html":"outputs/dog-jeopardy.html";
-  location.replace(target+location.search+location.hash);
+  const routes={timeline:"outputs/dog-jeopardy.html",classic:"outputs/classic-jeopardy.html",standard:"outputs/standard-jeopardy.html"};
+  const target=routes[phoneParams.get("mode")];
+  if(target) location.replace(target+location.search+location.hash);
+  else location.replace("index.html?mode-error=1");
 }
 </script>
 <style>
@@ -18,7 +20,7 @@ if(phoneParams.has("phone")){
 <body>
 <main class="wrap">
   <h1 class="title">JEOPARDY</h1>
-  <div class="sub">Choose a game mode.</div>
+  <div class="sub" id="modeSub">Choose a game mode.</div>
   <section class="modes">
     <a class="mode" href="outputs/dog-jeopardy.html">
       <h2>What Happened First?</h2>
@@ -32,5 +34,6 @@ if(phoneParams.has("phone")){
     </a>
   </section>
 </main>
+<script>if(new URLSearchParams(location.search).has("mode-error"))document.getElementById("modeSub").textContent="That phone link uses an unknown game mode. Ask the host to scan a new QR code.";</script>
 </body>
 </html>
