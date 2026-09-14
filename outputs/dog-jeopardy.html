@@ -2773,7 +2773,7 @@ function normalizeToken(value){
 }
 
 function safeRemotePlayer(entry){
-  return Number.isInteger(entry?.playerIndex)&&entry.playerIndex>=0&&entry.playerIndex<playerCount;
+  return Number.isInteger(entry?.playerIndex)&&entry.playerIndex>=0&&entry.playerIndex<playerCount&&players[entry.playerIndex]?.playerId===entry.playerId;
 }
 
 function removeTimelinePlayer(index,entry){
@@ -2792,7 +2792,7 @@ function removeTimelinePlayer(index,entry){
   if(lastChancePlayerIndex===index){lastChancePending=false;lastChancePlayerIndex=null}else if(lastChancePlayerIndex>index)lastChancePlayerIndex--;
   playerTempStatus.splice(index,1);playerTempStatus.push(null);
   remotePlayerTokens.forEach((mapped,token)=>{if(mapped===index)remotePlayerTokens.delete(token);else if(mapped>index)remotePlayerTokens.set(token,mapped-1)});
-  remoteConnections.forEach(ctx=>{if(ctx===entry){ctx.playerIndex=null;ctx.token=null}else if(ctx.playerIndex>index)ctx.playerIndex--});
+  remoteConnections.forEach(ctx=>{if(ctx===entry){ctx.playerIndex=null;ctx.playerId=null;ctx.token=null}else if(ctx.playerIndex>index)ctx.playerIndex--});
   remoteTokenConnections.forEach((ctx,token)=>{if(ctx===entry||token===entry?.token)remoteTokenConnections.delete(token)});
   if(playerCount===0)activePlayer=0;else if(wasActive)activePlayer=index%playerCount;else if(activePlayer>index)activePlayer--;
   // Tie participants are stored as seats in this legacy engine. Rebase every
@@ -2857,13 +2857,14 @@ function handleRemoteAction(entry,msg){
       try{previous.conn.close()}catch(e){}
     }
     entry.playerIndex=idx;
+    entry.playerId=players[idx].playerId;
     entry.token=token;
     remotePlayerTokens.set(token,idx);
     remoteTokenConnections.set(token,entry);
     if(!gameStarted){players[idx].name=name;players[idx].avatar=avatarOptions[avatarIndex]?.src||""}
     players[idx].score=players[idx].score||0;players[idx].streak=players[idx].streak||0;players[idx].lossStreak=players[idx].lossStreak||0;
     if(playerCount===1)activePlayer=0;
-    entry.conn.send({type:"joined",playerIndex:idx,roomCode});
+    entry.conn.send({type:"joined",playerIndex:idx,playerId:entry.playerId,roomCode});
     updateHostPlayerCount();renderPlayers();buildBoard();
     showToast(`${name} joined by phone`,"good");
     broadcastGameState(true);
@@ -2961,7 +2962,7 @@ function applyRemoteSnapshot(s){
 
 function attachHostConnection(conn){
   WHF_NETWORK.watchConnection(conn,"timeline-host-data");
-  const entry={conn,playerIndex:null,token:null,superseded:false,connectedAt:Date.now(),lastSeen:Date.now()};
+  const entry={conn,playerIndex:null,playerId:null,token:null,superseded:false,connectedAt:Date.now(),lastSeen:Date.now()};
   const existing=remoteConnections.get(conn.peer);
   if(existing&&existing!==entry){existing.superseded=true;try{existing.conn.close()}catch(e){}}
   remoteConnections.set(conn.peer,entry);
@@ -4847,7 +4848,7 @@ function resetGameState(keepPlayers){
     playerCount=0;
     remotePlayerTokens.clear();
     remoteTokenConnections.clear();
-    remoteConnections.forEach(entry=>{entry.playerIndex=null;entry.token=null});
+    remoteConnections.forEach(entry=>{entry.playerIndex=null;entry.playerId=null;entry.token=null});
   }
   activePlayer=0;
   categories.forEach(c=>c.clues.forEach(x=>{delete x.playedMult;delete x.outcome;delete x.player;delete x.winnerName}));

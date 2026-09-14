@@ -118,6 +118,7 @@ requirePattern("start gate on remote clue selection", /action\s*===\s*["']select
 requirePattern("persistent reconnect token", /localStorage\.getItem\([\s\S]{0,160}(?:token|TOKEN)/i);
 requirePattern("token validation", /function\s+(?:safeToken|validToken|normalizeToken)\s*\(/);
 requirePattern("token-based player reclaim", /(?:remotePlayerTokens\.get|findIndex\([^)]*token)/);
+requirePattern("Timeline connection identity binding", /entry\.playerId=players\[idx\]\.playerId/);
 requirePattern("duplicate connection displacement or binding", /(?:replace|supersed|previous|existing|duplicate|playerConnections|connectionByPlayer)/i);
 requirePattern("state resync after reconnect", /(?:resume|rejoin)[\s\S]{0,300}(?:broadcastGameState|sendNetworkSnapshot|sendState)/);
 requirePattern("ordered state snapshots", /revision[\s\S]{0,300}(?:appliedNetworkRevision|lastAppliedRevision)/);
