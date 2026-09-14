@@ -57,6 +57,7 @@ requirePattern('persistent reconnect token',/localStorage\.getItem\([\s\S]{0,160
 requirePattern('validated reconnect token',/function\s+safeToken\s*\(/);
 requirePattern('token-based player reclaim',/findIndex\([^)]*\.token\s*===\s*token/);
 requirePattern('Classic connection identity binding',/ctx\.playerId=players\[index\]\?\.playerId\|\|null/);
+requirePattern('Classic answer identity records',/class PlayerIdentityMap extends Map[\s\S]{0,400}class PlayerIdentitySet extends Set/);
 requirePattern('duplicate connection displacement or binding',/(?:replace|supersed|previous|existing|duplicate|playerConnections|connectionByPlayer)/i);
 requirePattern('state resync after reconnect',/(?:rejoin|resume)[\s\S]{0,300}(?:sendState|broadcastState)/);
 requirePattern('lobby state sent to phones',/!gameStarted[^\n]*mode\s*:\s*["']lobby["']/);
