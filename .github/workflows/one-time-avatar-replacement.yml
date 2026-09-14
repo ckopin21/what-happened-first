@@ -20,9 +20,9 @@ jobs:
       - name: Replace avatar artwork
         run: python3 work/one-time-replace-avatars-svg.py
       - name: Audit timeline game
-        run: node work/audit-game.js
+        run: node work/audit-game.js outputs/dog-jeopardy.html
       - name: Audit classic game
-        run: node work/audit-classic.js
+        run: node work/audit-classic.js outputs/classic-jeopardy.html
       - name: Commit replacement and remove one-time files
         run: |
           rm -f work/one-time-replace-avatars-svg.py .github/workflows/one-time-avatar-replacement.yml
@@ -31,5 +31,3 @@ jobs:
           git add outputs/dog-jeopardy.html work/one-time-replace-avatars-svg.py .github/workflows/one-time-avatar-replacement.yml
           git commit -m "Replace avatars with centered artwork"
           git push
-
-# rerun after audit marker update
