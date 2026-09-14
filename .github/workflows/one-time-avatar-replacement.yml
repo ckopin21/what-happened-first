@@ -31,3 +31,5 @@ jobs:
           git add outputs/dog-jeopardy.html work/one-time-replace-avatars-svg.py .github/workflows/one-time-avatar-replacement.yml
           git commit -m "Replace avatars with centered artwork"
           git push
+
+# rerun after audit marker update
