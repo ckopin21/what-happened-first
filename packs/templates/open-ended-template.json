@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "replace-this-topic-v1",
+  "name": "Replace This Topic",
+  "genre": "Replace This Genre",
+  "answerType": "open-ended",
+  "title": "REPLACE THIS TOPIC",
+  "subtitle": "Replace this subtitle.",
+  "rules": {"hintMultiplier": 0.5, "wrongMultiplier": 0},
+  "categories": []
+}

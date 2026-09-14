@@ -30,6 +30,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate JSON question packs
+        run: node work/validate-packs.js
       - name: Audit timeline mode
         run: node work/audit-game.js outputs/dog-jeopardy.html
       - name: Audit classic mode

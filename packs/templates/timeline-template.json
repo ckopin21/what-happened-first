@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "replace-this-timeline-v1",
+  "name": "Replace This Timeline",
+  "genre": "Replace This Genre",
+  "answerType": "timeline",
+  "title": "REPLACE THIS TIMELINE",
+  "subtitle": "Choose which event happened first.",
+  "rules": {"hintMultiplier": 0.5},
+  "categories": []
+}

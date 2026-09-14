@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ckopin21.github.io/what-happened-first/packs/schema/question-pack.schema.json",
+  "title": "Jeopardy question pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "name", "genre", "answerType", "title", "subtitle", "rules", "categories"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*-v[1-9][0-9]*$"},
+    "name": {"type": "string", "minLength": 1},
+    "genre": {"type": "string", "minLength": 1},
+    "answerType": {"enum": ["timeline", "open-ended"]},
+    "title": {"type": "string", "minLength": 1},
+    "subtitle": {"type": "string", "minLength": 1},
+    "rules": {"type": "object"},
+    "categories": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/category"}}
+  },
+  "$defs": {
+    "category": {
+      "type": "object", "additionalProperties": false, "required": ["name", "clues"],
+      "properties": {"name": {"type": "string", "minLength": 1}, "clues": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/clue"}}}
+    },
+    "clue": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "value", "question", "answer", "aliases", "hint"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1}, "value": {"enum": [100, 200, 300, 400, 500]},
+        "question": {"type": "string", "minLength": 1}, "answer": {"type": "string", "minLength": 1},
+        "aliases": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "hint": {"type": "string", "minLength": 1},
+        "choices": {"type": "array", "minItems": 2, "maxItems": 4, "items": {"type": "string", "minLength": 1}},
+        "followup": {"$ref": "#/$defs/followup"}, "allowReuse": {"const": true}
+      }
+    },
+    "followup": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "question", "answer", "aliases", "hint"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1}, "question": {"type": "string", "minLength": 1}, "answer": {"type": "string", "minLength": 1},
+        "aliases": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "hint": {"type": "string", "minLength": 1},
+        "choices": {"type": "array", "minItems": 2, "maxItems": 4, "items": {"type": "string", "minLength": 1}}, "allowReuse": {"const": true}
+      }
+    }
+  }
+}
