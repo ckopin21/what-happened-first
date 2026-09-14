@@ -1,5 +1,25 @@
 # Question pack workflow
 
+## JSON pack contract (new content architecture)
+
+The new pure-data contract lives at `packs/schema/question-pack.schema.json`.
+Use `packs/templates/timeline-template.json` or
+`packs/templates/open-ended-template.json` as the starting point. This is the
+required format for new catalog packs; the installed JavaScript packs are a
+temporary compatibility layer while their existing questions are migrated.
+
+Never edit `outputs/**`, `assets/network/**`, shared UI, or scoring code for a
+content-only request. Read, in order: this file, the schema, the relevant
+manifest, installed-pack metadata, and permanent history. Use a unique
+versioned pack ID (for example `science-v1`), five categories, five clues per
+category, globally unique clue/follow-up IDs, readable `question`, `answer`,
+`aliases`, and `hint` fields. Timeline clues additionally require exactly two
+`choices`; their answer must identify one choice. A follow-up is a nested
+`followup` object with the same readable answer fields.
+
+Run `node work/validate-packs.js` for every JSON-only change, then the legacy
+validator and mode audits while the compatibility layer remains installed.
+
 Question packs are data-only. Do not edit either game HTML for a content-only
 pack request. GitHub Pages loads `packs/<game>/manifest.js`; the manifest loads
 its default pack synchronously and the host can load any registered pack later.
@@ -32,8 +52,8 @@ near-duplicate wording is rejected across packs and history.
 
 ## Instructions for ChatGPT when adding a question pack
 
-1. Read this file, the relevant pack README, its manifest, all installed pack
-   metadata, and that game's history ledger.
+1. Read this file, `packs/schema/question-pack.schema.json`, the relevant pack
+   manifest, all installed-pack metadata, and that game's history ledger.
 2. Do not edit `outputs/dog-jeopardy.html` or `outputs/classic-jeopardy.html`
    for a content-only change.
 3. Create a unique pack ID and unique question IDs; check all new questions

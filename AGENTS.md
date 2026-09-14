@@ -15,7 +15,7 @@ Mode-specific rules:
 
 - Timeline mode: only the active player selects and answers a normal clue.
 - Classic mode: only the active player selects the clue, but every joined player may answer that clue once. Answers reveal automatically when all players submit, with a host early-reveal override.
-- Content-only pack work must not edit either game engine. Read `PACK_WORKFLOW.md`, the relevant manifest, every installed pack's metadata, and the matching history ledger; then edit only pack/manifest/history files.
+- Content-only pack work must not edit either game engine. Read `PACK_WORKFLOW.md`, `packs/schema/question-pack.schema.json`, the relevant manifest, every installed pack's metadata, and the matching history ledger; then edit only pack/manifest/history files. New catalog packs must be pure JSON and pass `node work/validate-packs.js`.
 
 Run both static audits after relevant edits:
 
