@@ -2537,6 +2537,7 @@ let tieActive=false;
 let tieResolved=false;
 let tieAnswered=new Set();
 let tieWinnerIndex=null;
+let tieWinnerId=null;
 let developerTieBreaker=false;
 const tieQuestions=[
   {q:"Which happened first: the first iPhone released, or Bitcoin's white paper was published?",choices:["the first iPhone released","Bitcoin's white paper was published"],a:"the first iPhone released"},
@@ -2738,7 +2739,7 @@ function makeNetworkSnapshot(){
     current:current?{key:current.key,base:current.base,mult:current.mult,value:current.value,lastChanceMult:current.lastChanceMult,isDaily:!!current.isDaily,choiceOrder:Array.isArray(current.choiceOrder)?current.choiceOrder.slice():[],item:{q:current.item.q,h:current.item.h,a:current.item.a,choices:current.item.choices,special:!!current.item.special,fq:current.item.fq,fa:current.item.fa,fchoices:current.item.fchoices,fcorrect:current.item.fcorrect,fc:Array.isArray(current.followOrder)?current.followOrder:followupChoicesFor(current.item)},followChoice:Number.isInteger(current.followChoice)?current.followChoice:null,followOrder:Array.isArray(current.followOrder)?current.followOrder:null}:null,
     pendingDaily:pendingDaily?{key:pendingDaily.key,maxWager:Math.max(100,Math.max(players[activePlayer]?.score||0,1000)),phaseMult:currentMultiplier()}:null,
     followOffer,followVisible,followAnswerVisible,
-    tie:{active:tieActive,resolved:tieResolved,questionIndex:tieQuestionIndex,players:tiePlayers.map(x=>x.i),answered:[...tieAnswered],winner:tieWinnerIndex}
+    tie:{active:tieActive,resolved:tieResolved,questionIndex:tieQuestionIndex,players:tiePlayers.map(x=>x.playerId||x.p?.playerId).filter(Boolean),answered:[...tieAnswered],winner:tieWinnerId,winnerIndex:tieWinnerIndex}
   };
 }
 
@@ -2779,12 +2780,12 @@ function safeRemotePlayer(entry){
 
 function removeTimelinePlayer(index,entry){
   if(!Number.isInteger(index)||index<0||index>=playerCount)return false;
-  const wasActive=index===activePlayer,leavesTie=tiePlayers.some(player=>player.i===index);
+  const wasActive=index===activePlayer,leavesTie=tiePlayers.some(player=>player.playerId===players[index]?.playerId);
   // An unresolved active turn is restored to the board; no score is applied.
   if((wasActive&&(current||pendingDaily))||leavesTie){
     current=null;pendingDaily=null;primaryBanked=false;reviewMode=false;hintUsed=false;questionResolved=false;selectedChoice=null;submittedChoice=null;choiceLocked=false;
     document.getElementById("modal")?.classList.remove("showing");document.getElementById("dailyModal")?.classList.remove("showing");document.getElementById("tiebreaker")?.classList.remove("showing");
-    tiePlayers=[];tieActive=false;tieResolved=false;tieAnswered=new Set();tieWinnerIndex=null;lastChancePending=false;lastChancePlayerIndex=null;lastChancePlayerId=null;
+    tiePlayers=[];tieActive=false;tieResolved=false;tieAnswered=new Set();tieWinnerIndex=null;tieWinnerId=null;lastChancePending=false;lastChancePlayerIndex=null;lastChancePlayerId=null;
   }
   const removed=players[index];
   for(let i=index;i<playerCount-1;i++)players[i]=players[i+1];
@@ -2799,9 +2800,8 @@ function removeTimelinePlayer(index,entry){
   // Tie participants are stored as seats in this legacy engine. Rebase every
   // remaining seat so a player cannot inherit a different player's tie state.
   if(tieActive&&!leavesTie){
-    tiePlayers=tiePlayers.map(player=>({i:player.i>index?player.i-1:player.i,p:players[player.i>index?player.i-1:player.i]}));
-    tieAnswered=new Set([...tieAnswered].filter(i=>i!==index).map(i=>i>index?i-1:i));
-    if(tieWinnerIndex!==null)tieWinnerIndex=tieWinnerIndex>index?tieWinnerIndex-1:tieWinnerIndex;
+    tiePlayers=tiePlayers.map(player=>{const seat=players.findIndex(p=>p.playerId===player.playerId);return seat>=0?{i:seat,p:players[seat],playerId:player.playerId}:null}).filter(Boolean);
+    tieWinnerIndex=tieWinnerId?players.findIndex(p=>p.playerId===tieWinnerId):null;
   }
   // The host room stays alive, but an empty roster must always be a fresh lobby.
   if(playerCount===0){resetGameState(true);return removed;}
@@ -2914,7 +2914,7 @@ function handleRemoteAction(entry,msg){
     const choice=Number(msg.choice);
     if(Number.isInteger(choice))chooseFollowup(choice);
   }else if(action==="tie"){
-    if(gameStarted&&tieActive&&!tieResolved&&tiePlayers.some(x=>x.i===i))submitTieChoice(i,String(msg.choice||""),null);
+    if(gameStarted&&tieActive&&!tieResolved&&tiePlayers.some(x=>x.playerId===players[i]?.playerId))submitTieChoice(i,String(msg.choice||""),null);
   }
   broadcastGameState(true);
 }
@@ -2933,8 +2933,9 @@ function applyRemoteSnapshot(s){
   current=s.current?{...s.current,item:{...s.current.item}}:null;
   pendingDaily=s.pendingDaily?{...s.pendingDaily}:null;
   tieActive=!!s.tie?.active;tieResolved=!!s.tie?.resolved;tieQuestionIndex=s.tie?.questionIndex??-1;
-  tieAnswered=new Set(s.tie?.answered||[]);tieWinnerIndex=s.tie?.winner??null;
-  tiePlayers=(s.tie?.players||[]).map(i=>({i,p:players[i]}));
+  tiePlayers=(s.tie?.players||[]).map(value=>{const playerId=Number.isInteger(value)?players[value]?.playerId:value,seat=players.findIndex(p=>p.playerId===playerId);return seat>=0?{i:seat,p:players[seat],playerId}:null}).filter(Boolean);
+  tieAnswered=new Set((s.tie?.answered||[]).map(value=>Number.isInteger(value)?players[value]?.playerId:value).filter(Boolean));
+  tieWinnerId=Number.isInteger(s.tie?.winner)?players[s.tie.winner]?.playerId:(s.tie?.winner||null);tieWinnerIndex=tieWinnerId?players.findIndex(p=>p.playerId===tieWinnerId):(s.tie?.winnerIndex??null);
   const modal=document.getElementById("modal");
   modal?.classList.toggle("showing",!!s.modalShowing);
   document.getElementById("followOffer")?.classList.toggle("visible",!!s.followOffer);
@@ -4492,7 +4493,7 @@ function devPreview(kind){
       return;
     }
     const topTwo=[0,1];
-    tiePlayers=topTwo.map(i=>({p:players[i],i}));
+    tiePlayers=topTwo.map(i=>({p:players[i],i,playerId:players[i].playerId}));
     developerTieBreaker=true;
     startTieBreaker();
     return;
@@ -4583,7 +4584,7 @@ function resolveEndGame(){
   developerTieBreaker=false;
   const active=players.slice(0,playerCount);
   const max=Math.max(...active.map(p=>p.score));
-  tiePlayers=active.map((p,i)=>({p,i})).filter(x=>x.p.score===max);
+  tiePlayers=active.map((p,i)=>({p,i,playerId:p.playerId})).filter(x=>x.p.score===max);
   if(tiePlayers.length>1) startTieBreaker();
   else showFinale();
 }
@@ -4593,7 +4594,7 @@ function startTieBreaker(){
   tieActive=true;
   tieResolved=false;
   tieAnswered=new Set();
-  tieWinnerIndex=null;
+  tieWinnerIndex=null;tieWinnerId=null;
 
   const q=tieQuestions[tieQuestionIndex];
   document.getElementById("tiePlayers").textContent="Tied: "+tiePlayers.map(x=>x.p.name).join(" vs ");
@@ -4615,7 +4616,7 @@ function cancelDeveloperTieBreaker(){
   tieActive=false;
   tieResolved=false;
   tieAnswered=new Set();
-  tieWinnerIndex=null;
+  tieWinnerIndex=null;tieWinnerId=null;
   tiePlayers=[];
   document.getElementById("tiebreaker").classList.remove("showing");
   document.getElementById("tieButtons").innerHTML="";
@@ -4624,7 +4625,7 @@ function cancelDeveloperTieBreaker(){
 
 function renderPhoneTieBreaker(){
   const phoneIndex=joinedPhonePlayerIndex ?? activePlayer;
-  const isParticipant=tiePlayers.some(x=>x.i===phoneIndex);
+  const isParticipant=tiePlayers.some(x=>x.playerId===players[phoneIndex]?.playerId);
   if(!tieActive || tieResolved || !isParticipant)return false;
 
   const q=tieQuestions[tieQuestionIndex];
@@ -4635,7 +4636,7 @@ function renderPhoneTieBreaker(){
   const choices=document.getElementById("phoneTieChoices");
   choices.innerHTML="";
 
-  const alreadyAnswered=tieAnswered.has(phoneIndex);
+  const alreadyAnswered=tieAnswered.has(players[phoneIndex]?.playerId);
   status.textContent=alreadyAnswered ? "Answer locked. Waiting for the other player…" : "First correct tap wins. No submit button.";
 
   q.choices.forEach(choice=>{
@@ -4653,10 +4654,11 @@ function renderPhoneTieBreaker(){
 function submitTieChoice(playerIndex,choice,buttonEl){
   if(remotePhoneMode){sendRemoteAction("tie",{choice});return}
   if(!tieActive || tieResolved)return;
-  if(!tiePlayers.some(x=>x.i===playerIndex))return;
-  if(tieAnswered.has(playerIndex))return;
+  const playerId=players[playerIndex]?.playerId;if(!playerId)return;
+  if(!tiePlayers.some(x=>x.playerId===playerId))return;
+  if(tieAnswered.has(playerId))return;
 
-  tieAnswered.add(playerIndex);
+  tieAnswered.add(playerId);
   const q=tieQuestions[tieQuestionIndex];
   const correct=normalizeChoiceText(choice)===normalizeChoiceText(q.a);
 
@@ -4668,7 +4670,7 @@ function submitTieChoice(playerIndex,choice,buttonEl){
     buttonEl?.classList.add("correct");
     tieResolved=true;
     tieActive=false;
-    tieWinnerIndex=playerIndex;
+    tieWinnerIndex=playerIndex;tieWinnerId=playerId;
     developerTieBreaker=false;
     document.getElementById("tieButtons").innerHTML="";
     const epoch=gameEpoch;
@@ -4859,7 +4861,7 @@ function resetGameState(keepPlayers){
   if(!keepPlayers) joinedPhonePlayerIndex=null;
   selectedJoinAvatar=0;
   lastPhase=1; pendingDaily=null; tiePlayers=[];
-  tieQuestionIndex=-1; tieActive=false; tieResolved=false; tieAnswered=new Set(); tieWinnerIndex=null; developerTieBreaker=false;
+  tieQuestionIndex=-1; tieActive=false; tieResolved=false; tieAnswered=new Set(); tieWinnerIndex=null; tieWinnerId=null; developerTieBreaker=false;
   lastChanceAwarded=false; lastChancePlayerIndex=null; lastChancePlayerId=null; lastChancePending=false;
   devForcedMultiplier=0; devForceDaily=false; setDevArmed("");
   document.getElementById("modal").classList.remove("showing");
