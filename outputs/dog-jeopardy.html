@@ -1993,7 +1993,7 @@ body.remote-phone-mode>.dev-fab,
 body.remote-phone-mode>.dev-panel{display:none!important}
 body.remote-phone-mode .controller-preview,
 body.remote-phone-mode .phone-join{padding:0;z-index:20000}
-body.remote-phone-mode .controller-preview .phone-close{display:none}
+body.remote-phone-mode .controller-preview #phoneCloseBtn{display:none}
 .remote-connection-note{font-size:12px;font-weight:800;color:#b9d8ec;margin-top:8px;text-align:center}
 /* Dynamic mobile browser viewport guard */
 body.remote-phone-mode .controller-preview,
@@ -2404,7 +2404,7 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
         <div class="phone-kicker">PLAYER CONTROLLER</div>
         <div class="phone-room">Room <span id="phoneRoomCode">----</span></div>
       </div>
-      <button class="phone-close" onclick="closeControllerPreview()">×</button>
+      <button class="phone-close" id="phoneCloseBtn" onclick="closeControllerPreview()">×</button>
       <button class="phone-close phone-profile-action" id="phoneProfileBtn" onclick="editTimelinePhoneProfile()" title="Edit Profile">Edit</button>
       <button class="phone-close phone-profile-action phone-remove" id="phoneRemoveBtn" onclick="removeTimelinePhonePlayer()" title="Remove yourself from this game">Remove</button>
     </div>
