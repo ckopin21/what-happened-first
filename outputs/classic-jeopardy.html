@@ -6,6 +6,7 @@
 <title>Classic Jeopardy</title>
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
 <script src="../assets/network/peer-network.js"></script>
+<script src="../assets/ui/avatar-registry.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="../packs/classic/manifest.js"></script>
 <style>
@@ -133,7 +134,7 @@ body.dev-mode #devFab{display:block!important}.dev-panel{position:fixed;right:16
 let PACK=window.CLASSIC_JEOPARDY_PACK;
 if(!PACK||!Array.isArray(PACK.categories))throw new Error("Classic Jeopardy question pack is missing or invalid.");
 const MAX_PLAYERS=5,GAME_VERSION="classic-3";
-const AVATARS=[{name:"Corgi",icon:"🐶"},{name:"Cat",icon:"🐱"},{name:"Panda",icon:"🐼"},{name:"Penguin",icon:"🐧"},{name:"Fox",icon:"🦊"},{name:"Frog",icon:"🐸"},{name:"Shark",icon:"🦈"},{name:"Duck",icon:"🦆"}];
+const AVATARS=window.JEOPARDY_AVATARS||[];
 let categories=JSON.parse(JSON.stringify(PACK.categories)),totalQuestions=categories.reduce((n,c)=>n+c.clues.length,0);
 let players=[],used=new Set(),history=new Map(),activePlayer=0,current=null,submissions=new Map(),judgements=new Map(),hintsUsed=new Set(),questionRevealed=false,questionResolved=false,reviewRecord=null,finalShown=false,pendingDaily=null,dailyDoubleIds=new Set(),gameStarted=false,gameEpoch=0,actionNonce="lobby";
 let developerMode=false,devForcedMultiplier=0;
@@ -152,7 +153,7 @@ function clueId(ci,qi){return `${ci}:${qi}`}
 function questionsRemaining(){return totalQuestions-used.size}
 function phaseMultiplier(){if(devForcedMultiplier===2||devForcedMultiplier===3)return devForcedMultiplier;const left=questionsRemaining();if(left<=3&&left>0)return 3;if(left<=6&&left>3)return 2;return 1}
 function phaseText(){const m=phaseMultiplier();return m===3?"TRIPLE POINTS":m===2?"DOUBLE POINTS":"1× POINTS"}
-function avatarIcon(i){return AVATARS[Number.isInteger(i)&&AVATARS[i]?i:0].icon}
+function avatarIcon(i){const avatar=AVATARS[Number.isInteger(i)&&AVATARS[i]?i:0];return avatar?`<img style="width:100%;height:100%;object-fit:contain;display:block" src="${avatar.src}" alt="${escapeHtml(avatar.name)}">`:""}
 function freshNonce(){return `${gameEpoch}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`}
 function classicManifestEntry(id){return (window.CLASSIC_PACK_MANIFEST?.packs||[]).find(entry=>entry.id===id)}
 function validateClassicRuntimePack(pack,entry){
@@ -329,7 +330,7 @@ function audioPop(freq=440,duration=.08,gain=.035,type="sine"){
 }
 function renderClassicHostAvatars(){
   const grid=document.getElementById("classicHostAvatarGrid");if(!grid)return;grid.innerHTML="";
-  AVATARS.forEach((a,i)=>{const b=document.createElement("button");b.type="button";b.className=`classic-host-avatar ${i===classicHostAvatar?"selected":""}`;b.title=a.name;b.textContent=a.icon;b.onclick=()=>{classicHostAvatar=i;renderClassicHostAvatars()};grid.appendChild(b)});
+  AVATARS.forEach((a,i)=>{const b=document.createElement("button");b.type="button";b.className=`classic-host-avatar ${i===classicHostAvatar?"selected":""}`;b.title=a.name;b.innerHTML=avatarIcon(i);b.onclick=()=>{classicHostAvatar=i;renderClassicHostAvatars()};grid.appendChild(b)});
 }
 function openClassicAddPlayer(){
   if(gameStarted){toast("Start a new game before changing the roster","bad");return}if(players.length>=MAX_PLAYERS){toast("Maximum of 5 players","bad");return}
@@ -404,7 +405,7 @@ function renderPhoneBoard(){let html='<div class="phone-board">';phoneState.boar
 function renderPhone(){
   if(!phoneState)return;document.getElementById("phoneRoomLabel").textContent=`Room ${phoneState.room||"----"} • Connected`;
   const join=document.getElementById("joinCard"),game=document.getElementById("gameCard");if(phoneState.mode==="join"||phoneState.mode==="locked"){join.style.display="block";game.style.display="none";if(phoneState.mode==="locked")document.getElementById("joinStatus").textContent="This game has already started. Reopen your original player link to reconnect.";return}join.style.display="none";game.style.display="block";
-  const me=phoneState.players?.[phoneState.playerIndex];if(!me)return;document.getElementById("phoneAvatar").textContent=avatarIcon(me.avatar);document.getElementById("phoneName").textContent=me.name;document.getElementById("phoneScore").textContent=money(me.score);const meta=document.getElementById("phoneMeta");const card=game;card.classList.toggle("on-fire",me.correctStreak>=3);card.classList.toggle("cold",me.wrongStreak>=3);meta.textContent=me.correctStreak>=3?"🔥 ON FIRE":me.wrongStreak>=3?"🥶 COLD STREAK":phoneState.playerIndex===phoneState.activePlayer?"YOUR TURN":"READY";
+  const me=phoneState.players?.[phoneState.playerIndex];if(!me)return;document.getElementById("phoneAvatar").innerHTML=avatarIcon(me.avatar);document.getElementById("phoneName").textContent=me.name;document.getElementById("phoneScore").textContent=money(me.score);const meta=document.getElementById("phoneMeta");const card=game;card.classList.toggle("on-fire",me.correctStreak>=3);card.classList.toggle("cold",me.wrongStreak>=3);meta.textContent=me.correctStreak>=3?"🔥 ON FIRE":me.wrongStreak>=3?"🥶 COLD STREAK":phoneState.playerIndex===phoneState.activePlayer?"YOUR TURN":"READY";
   const view=document.getElementById("phoneView");
   if(phoneState.mode==="lobby"){view.innerHTML=`<div class="waiting"><div class="big">IN THE LOBBY</div><div class="phone-small">You’re connected. Waiting for the host to start the game.</div></div>`;return}
   if(phoneState.mode==="choose"){view.innerHTML=`<div class="waiting"><div class="big">YOUR PICK</div><div class="phone-small">Choose the next question. Everyone will answer it.</div></div>${renderPhoneBoard()}`;return}

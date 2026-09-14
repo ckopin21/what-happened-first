@@ -89,7 +89,11 @@ for (const reference of assetReferences) {
   }
 }
 const avatarSource = script.match(/const avatarOptions\s*=\s*(\[[\s\S]*?\]);/)?.[1];
-if (!avatarSource) assetIssues.push({ reference: "avatarOptions", issue: "avatar declaration missing" });
+const usesSharedAvatarRegistry = /const avatarOptions\s*=\s*window\.JEOPARDY_AVATARS\s*\|\|\s*\[\]/.test(script);
+if (usesSharedAvatarRegistry) {
+  const registryPath = path.resolve(__dirname, "..", "assets", "ui", "avatar-registry.js");
+  if (!fs.existsSync(registryPath) || !fs.readFileSync(registryPath, "utf8").includes("JEOPARDY_AVATARS")) assetIssues.push({ reference: "avatarOptions", issue: "shared avatar registry missing or malformed" });
+} else if (!avatarSource) assetIssues.push({ reference: "avatarOptions", issue: "avatar declaration missing" });
 else {
   const avatars = new Function(`return ${avatarSource}`)();
   avatars.forEach((avatar, index) => {

@@ -2502,6 +2502,7 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
 
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
 <script src="../assets/network/peer-network.js"></script>
+<script src="../assets/ui/avatar-registry.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="../packs/timeline/manifest.js"></script>
 <script>
@@ -2606,17 +2607,7 @@ document.addEventListener("click",e=>{
 
 
 let roomCode="";
-/* AVATAR_NEW_VECTOR_ART_V14: standalone SVG assets for reliable mobile rendering */
-const avatarOptions=[
-{name:"Corgi",src:"../assets/avatars/corgi.svg?v=2"},
-{name:"Cat",src:"../assets/avatars/cat.svg?v=2"},
-{name:"Panda",src:"../assets/avatars/panda.svg?v=2"},
-{name:"Penguin",src:"../assets/avatars/penguin.svg?v=2"},
-{name:"Fox",src:"../assets/avatars/fox.svg?v=2"},
-{name:"Frog",src:"../assets/avatars/frog.svg?v=2"},
-{name:"Shark",src:"../assets/avatars/shark.svg?v=2"},
-{name:"Duck",src:"../assets/avatars/duck.png?v=3"}
-];
+const avatarOptions=window.JEOPARDY_AVATARS||[];
 let selectedJoinAvatar=0;
 let joinedPhonePlayerIndex=null;
 let joinMode="phone";
