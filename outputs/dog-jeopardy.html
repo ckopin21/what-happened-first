@@ -2826,16 +2826,6 @@ function editTimelinePlayer(index){
   player.name=name;player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);
 }
 
-function hostRemoveTimelinePlayer(index){
-  const player=players[index];if(!player||index<0||index>=playerCount)return;
-  if(!confirm(`Remove ${player.name} from this game?`))return;
-  const entry=[...remoteConnections.values()].find(context=>context.playerIndex===index);
-  const removed=removeTimelinePlayer(index,entry);
-  if(!removed)return;
-  if(entry){try{entry.conn.send({type:"removed-from-game"})}catch{}setTimeout(()=>{try{entry.conn.close()}catch{}},80)}
-  showToast(`${removed.name} was removed`,`neutral`);
-}
-
 function handleRemoteAction(entry,msg){
   if(!entry||!msg||msg.type!=="action")return;
   entry.lastSeen=Date.now();
@@ -3925,7 +3915,7 @@ function renderPlayers(){
         <button class="mini red" onclick="event.stopPropagation();hostRemoveTimelinePlayer(${i})">Remove</button>
       </div>`;
     wrap.appendChild(p);
-    if(i<playerCount){const remove=document.createElement("button");remove.className="mini red";remove.textContent="Remove";remove.onclick=event=>{event.stopPropagation();hostRemoveTimelinePlayer(i)};p.querySelector(".score-controls")?.appendChild(remove)}
+    if(i<playerCount){const edit=document.createElement("button");edit.className="mini blue";edit.textContent="Edit";edit.onclick=event=>{event.stopPropagation();editTimelinePlayer(i)};p.querySelector(".score-controls")?.appendChild(edit)}
     if(i<playerCount){const edit=document.createElement("button");edit.className="mini blue";edit.textContent="Edit";edit.onclick=event=>{event.stopPropagation();editTimelinePlayer(i)};p.querySelector(".score-controls")?.appendChild(edit)}
   }
 }

@@ -197,7 +197,7 @@ function renderHost(){
 }
 function renderScores(){
   const box=document.getElementById("scores");box.innerHTML="";
-  players.forEach((p,i)=>{const el=document.createElement("div");el.className="player"+(i===activePlayer?" active":"")+((p.correctStreak||0)>=3?" on-fire":"")+((p.wrongStreak||0)>=3?" cold":"");el.dataset.player=i;el.onclick=()=>setActivePlayer(i);el.innerHTML=`<div class="player-avatar">${avatarIcon(p.avatar)}</div><div class="player-name">${escapeHtml(p.name)}</div><div class="score">${money(p.score)}</div><div class="player-meta">${escapeHtml(streakLabel(p))}</div><div class="score-controls"><button class="mini red" onclick="event.stopPropagation();adjustScore(${i},-100)">−100</button><button class="mini green" onclick="event.stopPropagation();adjustScore(${i},100)">+100</button></div>`;const remove=document.createElement("button");remove.className="mini red";remove.textContent="Remove";remove.onclick=event=>{event.stopPropagation();hostRemoveClassicPlayer(i)};el.querySelector(".score-controls")?.appendChild(remove);box.appendChild(el)});
+  players.forEach((p,i)=>{const el=document.createElement("div");el.className="player"+(i===activePlayer?" active":"")+((p.correctStreak||0)>=3?" on-fire":"")+((p.wrongStreak||0)>=3?" cold":"");el.dataset.player=i;el.onclick=()=>setActivePlayer(i);el.innerHTML=`<div class="player-avatar">${avatarIcon(p.avatar)}</div><div class="player-name">${escapeHtml(p.name)}</div><div class="score">${money(p.score)}</div><div class="player-meta">${escapeHtml(streakLabel(p))}</div><div class="score-controls"><button class="mini red" onclick="event.stopPropagation();adjustScore(${i},-100)">−100</button><button class="mini green" onclick="event.stopPropagation();adjustScore(${i},100)">+100</button></div>`;const remove=document.createElement("button");remove.className="mini red";remove.textContent="Remove";remove.onclick=event=>{event.stopPropagation();hostRemoveClassicPlayer(i)};const edit=document.createElement("button");edit.className="mini blue";edit.textContent="Edit";edit.onclick=event=>{event.stopPropagation();editClassicPlayer(i)};el.querySelector(".score-controls")?.append(remove,edit);box.appendChild(el)});
 }
 function usedWinners(rec){if(!rec||!rec.winners?.length)return "No one";return rec.winners.join(", ")}
 function renderBoard(){
@@ -317,6 +317,13 @@ function hostRemoveClassicPlayer(index){
   if(!removed)return;
   if(ctx){try{ctx.conn.send({type:"removed-from-game"})}catch{}setTimeout(()=>{try{ctx.conn.close()}catch{}},80)}
   toast(`${removed.name} was removed`,`neutral`);
+}
+function editClassicPlayer(index){
+  const player=players[index];if(!player)return;
+  const name=String(prompt("Player name",player.name)||"").trim().slice(0,24);if(!name)return;
+  if(!uniquePlayerName(players,name,player.playerId)){toast("That player name is already in this room","bad");return}
+  const avatarRaw=prompt(`Avatar number (1-${AVATARS.length})`,String((player.avatar||0)+1));if(avatarRaw===null)return;
+  player.name=name;player.avatar=Math.max(0,Math.min(AVATARS.length-1,Number(avatarRaw)-1));renderHost();broadcastState();
 }
 function handleRemoteAction(ctx,action){
   if(!action||typeof action!=="object")return;
