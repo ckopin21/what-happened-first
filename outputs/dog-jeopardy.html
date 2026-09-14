@@ -2506,6 +2506,7 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
 <script src="../assets/network/peer-network.js"></script>
 <script src="../assets/ui/avatar-registry.js"></script>
+<script src="../assets/ui/profile-editor.js"></script>
 <script src="../assets/ui/player-sessions.js"></script>
 <script src="../assets/ui/json-pack-loader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -2823,11 +2824,15 @@ function hostRemoveTimelinePlayer(index){
 
 function editTimelinePlayer(index){
   const player=players[index];if(!player||index<0||index>=playerCount)return;
-  const name=String(prompt("Player name",player.name)||"").trim().slice(0,18);if(!name)return;
-  if(!uniquePlayerName(players.slice(0,playerCount),name,player.playerId)){showToast("That player name is already in this room","bad");return}
-  const avatarRaw=prompt(`Avatar number (1-${avatarOptions.length})`,String(Math.max(0,avatarIndexFor(player.avatar))+1));
-  if(avatarRaw===null)return;const avatarNumber=Number(avatarRaw);if(!Number.isInteger(avatarNumber)||avatarNumber<1||avatarNumber>avatarOptions.length){showToast(`Choose an avatar number from 1 to ${avatarOptions.length}`,"bad");return}const avatarIndex=avatarNumber-1;
-  player.name=name;player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);
+  window.WHF_PROFILE_EDITOR?.open({
+    title:"Edit Player",
+    subtitle:"Update this player’s name or avatar.",
+    name:player.name,
+    avatarIndex:Math.max(0,avatarIndexFor(player.avatar)),
+    avatars:avatarOptions,
+    validateName:name=>uniquePlayerName(players.slice(0,playerCount),name,player.playerId)?"":"That player name is already in this room.",
+    onSave:({name,avatarIndex})=>{player.name=name.slice(0,18);player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);showToast("Player profile updated","good")}
+  });
 }
 
 function handleRemoteAction(entry,msg){
@@ -4800,10 +4805,15 @@ function editTimelinePhoneProfile(){
   if(!remotePhoneMode||!Number.isInteger(joinedPhonePlayerIndex)||!hostConnection?.open)return;
   if(current||pendingDaily||gameFinished){showToast("Edit your profile between questions","neutral");return}
   const player=players[joinedPhonePlayerIndex];if(!player)return;
-  const name=String(prompt("Your name",player.name)||"").trim().slice(0,18);if(!name)return;
-  const avatarRaw=prompt(`Avatar number (1-${avatarOptions.length})`,String(Math.max(0,avatarIndexFor(player.avatar))+1));if(avatarRaw===null)return;
-  const avatarNumber=Number(avatarRaw);if(!Number.isInteger(avatarNumber)||avatarNumber<1||avatarNumber>avatarOptions.length){showToast(`Choose an avatar number from 1 to ${avatarOptions.length}`,"bad");return}const avatarIndex=avatarNumber-1;
-  sendRemoteAction("profile-update",{name,avatarIndex});
+  window.WHF_PROFILE_EDITOR?.open({
+    title:"Edit Your Profile",
+    subtitle:"Changes keep your score and connection.",
+    name:player.name,
+    avatarIndex:Math.max(0,avatarIndexFor(player.avatar)),
+    avatars:avatarOptions,
+    validateName:name=>uniquePlayerName(players.slice(0,playerCount),name,player.playerId)?"":"That player name is already in this room.",
+    onSave:({name,avatarIndex})=>sendRemoteAction("profile-update",{name:name.slice(0,18),avatarIndex})
+  });
 }
 
 function startGame(){

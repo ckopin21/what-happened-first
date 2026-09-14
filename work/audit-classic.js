@@ -23,6 +23,7 @@ if(twoPartCount<5)throw new Error('Classic pack must include at least five two-p
 
 const required=[
   '../packs/classic/manifest.js','Confirm & Submit','Reveal Now','fuzzyMatch','setJudgement',
+  '../assets/ui/profile-editor.js','WHF_PROFILE_EDITOR',
   'applyScores','allSubmitted','classic-jeopardy-','QRCode','Peer','usedWinners','reviewClue',
   'showFinale','phaseMultiplier','Use Hint','New Game','Reset Game','toggleFullscreen',
   'Developer Mode','devPreview','devPanel','fullscreenExitBtn','devForcedMultiplier','CLASSIC_DEVTOOLS_V1',

@@ -7,6 +7,7 @@
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
 <script src="../assets/network/peer-network.js"></script>
 <script src="../assets/ui/avatar-registry.js"></script>
+<script src="../assets/ui/profile-editor.js"></script>
 <script src="../assets/ui/player-sessions.js"></script>
 <script src="../assets/ui/json-pack-loader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -326,10 +327,15 @@ function hostRemoveClassicPlayer(index){
 }
 function editClassicPlayer(index){
   const player=players[index];if(!player)return;
-  const name=String(prompt("Player name",player.name)||"").trim().slice(0,24);if(!name)return;
-  if(!uniquePlayerName(players,name,player.playerId)){toast("That player name is already in this room","bad");return}
-  const avatarRaw=prompt(`Avatar number (1-${AVATARS.length})`,String((player.avatar||0)+1));if(avatarRaw===null)return;
-  const avatarNumber=Number(avatarRaw);if(!Number.isInteger(avatarNumber)||avatarNumber<1||avatarNumber>AVATARS.length){toast(`Choose an avatar number from 1 to ${AVATARS.length}`,"bad");return}player.name=name;player.avatar=avatarNumber-1;renderHost();broadcastState();
+  window.WHF_PROFILE_EDITOR?.open({
+    title:"Edit Player",
+    subtitle:"Update this player’s name or avatar.",
+    name:player.name,
+    avatarIndex:Math.max(0,Math.min(AVATARS.length-1,Number(player.avatar)||0)),
+    avatars:AVATARS,
+    validateName:name=>uniquePlayerName(players,name,player.playerId)?"":"That player name is already in this room.",
+    onSave:({name,avatarIndex})=>{player.name=name.slice(0,24);player.avatar=avatarIndex;renderHost();broadcastState();toast("Player profile updated","good")}
+  });
 }
 function handleRemoteAction(ctx,action){
   if(!action||typeof action!=="object")return;
@@ -426,10 +432,15 @@ function editClassicProfile(){
   if(!phoneConn?.open||!phoneState)return;
   if(phoneState.mode==="answer"||phoneState.mode==="daily-wager"){document.getElementById("phoneMeta").textContent="Profiles can be edited between questions.";return}
   const me=phoneState.players?.[phoneState.playerIndex];if(!me)return;
-  const name=String(prompt("Your name",me.name)||"").trim().slice(0,24);if(!name)return;
-  const avatarRaw=prompt(`Avatar number (1-${AVATARS.length})`,String((me.avatar||0)+1));if(avatarRaw===null)return;
-  const avatarNumber=Number(avatarRaw);if(!Number.isInteger(avatarNumber)||avatarNumber<1||avatarNumber>AVATARS.length){document.getElementById("phoneMeta").textContent=`Choose an avatar number from 1 to ${AVATARS.length}.`;return}const avatar=avatarNumber-1;
-  phoneConn.send(actionEnvelope("profile-update",{name,avatar}));
+  window.WHF_PROFILE_EDITOR?.open({
+    title:"Edit Your Profile",
+    subtitle:"Changes keep your score and connection.",
+    name:me.name,
+    avatarIndex:Math.max(0,Math.min(AVATARS.length-1,Number(me.avatar)||0)),
+    avatars:AVATARS,
+    validateName:name=>{const duplicate=(phoneState.players||[]).some((player,index)=>index!==phoneState.playerIndex&&String(player.name||"").trim().toLocaleLowerCase()===name.toLocaleLowerCase());return duplicate?"That player name is already in this room.":""},
+    onSave:({name,avatarIndex})=>phoneConn?.open&&phoneConn.send(actionEnvelope("profile-update",{name:name.slice(0,24),avatar:avatarIndex}))
+  });
 }
 function joinGame(){if(!phoneConn?.open){document.getElementById("joinStatus").textContent="Still connecting…";recoverPhoneConnection(false);return}const name=document.getElementById("nameInput").value.trim();if(!name){document.getElementById("joinStatus").textContent="Enter your name.";return}let token=phoneTokenForRoom(phoneRoom);if(!token){token=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`);savePhoneToken(phoneRoom,token)}phoneConn.send({type:"join",name,avatar:phoneSelectedAvatar,token});document.getElementById("joinStatus").textContent="Joining…"}
 function phoneSelect(ci,qi){if(phoneState?.mode!=="choose"||!phoneConn?.open)return;phoneConn.send(actionEnvelope("select",{ci,qi}))}

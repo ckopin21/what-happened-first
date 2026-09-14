@@ -11,6 +11,7 @@ if (!script) throw new Error("Inline game script not found");
 new Function(script);
 
 if (!html.includes('../packs/timeline/manifest.js')) throw new Error("Timeline pack manifest is not loaded");
+if (!html.includes('../assets/ui/profile-editor.js')) throw new Error("Shared profile editor is not loaded");
 if (!/TIMELINE_PACK\.categories/.test(script)) throw new Error("Timeline engine is not using the external question pack");
 const { loadPack } = require("./validate-questions");
 const timelinePack = loadPack("timeline");
@@ -146,6 +147,7 @@ if(specials.length!==5||specials.some(x=>x.row!==4||!x.clue.fq||!x.clue.fa)) thr
 if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!(html.includes("AVATAR_CENTERING_V12")||html.includes("AVATAR_NEW_VECTOR_ART_V14"))) throw new Error("Randomized follow-up/avatar centering fix missing");
 if(!html.includes("shuffledPrimaryChoices")||!html.includes("primaryChoicesForCurrent")||!/choiceOrder\s*:\s*Array\.isArray\(current\.choiceOrder\)/.test(html)||!/broadcastGameState\(true\)\s*;\s*showToast\(["']Primary answer correct["']/.test(html)) throw new Error("Primary choice shuffle or follow-up broadcast fix missing");
 if ((script.match(/textContent=\"Edit\"/g)||[]).length !== 1) throw new Error("Timeline must render exactly one Edit control per player");
+if (!/function editTimelinePlayer\([\s\S]*?window\.WHF_PROFILE_EDITOR\?\.open/.test(script) || !/function editTimelinePhoneProfile\([\s\S]*?window\.WHF_PROFILE_EDITOR\?\.open/.test(script)) throw new Error("Timeline Edit controls must open the shared profile editor");
 if (!html.includes('href="../index.html"') || !html.includes('>Game Modes</a>')) throw new Error("Timeline Game Modes navigation missing");
 if(!html.includes("PHONE_SCROLL_CHOICE_FIX_V7")||!html.includes("primaryCorrectSideBag")||!html.includes("buildPrimaryChoiceOrder")||!html.includes("nextPrimaryCorrectSide")) throw new Error("Phone scrolling or balanced primary answer-side randomization missing");
 if(!html.includes("DAILY_STATIC_WAGER_V11")||!html.includes("PHONE_HORIZONTAL_GUTTER_FIX_V11")) throw new Error("Static Daily Double wager or mobile gutter fix missing");
