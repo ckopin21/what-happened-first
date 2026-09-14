@@ -9,17 +9,19 @@ A host-led, 1–5 player trivia collection. The host runs the board on a laptop 
 
 Open `index.html` (or the GitHub Pages root) to choose a mode.
 
-## Classic question packs
+## Question packs
 
-Classic Jeopardy keeps its questions separate from the game engine. The current genre/question set is:
+Both games keep their questions separate from the game engine:
 
-`packs/classic/current.js`
+`packs/timeline/current.js` and `packs/classic/current.js`
 
 That means a genre change can be done without rewriting the multiplayer game. For example, ask ChatGPT:
 
 > Replace the Classic Jeopardy question pack with a Disney theme. Keep 5 categories × 5 clues, values 100–500, hints, accepted aliases, and leave the game engine unchanged.
 
-See `packs/classic/README.md` for the pack schema.
+See `QUESTION_WORKFLOW.md` for the atomic replacement workflow, validation, and
+permanent question histories. `packs/timeline/README.md` and
+`packs/classic/README.md` document their schemas.
 
 ## Phone play
 
@@ -39,6 +41,7 @@ Read `PROJECT_CONTEXT.md` and `AGENTS.md` before making changes. Run both audits
 ```text
 node work/audit-game.js outputs/dog-jeopardy.html
 node work/audit-classic.js
+node work/validate-questions.js
 ```
 
 No build step is required. The games are static HTML/JavaScript apps. For local networking tests, serve the repository over HTTP/HTTPS rather than `file://`.

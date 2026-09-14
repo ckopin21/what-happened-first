@@ -1,0 +1,426 @@
+{
+  "schemaVersion": 1,
+  "game": "classic",
+  "questions": [
+    {
+      "id": "classic-v2-world-geography-100",
+      "question": "What is the capital of Canada?",
+      "answer": "Ottawa",
+      "category": "World Geography",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-world-geography-200",
+      "question": "What strait separates southern Spain from northern Morocco?",
+      "answer": "Strait of Gibraltar",
+      "category": "World Geography",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-world-geography-300",
+      "question": "Salar de Uyuni, the world's largest salt flat, is in what country?",
+      "answer": "Bolivia",
+      "category": "World Geography",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-world-geography-400",
+      "question": "Ulaanbaatar is the capital of what country?",
+      "answer": "Mongolia",
+      "category": "World Geography",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-world-geography-500",
+      "question": "What river forms a large portion of the border between Texas and Mexico?",
+      "answer": "Rio Grande",
+      "category": "World Geography",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-world-geography-500-followup",
+      "question": "What name is commonly used for the Rio Grande in Mexico?",
+      "answer": "Rio Bravo",
+      "category": "World Geography",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-history-100",
+      "question": "What civilization built Chichén Itzá?",
+      "answer": "Maya",
+      "category": "History",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-history-200",
+      "question": "What war was formally ended between Germany and the Allied powers by the Treaty of Versailles?",
+      "answer": "World War I",
+      "category": "History",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-history-300",
+      "question": "Suleiman the Magnificent ruled what empire?",
+      "answer": "Ottoman Empire",
+      "category": "History",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-history-400",
+      "question": "What English ship carried the Pilgrims to New England in 1620?",
+      "answer": "Mayflower",
+      "category": "History",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-history-500",
+      "question": "Which leader crowned himself Emperor of the French in 1804?",
+      "answer": "Napoleon Bonaparte",
+      "category": "History",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-history-500-followup",
+      "question": "On what island did Napoleon spend his final exile?",
+      "answer": "Saint Helena",
+      "category": "History",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-science-100",
+      "question": "What gas do plants absorb from the atmosphere during photosynthesis?",
+      "answer": "Carbon dioxide",
+      "category": "Science",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-science-200",
+      "question": "What SI unit measures electric current?",
+      "answer": "Ampere",
+      "category": "Science",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-science-300",
+      "question": "What is the largest organ of the human body?",
+      "answer": "Skin",
+      "category": "Science",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-science-400",
+      "question": "What type of blood vessel carries blood away from the heart?",
+      "answer": "Artery",
+      "category": "Science",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-science-500",
+      "question": "What is the boundary around a black hole beyond which nothing can escape called?",
+      "answer": "Event horizon",
+      "category": "Science",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-science-500-followup",
+      "question": "What theoretical radiation from black holes is named after a physicist?",
+      "answer": "Hawking radiation",
+      "category": "Science",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-entertainment-100",
+      "question": "What is the name of Mario's brother in Nintendo games?",
+      "answer": "Luigi",
+      "category": "Entertainment",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-entertainment-200",
+      "question": "What fictional continent contains King's Landing in Game of Thrones?",
+      "answer": "Westeros",
+      "category": "Entertainment",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-entertainment-300",
+      "question": "Who directed Inception, Interstellar, and Oppenheimer?",
+      "answer": "Christopher Nolan",
+      "category": "Entertainment",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-entertainment-400",
+      "question": "What band released the 1977 album Rumours?",
+      "answer": "Fleetwood Mac",
+      "category": "Entertainment",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-entertainment-500",
+      "question": "What 2019 South Korean film became the first non-English-language movie to win the Academy Award for Best Picture?",
+      "answer": "Parasite",
+      "category": "Entertainment",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-entertainment-500-followup",
+      "question": "Who directed Parasite?",
+      "answer": "Bong Joon-ho",
+      "category": "Entertainment",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-sports-100",
+      "question": "How many players from one team are on the court at a time in basketball?",
+      "answer": "Five",
+      "category": "Sports",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-sports-200",
+      "question": "What trophy is awarded to the NHL champion?",
+      "answer": "Stanley Cup",
+      "category": "Sports",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-sports-300",
+      "question": "Which country won the 2010 FIFA World Cup?",
+      "answer": "Spain",
+      "category": "Sports",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-sports-400",
+      "question": "Which boxer was famously nicknamed 'The Greatest'?",
+      "answer": "Muhammad Ali",
+      "category": "Sports",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-sports-500",
+      "question": "Who achieved tennis's only calendar-year Golden Slam in singles, in 1988?",
+      "answer": "Steffi Graf",
+      "category": "Sports",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v2-sports-500-followup",
+      "question": "Which city hosted the 1988 Summer Olympics where she completed the Golden Slam?",
+      "answer": "Seoul",
+      "category": "Sports",
+      "firstUsedPack": "general-knowledge-v2"
+    },
+    {
+      "id": "classic-v3-oceans-islands-100",
+      "question": "What is the largest ocean on Earth?",
+      "answer": "Pacific Ocean",
+      "category": "Oceans & Islands",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-oceans-islands-200",
+      "question": "Reykjavík is the capital of what island nation?",
+      "answer": "Iceland",
+      "category": "Oceans & Islands",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-oceans-islands-300",
+      "question": "Sumatra is an island belonging to what country?",
+      "answer": "Indonesia",
+      "category": "Oceans & Islands",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-oceans-islands-400",
+      "question": "Angel Falls, the world's tallest uninterrupted waterfall, is in what country?",
+      "answer": "Venezuela",
+      "category": "Oceans & Islands",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-oceans-islands-500",
+      "question": "What sea is defined by ocean currents rather than by surrounding land?",
+      "answer": "Sargasso Sea",
+      "category": "Oceans & Islands",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-oceans-islands-500-followup",
+      "question": "The Sargasso Sea is located within which ocean?",
+      "answer": "Atlantic Ocean",
+      "category": "Oceans & Islands",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-words-language-100",
+      "question": "What do you call a word with the opposite meaning of another word?",
+      "answer": "Antonym",
+      "category": "Words & Language",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-words-language-200",
+      "question": "What is a sentence containing every letter of the alphabet called?",
+      "answer": "Pangram",
+      "category": "Words & Language",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-words-language-300",
+      "question": "The prefix bio-, as in biology, comes from a Greek word meaning what?",
+      "answer": "Life",
+      "category": "Words & Language",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-words-language-400",
+      "question": "What word names an intense fear of heights?",
+      "answer": "Acrophobia",
+      "category": "Words & Language",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-words-language-500",
+      "question": "What are the logographic characters used in Japanese writing called?",
+      "answer": "Kanji",
+      "category": "Words & Language",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-words-language-500-followup",
+      "question": "Kanji characters were historically adopted from which language?",
+      "answer": "Chinese",
+      "category": "Words & Language",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-food-drink-100",
+      "question": "What legume is the main ingredient in traditional hummus?",
+      "answer": "Chickpeas",
+      "category": "Food & Drink",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-food-drink-200",
+      "question": "What crumbly white cheese is traditionally used in a Greek salad?",
+      "answer": "Feta",
+      "category": "Food & Drink",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-food-drink-300",
+      "question": "What finely ground green tea powder is used in Japanese tea ceremonies?",
+      "answer": "Matcha",
+      "category": "Food & Drink",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-food-drink-400",
+      "question": "Paella originated in what Spanish city or surrounding region?",
+      "answer": "Valencia",
+      "category": "Food & Drink",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-food-drink-500",
+      "question": "What dessert base is made by whipping egg whites with sugar?",
+      "answer": "Meringue",
+      "category": "Food & Drink",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-food-drink-500-followup",
+      "question": "What French dessert sandwiches buttercream between two almond-meringue shells?",
+      "answer": "Macaron",
+      "category": "Food & Drink",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-wild-nature-100",
+      "question": "What is the largest living land animal?",
+      "answer": "African bush elephant",
+      "category": "Wild Nature",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-wild-nature-200",
+      "question": "What process transforms a caterpillar into a butterfly?",
+      "answer": "Metamorphosis",
+      "category": "Wild Nature",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-wild-nature-300",
+      "question": "What fast-growing plant is the tallest member of the grass family?",
+      "answer": "Bamboo",
+      "category": "Wild Nature",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-wild-nature-400",
+      "question": "What biological sonar ability helps many bats navigate in darkness?",
+      "answer": "Echolocation",
+      "category": "Wild Nature",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-wild-nature-500",
+      "question": "The axolotl is native to what lake and canal system?",
+      "answer": "Lake Xochimilco",
+      "category": "Wild Nature",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-wild-nature-500-followup",
+      "question": "Xochimilco is located within which national capital?",
+      "answer": "Mexico City",
+      "category": "Wild Nature",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-arts-architecture-100",
+      "question": "Who painted Girl with a Pearl Earring?",
+      "answer": "Johannes Vermeer",
+      "category": "Arts & Architecture",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-arts-architecture-200",
+      "question": "Flying buttresses are most strongly associated with what architectural style?",
+      "answer": "Gothic",
+      "category": "Arts & Architecture",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-arts-architecture-300",
+      "question": "Who composed the ballet Swan Lake?",
+      "answer": "Pyotr Ilyich Tchaikovsky",
+      "category": "Arts & Architecture",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-arts-architecture-400",
+      "question": "Who created the sculpture The Thinker?",
+      "answer": "Auguste Rodin",
+      "category": "Arts & Architecture",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-arts-architecture-500",
+      "question": "Which architect designed the house Fallingwater?",
+      "answer": "Frank Lloyd Wright",
+      "category": "Arts & Architecture",
+      "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v3-arts-architecture-500-followup",
+      "question": "Fallingwater is located in what U.S. state?",
+      "answer": "Pennsylvania",
+      "category": "Arts & Architecture",
+      "firstUsedPack": "general-knowledge-v3"
+    }
+  ]
+}

@@ -27,6 +27,7 @@ window.CLASSIC_JEOPARDY_PACK = {
       name: "Category",
       clues: [
         {
+          id: "theme-category-100",
           value: 100,
           question: "Question text",
           answer: "Canonical answer",
@@ -38,5 +39,9 @@ window.CLASSIC_JEOPARDY_PACK = {
   ]
 };
 ```
+
+Every primary clue and `followup` needs a stable unique `id`. Follow the
+repository-wide replacement process in [`QUESTION_WORKFLOW.md`](../../QUESTION_WORKFLOW.md);
+the validator checks this pack against the permanent Classic question history.
 
 The default board is designed for 5 categories × 5 clues, but the engine reads the category count and clue data from the pack rather than embedding questions in the game HTML.

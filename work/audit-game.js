@@ -1,5 +1,7 @@
 const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
+const { validateCurrentPacks } = require("./validate-questions");
 
 const file = process.argv[2];
 if (!file) throw new Error("Usage: node work/audit-game.js outputs/dog-jeopardy.html");
@@ -8,9 +10,16 @@ const script = html.split("<script>")[1]?.split("</script>")[0];
 if (!script) throw new Error("Inline game script not found");
 new Function(script);
 
-const categoriesSource = script.match(/const categories=(\[[\s\S]*?\]);\s*\n\s*let players=/)?.[1];
-if (!categoriesSource) throw new Error("Question data not found");
-const categories = new Function(`return ${categoriesSource}`)();
+if (!html.includes('../packs/timeline/current.js')) throw new Error("Timeline question pack script is not loaded");
+if (!/const\s+categories\s*=\s*TIMELINE_PACK\.categories\s*;/.test(script)) throw new Error("Timeline engine is not using the external question pack");
+const packFile = path.resolve(__dirname, "../packs/timeline/current.js");
+const packSandbox = { window: {} };
+vm.runInNewContext(fs.readFileSync(packFile, "utf8"), packSandbox, { filename: packFile });
+const timelinePack = packSandbox.window.TIMELINE_JEOPARDY_PACK;
+if (!timelinePack || !Array.isArray(timelinePack.categories)) throw new Error("Timeline question pack is invalid");
+const categories = timelinePack.categories;
+const questionPackValidation = validateCurrentPacks();
+if (questionPackValidation.errors.length) throw new Error(`Question pack validation failed:\n- ${questionPackValidation.errors.join("\n- ")}`);
 
 const normalize = (text) => String(text || "")
   .toLowerCase()

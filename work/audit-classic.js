@@ -1,6 +1,7 @@
 const fs=require('fs');
 const path=require('path');
 const vm=require('vm');
+const {validateCurrentPacks}=require('./validate-questions');
 
 const htmlFile=path.resolve(__dirname,'../outputs/classic-jeopardy.html');
 const packFile=path.resolve(__dirname,'../packs/classic/current.js');
@@ -16,6 +17,8 @@ const sandbox={window:{}};
 vm.runInNewContext(packJs,sandbox);
 const pack=sandbox.window.CLASSIC_JEOPARDY_PACK;
 if(!pack||!Array.isArray(pack.categories)||pack.categories.length<2)throw new Error('Invalid Classic question pack');
+const questionPackValidation=validateCurrentPacks();
+if(questionPackValidation.errors.length)throw new Error(`Question pack validation failed:\n- ${questionPackValidation.errors.join('\n- ')}`);
 for(const category of pack.categories){
   if(!category.name||!Array.isArray(category.clues)||!category.clues.length)throw new Error('Invalid category in Classic question pack');
   for(const clue of category.clues){
