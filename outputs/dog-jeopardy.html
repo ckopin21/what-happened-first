@@ -2400,6 +2400,7 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
         <div class="phone-room">Room <span id="phoneRoomCode">----</span></div>
       </div>
       <button class="phone-close" onclick="closeControllerPreview()">×</button>
+      <button class="phone-close" id="phoneProfileBtn" onclick="editTimelinePhoneProfile()" title="Edit Profile">Edit</button>
       <button class="phone-close" id="phoneLeaveBtn" onclick="leavePhoneGame()" title="Leave Game">Leave</button>
     </div>
 
@@ -2816,6 +2817,15 @@ function hostRemoveTimelinePlayer(index){
   showToast(`${removed.name} was removed`,`neutral`);
 }
 
+function editTimelinePlayer(index){
+  const player=players[index];if(!player||index<0||index>=playerCount)return;
+  const name=String(prompt("Player name",player.name)||"").trim().slice(0,18);if(!name)return;
+  if(!uniquePlayerName(players.slice(0,playerCount),name,player.playerId)){showToast("That player name is already in this room","bad");return}
+  const avatarRaw=prompt(`Avatar number (1-${avatarOptions.length})`,String(Math.max(0,avatarIndexFor(player.avatar))+1));
+  if(avatarRaw===null)return;const avatarIndex=Math.max(0,Math.min(avatarOptions.length-1,Number(avatarRaw)-1));
+  player.name=name;player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);
+}
+
 function hostRemoveTimelinePlayer(index){
   const player=players[index];if(!player||index<0||index>=playerCount)return;
   if(!confirm(`Remove ${player.name} from this game?`))return;
@@ -2874,6 +2884,18 @@ function handleRemoteAction(entry,msg){
     const removed=removeTimelinePlayer(i,entry);
     if(removed){try{entry.conn.send({type:"left"})}catch(e){}setTimeout(()=>{try{entry.conn.close()}catch(e){}},80);showToast(`${removed.name} left the game`,"neutral")}
     return;
+  }
+  if(action==="profile-update"){
+    if(current||pendingDaily||gameFinished){try{entry.conn.send({type:"profile-error",message:"Profiles can be changed between questions."})}catch(e){}return}
+    const player=players[i],name=String(msg.name||"").trim().slice(0,18),avatarIndex=Math.max(0,Math.min(avatarOptions.length-1,Number(msg.avatarIndex)||0));
+    if(!name||!uniquePlayerName(players.slice(0,playerCount),name,player.playerId)){try{entry.conn.send({type:"profile-error",message:"Choose a unique player name."})}catch(e){}return}
+    player.name=name;player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);return;
+  }
+  if(action==="profile-update"){
+    if(current||pendingDaily||gameFinished){try{entry.conn.send({type:"profile-error",message:"Profiles can be changed between questions."})}catch(e){}return}
+    const name=String(msg.name||"").trim().slice(0,18),avatarIndex=Math.max(0,Math.min(avatarOptions.length-1,Number(msg.avatarIndex)||0)),player=players[i];
+    if(!name||!uniquePlayerName(players.slice(0,playerCount),name,player.playerId)){try{entry.conn.send({type:"profile-error",message:"Choose a unique player name."})}catch(e){}return}
+    player.name=name;player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);return;
   }
   if(action==="resume"){
     try{entry.conn.send({type:"resume-ok",playerIndex:i})}catch(e){}
@@ -3092,6 +3114,8 @@ function connectRemotePhone(){
         remoteReconnectAttempt=0;setNetworkStatus("Connected to host");
       }else if(msg?.type==="join-error"){
         document.getElementById("joinNote").textContent=msg.message||"Unable to join.";
+      }else if(msg?.type==="profile-error"){
+        showToast(msg.message||"Could not update profile.","bad");
       }else applyRemoteSnapshot(msg);
     });
     connection.on("close",fail);
@@ -3902,6 +3926,7 @@ function renderPlayers(){
       </div>`;
     wrap.appendChild(p);
     if(i<playerCount){const remove=document.createElement("button");remove.className="mini red";remove.textContent="Remove";remove.onclick=event=>{event.stopPropagation();hostRemoveTimelinePlayer(i)};p.querySelector(".score-controls")?.appendChild(remove)}
+    if(i<playerCount){const edit=document.createElement("button");edit.className="mini blue";edit.textContent="Edit";edit.onclick=event=>{event.stopPropagation();editTimelinePlayer(i)};p.querySelector(".score-controls")?.appendChild(edit)}
   }
 }
 
@@ -4778,6 +4803,16 @@ function leavePhoneGame(){
   remoteLeaving=true;
   setNetworkStatus("Leaving game…");
   sendRemoteAction("leave");
+}
+
+function editTimelinePhoneProfile(){
+  if(!remotePhoneMode||!Number.isInteger(joinedPhonePlayerIndex)||!hostConnection?.open)return;
+  if(current||pendingDaily||gameFinished){showToast("Edit your profile between questions","neutral");return}
+  const player=players[joinedPhonePlayerIndex];if(!player)return;
+  const name=String(prompt("Your name",player.name)||"").trim().slice(0,18);if(!name)return;
+  const avatarRaw=prompt(`Avatar number (1-${avatarOptions.length})`,String(Math.max(0,avatarIndexFor(player.avatar))+1));if(avatarRaw===null)return;
+  const avatarIndex=Math.max(0,Math.min(avatarOptions.length-1,Number(avatarRaw)-1));
+  sendRemoteAction("profile-update",{name,avatarIndex});
 }
 
 function startGame(){
