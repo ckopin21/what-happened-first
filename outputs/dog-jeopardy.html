@@ -2882,12 +2882,6 @@ function handleRemoteAction(entry,msg){
     if(!name||!uniquePlayerName(players.slice(0,playerCount),name,player.playerId)){try{entry.conn.send({type:"profile-error",message:"Choose a unique player name."})}catch(e){}return}
     player.name=name;player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);return;
   }
-  if(action==="profile-update"){
-    if(current||pendingDaily||gameFinished){try{entry.conn.send({type:"profile-error",message:"Profiles can be changed between questions."})}catch(e){}return}
-    const name=String(msg.name||"").trim().slice(0,18),avatarIndex=Math.max(0,Math.min(avatarOptions.length-1,Number(msg.avatarIndex)||0)),player=players[i];
-    if(!name||!uniquePlayerName(players.slice(0,playerCount),name,player.playerId)){try{entry.conn.send({type:"profile-error",message:"Choose a unique player name."})}catch(e){}return}
-    player.name=name;player.avatar=avatarOptions[avatarIndex]?.src||player.avatar;renderPlayers();broadcastGameState(true);return;
-  }
   if(action==="resume"){
     try{entry.conn.send({type:"resume-ok",playerIndex:i})}catch(e){}
     broadcastGameState(true);

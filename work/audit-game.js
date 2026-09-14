@@ -131,6 +131,7 @@ requirePattern("duplicate scoring guard", /questionResolved/);
 requirePattern("lobby state sent to phones", /gameStarted[\s\S]{0,500}(?:Waiting for host|lobby)/i);
 requirePattern("new game keeps roster", /function\s+newGame\s*\([^)]*\)\s*\{[\s\S]{0,120}(?:resetGameState\(true\)|resetGameState\([^)]*keep)/);
 requirePattern("full reset clears roster", /function\s+resetGame\s*\([^)]*\)\s*\{[\s\S]{0,120}(?:resetGameState\(false\)|playerCount\s*=\s*0)/);
+if ((script.match(/action===\"profile-update\"/g)||[]).length !== 1) regressionIssues.push("Timeline must have exactly one profile-update action handler");
 if (/\{\s*(?:score|playerIndex)\s*:/.test(script.match(/function\s+sendRemoteAction[\s\S]*?\n\}/)?.[0] || "")) {
   regressionIssues.push("phone intent helper must not send score/playerIndex authority");
 }
