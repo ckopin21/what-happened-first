@@ -155,7 +155,16 @@ function phaseText(){const m=phaseMultiplier();return m===3?"TRIPLE POINTS":m===
 function avatarIcon(i){return AVATARS[Number.isInteger(i)&&AVATARS[i]?i:0].icon}
 function freshNonce(){return `${gameEpoch}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`}
 function classicManifestEntry(id){return (window.CLASSIC_PACK_MANIFEST?.packs||[]).find(entry=>entry.id===id)}
-function validateClassicRuntimePack(pack,entry){return !!(pack&&pack.id===entry?.id&&pack.name===entry?.name&&pack.genre===entry?.genre&&Array.isArray(pack.categories)&&pack.categories.length===5&&pack.categories.every(category=>Array.isArray(category.clues)&&category.clues.length===5))}
+function validateClassicRuntimePack(pack,entry){
+  if(!pack||pack.id!==entry?.id||pack.name!==entry?.name||pack.genre!==entry?.genre||!Array.isArray(pack.categories)||pack.categories.length!==5)return false;
+  const ids=new Set(),values=[100,200,300,400,500];
+  return pack.categories.every(category=>typeof category?.name==="string"&&category.name.trim()&&Array.isArray(category.clues)&&category.clues.length===5&&category.clues.every((clue,index)=>{
+    if(!clue||typeof clue.id!=="string"||!clue.id.trim()||ids.has(clue.id)||clue.value!==values[index]||typeof clue.question!=="string"||!clue.question.trim()||typeof clue.answer!=="string"||!clue.answer.trim()||typeof clue.hint!=="string"||!clue.hint.trim()||!Array.isArray(clue.aliases)||!clue.aliases.length||clue.aliases.some(alias=>typeof alias!=="string"||!alias.trim()))return false;
+    ids.add(clue.id);const followup=clue.followup;if(!followup)return true;
+    if(typeof followup.id!=="string"||!followup.id.trim()||ids.has(followup.id)||typeof followup.question!=="string"||!followup.question.trim()||typeof followup.answer!=="string"||!followup.answer.trim()||typeof followup.hint!=="string"||!followup.hint.trim()||!Array.isArray(followup.aliases)||!followup.aliases.length||followup.aliases.some(alias=>typeof alias!=="string"||!alias.trim()))return false;
+    ids.add(followup.id);return true;
+  }));
+}
 function populateClassicPackSelector(){const select=document.getElementById("classicPackSelect");if(!select)return;select.innerHTML="";(window.CLASSIC_PACK_MANIFEST?.packs||[]).forEach(entry=>{const option=document.createElement("option");option.value=entry.id;option.textContent=`${entry.name} — ${entry.genre}`;select.appendChild(option)});select.value=PACK.id}
 function loadClassicPack(entry){return new Promise((resolve,reject)=>{const cached=window.CLASSIC_QUESTION_PACKS?.[entry.id];if(cached)return resolve(cached);const script=document.createElement("script");script.src=`../packs/classic/${entry.file}`;script.async=true;script.onload=()=>window.CLASSIC_QUESTION_PACKS?.[entry.id]?resolve(window.CLASSIC_QUESTION_PACKS[entry.id]):reject(new Error("Pack did not register"));script.onerror=()=>reject(new Error(`Could not load ${entry.file}`));document.head.appendChild(script)})}
 async function switchClassicPack(id){
@@ -234,10 +243,10 @@ function renderRevealCurrent(){
 function setJudgement(index,isCorrect){if(!current||questionResolved||!players[index])return;judgements.set(index,!!isCorrect);renderRevealCurrent();broadcastState()}
 function applyScores(){
   if(!current||questionResolved)return;questionResolved=true;const indexes=current.isDaily?[current.dailyPlayer]:players.map((_p,i)=>i);
-  const now=indexes.map(i=>({index:i,name:players[i].name,avatar:players[i].avatar,answer:submissions.get(i)||"",correct:!!judgements.get(i),hinted:hintsUsed.has(i),delta:scoreDeltaFor(i,!!judgements.get(i))}));
+  const now=indexes.map(i=>({playerToken:players[i].token,index:i,name:players[i].name,avatar:players[i].avatar,answer:submissions.get(i)||"",correct:!!judgements.get(i),hinted:hintsUsed.has(i),delta:scoreDeltaFor(i,!!judgements.get(i))}));
   if(current.followup&&current.part===1){actionNonce=freshNonce();current.partOneResults=now;current.part=2;current.question=current.followup.question;current.answer=current.followup.answer;current.aliases=Array.isArray(current.followup.aliases)&&current.followup.aliases.length?current.followup.aliases:[current.followup.answer];current.hint=current.followup.hint||"No hint available.";submissions=new Map();judgements=new Map();hintsUsed=new Set();questionRevealed=false;questionResolved=false;document.getElementById("revealOverlay").classList.remove("showing");showQuestionHost();resetClassicQuestionScroll();renderHost();broadcastState();toast("PART 2","neutral");return}
   const oldMult=current.mult,flashes=[],prior=Array.isArray(current.partOneResults)?current.partOneResults:[],answers=[];
-  indexes.forEach(i=>{const p=players[i],a=now.find(x=>x.index===i),b=prior.find(x=>x.index===i),delta=(b?.delta||0)+(a?.delta||0),correct=current.followup?!!b?.correct&&!!a?.correct:!!a?.correct;p.score+=delta;if(correct){p.correctStreak=(p.correctStreak||0)+1;p.wrongStreak=0;flashes.push([i,"good"])}else{p.correctStreak=0;p.wrongStreak=(p.wrongStreak||0)+1;flashes.push([i,"bad"])}answers.push({name:p.name,avatar:p.avatar,answer:current.followup?`Part 1: ${b?.answer||"No answer"} • Part 2: ${a?.answer||"No answer"}`:(a?.answer||""),correct,hinted:!!b?.hinted||!!a?.hinted,delta})});
+  indexes.forEach(i=>{const p=players[i],a=now.find(x=>x.playerToken===p.token),b=prior.find(x=>x.playerToken===p.token),delta=(b?.delta||0)+(a?.delta||0),correct=current.followup?!!b?.correct&&!!a?.correct:!!a?.correct;p.score+=delta;if(correct){p.correctStreak=(p.correctStreak||0)+1;p.wrongStreak=0;flashes.push([i,"good"])}else{p.correctStreak=0;p.wrongStreak=(p.wrongStreak||0)+1;flashes.push([i,"bad"])}answers.push({name:p.name,avatar:p.avatar,answer:current.followup?`Part 1: ${b?.answer||"No answer"} • Part 2: ${a?.answer||"No answer"}`:(a?.answer||""),correct,hinted:!!b?.hinted||!!a?.hinted,delta})});
   const winners=answers.filter(a=>a.delta>0).map(a=>a.name),historyQuestion=current.followup?`Part 1: ${current.primaryQuestion} • Part 2: ${current.followup.question}`:current.question,historyAnswer=current.followup?`${current.primaryAnswer} / ${current.followup.answer}`:current.answer;history.set(current.id,{...current,question:historyQuestion,answer:historyAnswer,answers,winners});used.add(current.id);document.getElementById("revealOverlay").classList.remove("showing");document.getElementById("questionOverlay").classList.remove("showing");current=null;submissions=new Map();judgements=new Map();hintsUsed=new Set();questionRevealed=false;questionResolved=false;actionNonce=freshNonce();if(players.length)activePlayer=(activePlayer+1)%players.length;renderHost();broadcastState();flashes.forEach(([i,type])=>flashPlayer(i,type));const newMult=phaseMultiplier(),epoch=gameEpoch;if(questionsRemaining()===0){setTimeout(()=>{if(epoch===gameEpoch&&gameStarted&&questionsRemaining()===0&&!current)showFinale()},500)}else if(newMult!==oldMult&&newMult>1){showPhaseOverlay(newMult===3?"TRIPLE POINTS":"DOUBLE POINTS")}
 }
 function flashPlayer(i,type){const el=document.querySelector(`.player[data-player="${i}"]`);if(!el)return;el.classList.add(type==="good"?"flash-good":"flash-bad");setTimeout(()=>el.classList.remove("flash-good","flash-bad"),800)}
@@ -287,7 +296,11 @@ function removeClassicPlayer(index,ctx){
   if(current&&!wasDaily&&current.dailyPlayer>index)current.dailyPlayer--;
   if(pendingDaily?.playerIndex>index)pendingDaily.playerIndex--;
   for(const other of remoteContexts.values()){if(other===ctx)other.playerIndex=null;else if(other.playerIndex>index)other.playerIndex--}
-  if(!players.length)activePlayer=0;else if(wasActive)activePlayer=index%players.length;else if(activePlayer>index)activePlayer--;
+  if(!players.length){
+    // No player can own a Daily Double, submission, or two-part result now.
+    // Keep the host peer alive, clear the board, and return to a joinable lobby.
+    newGame();return removed;
+  }else if(wasActive)activePlayer=index%players.length;else if(activePlayer>index)activePlayer--;
   renderHost();broadcastState();
   if(current&&!questionRevealed&&allSubmitted())revealQuestion(false);
   return removed;

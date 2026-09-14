@@ -6,15 +6,18 @@ on:
     paths:
       - 'index.html'
       - 'outputs/**'
-      - 'work/audit-game.js'
-      - 'work/audit-classic.js'
+      - 'packs/**'
+      - 'assets/**'
+      - 'work/**'
       - '.github/workflows/audit-games.yml'
   pull_request:
     paths:
       - 'index.html'
       - 'outputs/**'
-      - 'work/audit-game.js'
-      - 'work/audit-classic.js'
+      - 'packs/**'
+      - 'assets/**'
+      - 'work/**'
+      - '.github/workflows/audit-games.yml'
 
 permissions:
   contents: read

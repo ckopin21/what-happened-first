@@ -139,7 +139,7 @@ function validatePack(kind,pack,history){
 }
 
 function validateCurrentPacks(kinds=Object.keys(DEFINITIONS),packId=""){
-  const result={errors:[],warnings:[],packs:{}};let foundPack=!packId;
+  const result={errors:[],warnings:[],packs:{}};let foundPack=!packId;const globalRecords=[],globalPackIds=new Set();
   kinds.forEach(kind=>{
     const loaded=loadRegisteredPacks(kind),history=loadHistory(kind);result.errors.push(...loaded.errors);
     const ids=new Set(),names=new Set(),allRecords=[];
@@ -148,20 +148,27 @@ function validateCurrentPacks(kinds=Object.keys(DEFINITIONS),packId=""){
     if(selectedPacks.length)foundPack=true;
     selectedPacks.forEach(({entry,pack})=>{
       if(ids.has(entry.id))result.errors.push(`${kind} manifest duplicates pack id '${entry.id}'`);ids.add(entry.id);
+      if(globalPackIds.has(entry.id))result.errors.push(`Installed packs reuse pack id '${entry.id}' across game modes`);globalPackIds.add(entry.id);
       if(names.has(clean(entry.name)))result.errors.push(`${kind} manifest duplicates display name '${entry.name}'`);names.add(clean(entry.name));
       if(pack.id!==entry.id||pack.name!==entry.name||pack.genre!==entry.genre)result.errors.push(`${kind} pack '${entry.id}' metadata does not match its manifest entry`);
-      const check=validatePack(kind,pack,history);result.errors.push(...check.errors.map(e=>`[${entry.id}] ${e}`));result.warnings.push(...check.warnings);result.packs[`${kind}:${entry.id}`]=check;allRecords.push(...check.records.map(record=>({...record,packId:entry.id})));
+      const check=validatePack(kind,pack,history);result.errors.push(...check.errors.map(e=>`[${entry.id}] ${e}`));result.warnings.push(...check.warnings);result.packs[`${kind}:${entry.id}`]=check;const records=check.records.map(record=>({...record,packId:entry.id,kind}));allRecords.push(...records);globalRecords.push(...records);
     });
     for(let i=0;i<allRecords.length;i++)for(let j=0;j<i;j++){const match=similar(allRecords[i].question,allRecords[j].question);if(match&&!allRecords[i].allowReuse)result.errors.push(`${kind} pack '${allRecords[i].packId}' question '${allRecords[i].id}' duplicates ${match} in installed pack '${allRecords[j].packId}' question '${allRecords[j].id}'`)}
   });
+  for(let i=0;i<globalRecords.length;i++)for(let j=0;j<i;j++){
+    const current=globalRecords[i],prior=globalRecords[j];
+    if(current.id===prior.id)result.errors.push(`Installed packs reuse question id '${current.id}' (${prior.kind}:${prior.packId} and ${current.kind}:${current.packId})`);
+    const match=similar(current.question,prior.question);
+    if(match&&!current.allowReuse)result.errors.push(`Installed pack '${current.packId}' question '${current.id}' duplicates ${match} in ${prior.kind}:${prior.packId} '${prior.id}'`);
+  }
   if(!foundPack)result.errors.push(`No registered pack has id '${packId}'`);
   return result;
 }
 function recordCurrent(kind){
-  const historyPath=path.join(ROOT,DEFINITIONS[kind].history), history=loadHistory(kind), pack=loadPack(kind), check=validatePack(kind,pack,history);
-  if(check.errors.length)throw new Error(check.errors.join("\n"));
+  const historyPath=path.join(ROOT,DEFINITIONS[kind].history), history=loadHistory(kind), loaded=loadRegisteredPacks(kind);
+  if(loaded.errors.length)throw new Error(loaded.errors.join("\n"));
   const known=new Set(history.questions.map(record=>`${record.id}\u0000${clean(record.question)}`));
-  check.records.forEach(record=>{const key=`${record.id}\u0000${clean(record.question)}`;if(!known.has(key))history.questions.push({id:record.id,question:record.question,answer:record.answer,category:record.category,firstUsedPack:pack.id});});
+  loaded.packs.forEach(({pack})=>{const check=validatePack(kind,pack,history);if(check.errors.length)throw new Error(check.errors.join("\n"));check.records.forEach(record=>{const key=`${record.id}\u0000${clean(record.question)}`;if(!known.has(key)){history.questions.push({id:record.id,question:record.question,answer:record.answer,category:record.category,firstUsedPack:pack.id});known.add(key)}})});
   const temporary=`${historyPath}.tmp`; fs.writeFileSync(temporary,`${JSON.stringify(history,null,2)}\n`);fs.renameSync(temporary,historyPath);
 }
 function cli(){

@@ -2788,9 +2788,9 @@ function safeRemotePlayer(entry){
 
 function removeTimelinePlayer(index,entry){
   if(!Number.isInteger(index)||index<0||index>=playerCount)return false;
-  const wasActive=index===activePlayer;
+  const wasActive=index===activePlayer,leavesTie=tiePlayers.some(player=>player.i===index);
   // An unresolved active turn is restored to the board; no score is applied.
-  if((wasActive&&(current||pendingDaily))||tiePlayers.some(player=>player.i===index)){
+  if((wasActive&&(current||pendingDaily))||leavesTie){
     current=null;pendingDaily=null;primaryBanked=false;reviewMode=false;hintUsed=false;questionResolved=false;selectedChoice=null;submittedChoice=null;choiceLocked=false;
     document.getElementById("modal")?.classList.remove("showing");document.getElementById("dailyModal")?.classList.remove("showing");document.getElementById("tiebreaker")?.classList.remove("showing");
     tiePlayers=[];tieActive=false;tieResolved=false;tieAnswered=new Set();tieWinnerIndex=null;lastChancePending=false;lastChancePlayerIndex=null;
@@ -2805,6 +2805,15 @@ function removeTimelinePlayer(index,entry){
   remoteConnections.forEach(ctx=>{if(ctx===entry){ctx.playerIndex=null;ctx.token=null}else if(ctx.playerIndex>index)ctx.playerIndex--});
   remoteTokenConnections.forEach((ctx,token)=>{if(ctx===entry||token===entry?.token)remoteTokenConnections.delete(token)});
   if(playerCount===0)activePlayer=0;else if(wasActive)activePlayer=index%playerCount;else if(activePlayer>index)activePlayer--;
+  // Tie participants are stored as seats in this legacy engine. Rebase every
+  // remaining seat so a player cannot inherit a different player's tie state.
+  if(tieActive&&!leavesTie){
+    tiePlayers=tiePlayers.map(player=>({i:player.i>index?player.i-1:player.i,p:players[player.i>index?player.i-1:player.i]}));
+    tieAnswered=new Set([...tieAnswered].filter(i=>i!==index).map(i=>i>index?i-1:i));
+    if(tieWinnerIndex!==null)tieWinnerIndex=tieWinnerIndex>index?tieWinnerIndex-1:tieWinnerIndex;
+  }
+  // The host room stays alive, but an empty roster must always be a fresh lobby.
+  if(playerCount===0){resetGameState(true);return removed;}
   updateHostPlayerCount();renderPlayers();buildBoard();renderPhoneController();broadcastGameState(true);
   return removed;
 }
@@ -4723,7 +4732,17 @@ function updateHostPlayerCount(){
 }
 
 function timelineManifestEntry(id){return (window.TIMELINE_PACK_MANIFEST?.packs||[]).find(entry=>entry.id===id)}
-function validateTimelineRuntimePack(pack,entry){return !!(pack&&pack.id===entry?.id&&pack.name===entry?.name&&pack.genre===entry?.genre&&Array.isArray(pack.categories)&&pack.categories.length===5&&pack.categories.every(category=>Array.isArray(category.clues)&&category.clues.length===5))}
+function validateTimelineRuntimePack(pack,entry){
+  if(!pack||pack.id!==entry?.id||pack.name!==entry?.name||pack.genre!==entry?.genre||!Array.isArray(pack.categories)||pack.categories.length!==5)return false;
+  const ids=new Set();
+  return pack.categories.every(category=>typeof category?.name==="string"&&category.name.trim()&&Array.isArray(category.clues)&&category.clues.length===5&&category.clues.every(clue=>{
+    if(!clue||typeof clue.id!=="string"||!clue.id.trim()||ids.has(clue.id)||typeof clue.q!=="string"||!clue.q.trim()||typeof clue.h!=="string"||!clue.h.trim()||typeof clue.a!=="string"||!clue.a.trim()||!Array.isArray(clue.choices)||clue.choices.length!==2||clue.choices.some(choice=>typeof choice!=="string"||!choice.trim()))return false;
+    ids.add(clue.id);
+    if(!clue.special)return !["followupId","fq","fa","fchoices","fcorrect"].some(key=>key in clue);
+    if(typeof clue.followupId!=="string"||!clue.followupId.trim()||ids.has(clue.followupId)||typeof clue.fq!=="string"||!clue.fq.trim()||typeof clue.fa!=="string"||!clue.fa.trim()||!Array.isArray(clue.fchoices)||clue.fchoices.length!==4||clue.fchoices.some(choice=>typeof choice!=="string"||!choice.trim())||typeof clue.fcorrect!=="string"||!clue.fchoices.includes(clue.fcorrect))return false;
+    ids.add(clue.followupId);return true;
+  }));
+}
 function populateTimelinePackSelector(){const select=document.getElementById("timelinePackSelect");if(!select)return;select.innerHTML="";(window.TIMELINE_PACK_MANIFEST?.packs||[]).forEach(entry=>{const option=document.createElement("option");option.value=entry.id;option.textContent=`${entry.name} — ${entry.genre}`;option.selected=entry.id===TIMELINE_PACK.id;select.appendChild(option)});select.value=TIMELINE_PACK.id}
 function loadTimelinePack(entry){return new Promise((resolve,reject)=>{const cached=window.TIMELINE_QUESTION_PACKS?.[entry.id];if(cached)return resolve(cached);const script=document.createElement("script");script.src=`../packs/timeline/${entry.file}`;script.async=true;script.onload=()=>window.TIMELINE_QUESTION_PACKS?.[entry.id]?resolve(window.TIMELINE_QUESTION_PACKS[entry.id]):reject(new Error("Pack did not register"));script.onerror=()=>reject(new Error(`Could not load ${entry.file}`));document.head.appendChild(script)})}
 async function switchTimelinePack(id){
