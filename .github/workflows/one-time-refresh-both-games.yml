@@ -1,0 +1,30 @@
+name: One-time refresh both games
+on:
+  push:
+    paths:
+      - 'work/refresh-both-games.py'
+      - '.github/workflows/one-time-refresh-both-games.yml'
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Apply refresh
+        run: python work/refresh-both-games.py
+      - name: Audit timeline
+        run: node work/audit-game.js outputs/dog-jeopardy.html
+      - name: Audit classic
+        run: node work/audit-classic.js outputs/classic-jeopardy.html
+      - name: Commit final changes
+        run: |
+          rm -f work/refresh-both-games.py .github/workflows/one-time-refresh-both-games.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Refresh avatars and questions for both games'
+          git push
