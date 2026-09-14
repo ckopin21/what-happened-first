@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "mode": "timeline",
+  "defaultPackId": "timeline-general-knowledge-v3",
+  "packs": [
+    {
+      "id": "timeline-general-knowledge-v3",
+      "name": "General Knowledge",
+      "genre": "Timeline",
+      "answerType": "timeline",
+      "file": "../catalog/timeline-general-knowledge-v3.json"
+    }
+  ]
+}

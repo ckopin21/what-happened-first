@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "mode": "classic",
+  "defaultPackId": "classic-general-knowledge-v3",
+  "packs": [
+    {
+      "id": "classic-general-knowledge-v3",
+      "name": "General Knowledge",
+      "genre": "General Knowledge",
+      "answerType": "open-ended",
+      "file": "../catalog/classic-general-knowledge-v3.json"
+    }
+  ]
+}
