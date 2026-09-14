@@ -421,6 +421,216 @@
       "answer": "Pennsylvania",
       "category": "Arts & Architecture",
       "firstUsedPack": "general-knowledge-v3"
+    },
+    {
+      "id": "classic-v4-books-stories-100",
+      "question": "Who wrote Charlotte's Web?",
+      "answer": "E. B. White",
+      "category": "Books & Stories",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-books-stories-200",
+      "question": "What surname do Meg, Jo, Beth, and Amy share in Little Women?",
+      "answer": "March",
+      "category": "Books & Stories",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-books-stories-300",
+      "question": "Which novel begins with the line “Call me Ishmael”?",
+      "answer": "Moby-Dick",
+      "category": "Books & Stories",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-books-stories-400",
+      "question": "Which author created the detective Hercule Poirot?",
+      "answer": "Agatha Christie",
+      "category": "Books & Stories",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-books-stories-500",
+      "question": "What fictional town is the central setting of One Hundred Years of Solitude?",
+      "answer": "Macondo",
+      "category": "Books & Stories",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-books-stories-500-followup",
+      "question": "Who wrote One Hundred Years of Solitude?",
+      "answer": "Gabriel García Márquez",
+      "category": "Books & Stories",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-earth-weather-100",
+      "question": "What instrument is used to measure temperature?",
+      "answer": "Thermometer",
+      "category": "Earth & Weather",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-earth-weather-200",
+      "question": "Which layer of Earth's atmosphere contains most of the planet's weather?",
+      "answer": "Troposphere",
+      "category": "Earth & Weather",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-earth-weather-300",
+      "question": "What scale classifies hurricanes from Category 1 through Category 5 based on sustained wind speed?",
+      "answer": "Saffir-Simpson Hurricane Wind Scale",
+      "category": "Earth & Weather",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-earth-weather-400",
+      "question": "What is the point inside Earth where an earthquake rupture begins called?",
+      "answer": "Hypocenter",
+      "category": "Earth & Weather",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-earth-weather-500",
+      "question": "What magnitude scale is widely used for large earthquakes because it is based on seismic moment?",
+      "answer": "Moment magnitude scale",
+      "category": "Earth & Weather",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-earth-weather-500-followup",
+      "question": "What instrument records seismic waves from earthquakes?",
+      "answer": "Seismograph",
+      "category": "Earth & Weather",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-music-stage-100",
+      "question": "How many keys are on a standard full-size modern piano?",
+      "answer": "88",
+      "category": "Music & Stage",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-music-stage-200",
+      "question": "What musical term means to gradually get louder?",
+      "answer": "Crescendo",
+      "category": "Music & Stage",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-music-stage-300",
+      "question": "Which composer wrote The Four Seasons?",
+      "answer": "Antonio Vivaldi",
+      "category": "Music & Stage",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-music-stage-400",
+      "question": "What is the highest standard female classical singing voice?",
+      "answer": "Soprano",
+      "category": "Music & Stage",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-music-stage-500",
+      "question": "In Mozart's The Magic Flute, which character sings the famous aria “Der Hölle Rache”?",
+      "answer": "Queen of the Night",
+      "category": "Music & Stage",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-music-stage-500-followup",
+      "question": "The Magic Flute was originally written with a libretto in what language?",
+      "answer": "German",
+      "category": "Music & Stage",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-ancient-world-100",
+      "question": "What writing system of picture-like symbols is most associated with ancient Egypt?",
+      "answer": "Hieroglyphs",
+      "category": "Ancient World",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-ancient-world-200",
+      "question": "What Roman city was buried by Mount Vesuvius in AD 79?",
+      "answer": "Pompeii",
+      "category": "Ancient World",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-ancient-world-300",
+      "question": "Which philosopher tutored Alexander the Great?",
+      "answer": "Aristotle",
+      "category": "Ancient World",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-ancient-world-400",
+      "question": "The Parthenon stands on the Acropolis of what ancient Greek city?",
+      "answer": "Athens",
+      "category": "Ancient World",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-ancient-world-500",
+      "question": "Which Carthaginian general crossed the Alps with war elephants during the Second Punic War?",
+      "answer": "Hannibal",
+      "category": "Ancient World",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-ancient-world-500-followup",
+      "question": "In what year BC did Hannibal cross the Alps into Italy?",
+      "answer": "218 BC",
+      "category": "Ancient World",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-100",
+      "question": "Big Ben is in what city?",
+      "answer": "London",
+      "category": "Famous Landmarks",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-200",
+      "question": "Christ the Redeemer overlooks what Brazilian city?",
+      "answer": "Rio de Janeiro",
+      "category": "Famous Landmarks",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-300",
+      "question": "Petra is in what modern-day country?",
+      "answer": "Jordan",
+      "category": "Famous Landmarks",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-400",
+      "question": "Angkor Wat is in what modern-day country?",
+      "answer": "Cambodia",
+      "category": "Famous Landmarks",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-500",
+      "question": "The Alhambra palace-fortress overlooks what Spanish city?",
+      "answer": "Granada",
+      "category": "Famous Landmarks",
+      "firstUsedPack": "general-knowledge-v4"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-500-followup",
+      "question": "Granada is in what autonomous community of Spain?",
+      "answer": "Andalusia",
+      "category": "Famous Landmarks",
+      "firstUsedPack": "general-knowledge-v4"
     }
   ]
 }
