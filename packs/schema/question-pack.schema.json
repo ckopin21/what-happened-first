@@ -38,7 +38,7 @@
       "properties": {
         "id": {"type": "string", "minLength": 1}, "question": {"type": "string", "minLength": 1}, "answer": {"type": "string", "minLength": 1},
         "aliases": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}, "hint": {"type": "string", "minLength": 1},
-        "choices": {"type": "array", "minItems": 2, "maxItems": 4, "items": {"type": "string", "minLength": 1}}, "allowReuse": {"const": true}
+        "choices": {"type": "array", "minItems": 2, "maxItems": 4, "items": {"type": "string", "minLength": 1}}, "correctChoice": {"type": "string", "minLength": 1}, "allowReuse": {"const": true}
       }
     }
   }

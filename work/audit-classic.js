@@ -1,21 +1,14 @@
 const fs=require('fs');
 const path=require('path');
-const vm=require('vm');
-const {validateCurrentPacks}=require('./validate-questions');
+const {loadPack,validateCurrentPacks}=require('./validate-questions');
 
 const htmlFile=path.resolve(__dirname,'../outputs/classic-jeopardy.html');
-const packFile=path.resolve(__dirname,'../packs/classic/current.js');
 const html=fs.readFileSync(htmlFile,'utf8');
-const packJs=fs.readFileSync(packFile,'utf8');
 
 const scripts=[...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]).filter(Boolean);
 if(!scripts.length)throw new Error('No inline script found');
 scripts.forEach((code,i)=>{try{new Function(code)}catch(err){throw new Error(`Inline script ${i+1} syntax error: ${err.message}`)}});
-try{new Function(packJs)}catch(err){throw new Error(`Question pack syntax error: ${err.message}`)}
-
-const sandbox={window:{}};
-vm.runInNewContext(packJs,sandbox);
-const pack=sandbox.window.CLASSIC_JEOPARDY_PACK;
+const pack=loadPack('classic');
 if(!pack||!Array.isArray(pack.categories)||pack.categories.length<2)throw new Error('Invalid Classic question pack');
 const questionPackValidation=validateCurrentPacks();
 if(questionPackValidation.errors.length)throw new Error(`Question pack validation failed:\n- ${questionPackValidation.errors.join('\n- ')}`);

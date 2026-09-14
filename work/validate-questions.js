@@ -39,8 +39,7 @@ function loadRegisteredPacks(kind){
     if(!entry||typeof entry!=="object"||!hasText(entry.id)||!hasText(entry.name)||!hasText(entry.genre)||!hasText(entry.file)){errors.push(`${kind} manifest entry ${index+1} needs id, name, genre, and file`);return}
     const file=path.resolve(ROOT,def.directory,entry.file);
     if(!file.startsWith(path.resolve(ROOT,def.directory)+path.sep)||!fs.existsSync(file)){errors.push(`${kind} manifest entry '${entry.id}' points to a missing pack '${entry.file}'`);return}
-    const sandbox={window:{}};try{vm.runInNewContext(fs.readFileSync(file,"utf8"),sandbox,{filename:file,timeout:1000})}catch(error){errors.push(`${kind} pack '${entry.id}' cannot load: ${error.message}`);return}
-    const pack=sandbox.window[def.packsGlobal]?.[entry.id];
+    const sandbox={window:{}};let pack;try{const source=fs.readFileSync(file,"utf8"),jsonMatch=source.match(/WHF_JSON_PACKS\.loadSync\("([^"\\]+)"/);if(jsonMatch){const jsonFile=path.resolve(ROOT,"outputs",jsonMatch[1]);pack=legacyPackFor(kind,JSON.parse(fs.readFileSync(jsonFile,"utf8")))}else{vm.runInNewContext(source,sandbox,{filename:file,timeout:1000});pack=sandbox.window[def.packsGlobal]?.[entry.id]}}catch(error){errors.push(`${kind} pack '${entry.id}' cannot load: ${error.message}`);return}
     if(!pack){errors.push(`${kind} manifest entry '${entry.id}' did not register matching pack metadata`);return}
     packs.push({entry,pack,file});
   });
@@ -56,6 +55,15 @@ function loadHistory(kind){return JSON.parse(fs.readFileSync(path.join(ROOT,DEFI
 function issue(errors,message){errors.push(message)}
 function fieldCheck(errors,obj,allowed,label){Object.keys(obj||{}).filter(key=>!allowed.has(key)).forEach(key=>issue(errors,`${label} has unsupported field '${key}'`))}
 function hasText(value){return typeof value==="string"&&value.trim().length>0}
+function legacyPackFor(kind,pack){
+  if(!pack||pack.schemaVersion!==1)return pack;
+  if(kind==="classic")return {id:pack.id,name:pack.name,genre:pack.genre,title:pack.title,subtitle:pack.subtitle,rules:pack.rules||{},categories:pack.categories};
+  return {id:pack.id,name:pack.name,genre:pack.genre,title:pack.title,subtitle:pack.subtitle,rules:pack.rules||{},categories:pack.categories.map(category=>({name:category.name,clues:category.clues.map(clue=>{
+    const legacy={id:clue.id,q:clue.question,h:clue.hint,a:clue.answer,choices:clue.choices,allowReuse:clue.allowReuse};
+    if(clue.followup){legacy.special=true;legacy.followupId=clue.followup.id;legacy.fq=clue.followup.question;legacy.fa=clue.followup.answer;legacy.fchoices=clue.followup.choices;legacy.fcorrect=clue.followup.correctChoice;legacy.followupAllowReuse=clue.followup.allowReuse}
+    return legacy;
+  })}))};
+}
 
 function recordsFor(kind,pack){
   const records=[];
