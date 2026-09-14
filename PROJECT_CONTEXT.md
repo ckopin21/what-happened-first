@@ -46,6 +46,10 @@ Classic content is intentionally separated from its engine.
 - Networking uses PeerJS 1.5.5 over WebRTC data channels with the public PeerJS cloud signaling service.
 - Phones send validated intents, never score values or unrestricted state.
 - A session-scoped phone token lets a refreshed phone reclaim its player in the current host session.
+- The host owns an explicit lobby phase. Players may join before **Start Game**; once started, only a known session token may reclaim an existing seat.
+- Phone identities are persisted per room with a local-storage preference and session-storage fallback. Duplicate live connections for one identity are superseded instead of creating duplicate players.
+- Phones recover in place after connection errors, app/background resume, browser page restoration, and network return. Reconnects receive a complete authoritative state snapshot.
+- Timeline snapshots carry monotonic revisions and remote intents carry replay IDs. Classic actions carry the current game epoch and phase nonce. These guards prevent delayed messages from an earlier question or game from mutating current state.
 - Timeline host peer ID: `what-happened-first-<room code in lowercase>`.
 - Classic host peer ID: `classic-jeopardy-<room code in lowercase>`.
 
@@ -97,7 +101,8 @@ For networking/game-flow changes, test over HTTP/HTTPS with multiple browser con
 - The free public PeerJS service is suitable for casual play but has no uptime guarantee.
 - WebRTC may fail on restrictive networks without a TURN relay.
 - Host refresh creates a new room and resets in-memory game state.
-- A production version could add dedicated signaling/TURN infrastructure and automated multi-browser tests.
+- Browser suspension may still interrupt a WebRTC data channel; the phone now reconnects after it is resumed, but it cannot exchange data while the operating system has frozen the page.
+- The highest-value production reliability upgrade is dedicated PeerJS signaling plus a TURN relay. After that, add automated Chromium/WebKit multi-context tests for lobby, reconnect, network-loss, and repeated-game flows.
 
 ## Provenance
 

@@ -27,7 +27,10 @@ See `packs/classic/README.md` for the pack schema.
 2. Keep the host page open for the entire game.
 3. Players scan the large QR code or open the displayed phone link.
 4. Each player enters a name, chooses an avatar, and joins.
-5. The host remains authoritative for game state and scoring.
+5. Phones wait in the lobby until the host presses **Start Game**.
+6. The host remains authoritative for game state and scoring.
+
+A phone stores a room-scoped session identity in browser storage. Refreshing, using back/forward navigation, or briefly backgrounding the browser reconnects that identity to the existing player and requests a complete state refresh. A new browser identity cannot join after gameplay starts, while an existing player can reclaim their seat.
 
 ## Development
 
@@ -43,3 +46,5 @@ No build step is required. The games are static HTML/JavaScript apps. For local 
 ## Networking
 
 Phone controllers use PeerJS/WebRTC. Game state travels directly between the host browser and phones; the public PeerJS cloud service handles connection signaling. Some restrictive networks may block peer-to-peer connections, in which case dedicated signaling/TURN infrastructure would be the production-grade fallback.
+
+Both games retry interrupted signaling and data connections with backoff, replace duplicate connections for the same player session, and reject phone actions that do not match the connection's assigned player and current game phase. The timeline engine additionally uses monotonic state revisions and intent replay protection; Classic uses game epochs and per-phase action nonces.
