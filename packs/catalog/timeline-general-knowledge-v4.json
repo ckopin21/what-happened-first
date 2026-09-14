@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "id": "timeline-general-knowledge-v4",
+  "name": "General Knowledge II",
+  "genre": "Timeline",
+  "answerType": "timeline",
+  "title": "WHAT HAPPENED FIRST?",
+  "subtitle": "Pick the earlier event.",
+  "rules": {
+    "hintMultiplier": 0.5
+  },
+  "categories": [
+    {
+      "name": "Technology",
+      "clues": [
+        {
+          "id": "timeline-v4-technology-100",
+          "value": 100,
+          "question": "Which happened first: the original Macintosh was introduced, or Windows 1.0 was released?",
+          "answer": "the original Macintosh was introduced first",
+          "aliases": ["the original Macintosh was introduced first"],
+          "hint": "Both milestones arrived in the mid-1980s, less than two years apart.",
+          "choices": ["the original Macintosh was introduced", "Windows 1.0 was released"]
+        },
+        {
+          "id": "timeline-v4-technology-200",
+          "value": 200,
+          "question": "Which happened first: Photoshop 1.0 was released, or the first Linux kernel version was released?",
+          "answer": "Photoshop 1.0 was released first",
+          "aliases": ["Photoshop 1.0 was released first"],
+          "hint": "Both releases helped shape modern computing in the early 1990s.",
+          "choices": ["Photoshop 1.0 was released", "the first Linux kernel version was released"]
+        },
+        {
+          "id": "timeline-v4-technology-300",
+          "value": 300,
+          "question": "Which happened first: Google Chrome was first released, or WhatsApp was founded?",
+          "answer": "Google Chrome was first released first",
+          "aliases": ["Google Chrome was first released first"],
+          "hint": "These milestones arrived in consecutive years near the end of the 2000s.",
+          "choices": ["Google Chrome was first released", "WhatsApp was founded"]
+        },
+        {
+          "id": "timeline-v4-technology-400",
+          "value": 400,
+          "question": "Which happened first: GitHub officially launched, or Dropbox launched to the public?",
+          "answer": "GitHub officially launched first",
+          "aliases": ["GitHub officially launched first"],
+          "hint": "Both launched publicly in 2008, only months apart.",
+          "choices": ["GitHub officially launched", "Dropbox launched to the public"]
+        },
+        {
+          "id": "timeline-v4-technology-500",
+          "value": 500,
+          "question": "Which happened first: the Nintendo Switch launched, or Microsoft Teams became generally available?",
+          "answer": "the Nintendo Switch launched first",
+          "aliases": ["the Nintendo Switch launched first"],
+          "hint": "Both launched in March 2017, less than two weeks apart.",
+          "choices": ["the Nintendo Switch launched", "Microsoft Teams became generally available"],
+          "followup": {
+            "id": "timeline-v4-technology-500-followup",
+            "question": "On what date did the Nintendo Switch launch?",
+            "answer": "March 3, 2017 — the Nintendo Switch launched worldwide on March 3, 2017.",
+            "aliases": ["March 3, 2017 — the Nintendo Switch launched worldwide on March 3, 2017.", "March 3, 2017"],
+            "hint": "Follow-up question",
+            "choices": ["February 24, 2017", "March 3, 2017", "March 14, 2017", "March 31, 2017"],
+            "correctChoice": "March 3, 2017"
+          }
+        }
+      ]
+    },
+    {
+      "name": "World History",
+      "clues": [
+        {
+          "id": "timeline-v4-world-history-100",
+          "value": 100,
+          "question": "Which happened first: the Great Fire of London, or the Salem witch trials began?",
+          "answer": "the Great Fire of London first",
+          "aliases": ["the Great Fire of London first"],
+          "hint": "These events took place in the late 1600s, more than two decades apart.",
+          "choices": ["the Great Fire of London", "the Salem witch trials began"]
+        },
+        {
+          "id": "timeline-v4-world-history-200",
+          "value": 200,
+          "question": "Which happened first: the Louisiana Purchase was completed, or the Battle of Trafalgar was fought?",
+          "answer": "the Louisiana Purchase was completed first",
+          "aliases": ["the Louisiana Purchase was completed first"],
+          "hint": "Both events occurred during the first years of the 1800s.",
+          "choices": ["the Louisiana Purchase was completed", "the Battle of Trafalgar was fought"]
+        },
+        {
+          "id": "timeline-v4-world-history-300",
+          "value": 300,
+          "question": "Which happened first: the United States purchased Alaska from Russia, or the Meiji Restoration began in Japan?",
+          "answer": "the United States purchased Alaska from Russia first",
+          "aliases": ["the United States purchased Alaska from Russia first"],
+          "hint": "These transformations happened in consecutive years during the late 1860s.",
+          "choices": ["the United States purchased Alaska from Russia", "the Meiji Restoration began in Japan"]
+        },
+        {
+          "id": "timeline-v4-world-history-400",
+          "value": 400,
+          "question": "Which happened first: the Berlin Wall fell, or Nelson Mandela was released from prison?",
+          "answer": "the Berlin Wall fell first",
+          "aliases": ["the Berlin Wall fell first"],
+          "hint": "These landmark events happened only a few months apart across 1989 and 1990.",
+          "choices": ["the Berlin Wall fell", "Nelson Mandela was released from prison"]
+        },
+        {
+          "id": "timeline-v4-world-history-500",
+          "value": 500,
+          "question": "Which happened first: the Soviet Union dissolved, or the Maastricht Treaty was signed?",
+          "answer": "the Soviet Union dissolved first",
+          "aliases": ["the Soviet Union dissolved first"],
+          "hint": "These events happened less than two months apart across 1991 and 1992.",
+          "choices": ["the Soviet Union dissolved", "the Maastricht Treaty was signed"],
+          "followup": {
+            "id": "timeline-v4-world-history-500-followup",
+            "question": "In which country was the Maastricht Treaty signed?",
+            "answer": "The Netherlands — the treaty was signed in Maastricht, Netherlands.",
+            "aliases": ["The Netherlands — the treaty was signed in Maastricht, Netherlands.", "The Netherlands", "Netherlands"],
+            "hint": "Follow-up question",
+            "choices": ["Belgium", "France", "Germany", "The Netherlands"],
+            "correctChoice": "The Netherlands"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movies & Music",
+      "clues": [
+        {
+          "id": "timeline-v4-movies-music-100",
+          "value": 100,
+          "question": "Which happened first: Jaws opened in theaters, or Rocky opened in theaters?",
+          "answer": "Jaws opened in theaters first",
+          "aliases": ["Jaws opened in theaters first"],
+          "hint": "These blockbuster films arrived in consecutive years in the mid-1970s.",
+          "choices": ["Jaws opened in theaters", "Rocky opened in theaters"]
+        },
+        {
+          "id": "timeline-v4-movies-music-200",
+          "value": 200,
+          "question": "Which happened first: Back to the Future opened in theaters, or Top Gun opened in theaters?",
+          "answer": "Back to the Future opened in theaters first",
+          "aliases": ["Back to the Future opened in theaters first"],
+          "hint": "These 1980s hits were released less than a year apart.",
+          "choices": ["Back to the Future opened in theaters", "Top Gun opened in theaters"]
+        },
+        {
+          "id": "timeline-v4-movies-music-300",
+          "value": 300,
+          "question": "Which happened first: Nirvana released Nevermind, or Disney's Beauty and the Beast opened in U.S. theaters?",
+          "answer": "Nirvana released Nevermind first",
+          "aliases": ["Nirvana released Nevermind first"],
+          "hint": "Both arrived during the second half of 1991.",
+          "choices": ["Nirvana released Nevermind", "Disney's Beauty and the Beast opened in U.S. theaters"]
+        },
+        {
+          "id": "timeline-v4-movies-music-400",
+          "value": 400,
+          "question": "Which happened first: The Sopranos premiered on HBO, or The Matrix opened in U.S. theaters?",
+          "answer": "The Sopranos premiered on HBO first",
+          "aliases": ["The Sopranos premiered on HBO first"],
+          "hint": "Both debuted in the first few months of 1999.",
+          "choices": ["The Sopranos premiered on HBO", "The Matrix opened in U.S. theaters"]
+        },
+        {
+          "id": "timeline-v4-movies-music-500",
+          "value": 500,
+          "question": "Which happened first: Finding Nemo opened in U.S. theaters, or Pirates of the Caribbean: The Curse of the Black Pearl opened in U.S. theaters?",
+          "answer": "Finding Nemo opened in U.S. theaters first",
+          "aliases": ["Finding Nemo opened in U.S. theaters first"],
+          "hint": "Both films opened during summer 2003, only weeks apart.",
+          "choices": ["Finding Nemo opened in U.S. theaters", "Pirates of the Caribbean: The Curse of the Black Pearl opened in U.S. theaters"],
+          "followup": {
+            "id": "timeline-v4-movies-music-500-followup",
+            "question": "Which animation studio produced Finding Nemo?",
+            "answer": "Pixar — Finding Nemo was produced by Pixar Animation Studios.",
+            "aliases": ["Pixar — Finding Nemo was produced by Pixar Animation Studios.", "Pixar", "Pixar Animation Studios"],
+            "hint": "Follow-up question",
+            "choices": ["Blue Sky Studios", "DreamWorks Animation", "Laika", "Pixar"],
+            "correctChoice": "Pixar"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Space & Exploration",
+      "clues": [
+        {
+          "id": "timeline-v4-space-exploration-100",
+          "value": 100,
+          "question": "Which happened first: Apollo 11 landed humans on the Moon, or Mariner 9 became the first spacecraft to orbit Mars?",
+          "answer": "Apollo 11 landed humans on the Moon first",
+          "aliases": ["Apollo 11 landed humans on the Moon first"],
+          "hint": "The Moon landing came a little more than two years before the Mars-orbit milestone.",
+          "choices": ["Apollo 11 landed humans on the Moon", "Mariner 9 became the first spacecraft to orbit Mars"]
+        },
+        {
+          "id": "timeline-v4-space-exploration-200",
+          "value": 200,
+          "question": "Which happened first: Viking 1 landed on Mars, or Voyager 1 launched?",
+          "answer": "Viking 1 landed on Mars first",
+          "aliases": ["Viking 1 landed on Mars first"],
+          "hint": "These NASA milestones occurred in consecutive years during the 1970s.",
+          "choices": ["Viking 1 landed on Mars", "Voyager 1 launched"]
+        },
+        {
+          "id": "timeline-v4-space-exploration-300",
+          "value": 300,
+          "question": "Which happened first: Mars Pathfinder landed on Mars, or the first module of the International Space Station was launched?",
+          "answer": "Mars Pathfinder landed on Mars first",
+          "aliases": ["Mars Pathfinder landed on Mars first"],
+          "hint": "These missions happened in consecutive years near the end of the 1990s.",
+          "choices": ["Mars Pathfinder landed on Mars", "the first module of the International Space Station was launched"]
+        },
+        {
+          "id": "timeline-v4-space-exploration-400",
+          "value": 400,
+          "question": "Which happened first: Cassini entered orbit around Saturn, or the Huygens probe landed on Titan?",
+          "answer": "Cassini entered orbit around Saturn first",
+          "aliases": ["Cassini entered orbit around Saturn first"],
+          "hint": "The two milestones were part of the same mission and happened about six months apart.",
+          "choices": ["Cassini entered orbit around Saturn", "the Huygens probe landed on Titan"]
+        },
+        {
+          "id": "timeline-v4-space-exploration-500",
+          "value": 500,
+          "question": "Which happened first: New Horizons launched toward Pluto, or Pluto was reclassified as a dwarf planet?",
+          "answer": "New Horizons launched toward Pluto first",
+          "aliases": ["New Horizons launched toward Pluto first"],
+          "hint": "Both happened in 2006, about seven months apart.",
+          "choices": ["New Horizons launched toward Pluto", "Pluto was reclassified as a dwarf planet"],
+          "followup": {
+            "id": "timeline-v4-space-exploration-500-followup",
+            "question": "In what year did New Horizons make its historic flyby of Pluto?",
+            "answer": "2015 — New Horizons flew past Pluto in July 2015.",
+            "aliases": ["2015 — New Horizons flew past Pluto in July 2015.", "2015"],
+            "hint": "Follow-up question",
+            "choices": ["2011", "2013", "2015", "2017"],
+            "correctChoice": "2015"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sports",
+      "clues": [
+        {
+          "id": "timeline-v4-sports-100",
+          "value": 100,
+          "question": "Which happened first: the first Masters Tournament was held, or the first NCAA men's basketball tournament was held?",
+          "answer": "the first Masters Tournament was held first",
+          "aliases": ["the first Masters Tournament was held first"],
+          "hint": "Both American sporting traditions began during the 1930s.",
+          "choices": ["the first Masters Tournament was held", "the first NCAA men's basketball tournament was held"]
+        },
+        {
+          "id": "timeline-v4-sports-200",
+          "value": 200,
+          "question": "Which happened first: Roger Maris hit his 61st home run of the 1961 season, or Wilt Chamberlain scored 100 points in an NBA game?",
+          "answer": "Roger Maris hit his 61st home run first",
+          "aliases": ["Roger Maris hit his 61st home run first"],
+          "hint": "The baseball milestone came several months before the basketball milestone.",
+          "choices": ["Roger Maris hit his 61st home run", "Wilt Chamberlain scored 100 points in an NBA game"]
+        },
+        {
+          "id": "timeline-v4-sports-300",
+          "value": 300,
+          "question": "Which happened first: the Battle of the Sexes tennis match, or Hank Aaron broke Babe Ruth's career home run record?",
+          "answer": "the Battle of the Sexes tennis match first",
+          "aliases": ["the Battle of the Sexes tennis match first"],
+          "hint": "These famous U.S. sports moments happened less than seven months apart.",
+          "choices": ["the Battle of the Sexes tennis match", "Hank Aaron broke Babe Ruth's career home run record"]
+        },
+        {
+          "id": "timeline-v4-sports-400",
+          "value": 400,
+          "question": "Which happened first: the U.S. Dream Team won Olympic basketball gold, or UFC 1 was held?",
+          "answer": "the U.S. Dream Team won Olympic basketball gold first",
+          "aliases": ["the U.S. Dream Team won Olympic basketball gold first"],
+          "hint": "These milestones happened in 1992 and 1993.",
+          "choices": ["the U.S. Dream Team won Olympic basketball gold", "UFC 1 was held"]
+        },
+        {
+          "id": "timeline-v4-sports-500",
+          "value": 500,
+          "question": "Which happened first: Kobe Bryant scored 81 points in an NBA game, or Italy won the 2006 FIFA World Cup?",
+          "answer": "Kobe Bryant scored 81 points in an NBA game first",
+          "aliases": ["Kobe Bryant scored 81 points in an NBA game first"],
+          "hint": "Both happened in 2006, less than six months apart.",
+          "choices": ["Kobe Bryant scored 81 points in an NBA game", "Italy won the 2006 FIFA World Cup"],
+          "followup": {
+            "id": "timeline-v4-sports-500-followup",
+            "question": "Against which team did Kobe Bryant score 81 points?",
+            "answer": "Toronto Raptors — Bryant scored 81 against Toronto.",
+            "aliases": ["Toronto Raptors — Bryant scored 81 against Toronto.", "Toronto Raptors", "Raptors"],
+            "hint": "Follow-up question",
+            "choices": ["New York Knicks", "Phoenix Suns", "Portland Trail Blazers", "Toronto Raptors"],
+            "correctChoice": "Toronto Raptors"
+          }
+        }
+      ]
+    }
+  ]
+}
