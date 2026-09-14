@@ -2499,6 +2499,7 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
 </div>
 
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
+<script src="../assets/network/peer-network.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 const categories=[
@@ -2938,6 +2939,7 @@ function applyRemoteSnapshot(s){
 }
 
 function attachHostConnection(conn){
+  WHF_NETWORK.watchConnection(conn,"timeline-host-data");
   const entry={conn,playerIndex:null,token:null,superseded:false,connectedAt:Date.now(),lastSeen:Date.now()};
   const existing=remoteConnections.get(conn.peer);
   if(existing&&existing!==entry){existing.superseded=true;try{existing.conn.close()}catch(e){}}
@@ -2970,7 +2972,7 @@ function startHostNetwork(){
   clearTimeout(hostNetworkRestartTimer);
   const generation=++hostNetworkGeneration;
   networkReady=false;
-  const peer=new Peer(peerRoomId(roomCode),{debug:0});
+  const peer=new Peer(peerRoomId(roomCode),WHF_NETWORK.peerOptions());WHF_NETWORK.watchPeer(peer,"timeline-host-peer");WHF_NETWORK.peerOpenTimeout(peer,"timeline-host-peer",stage=>{if(!stale())setNetworkStatus(`Phone service unavailable: ${stage}`,true)},10000);
   networkPeer=peer;
   const stale=()=>generation!==hostNetworkGeneration||networkPeer!==peer;
   const restart=()=>{
@@ -3008,11 +3010,11 @@ let remoteResumeTimer=null;
 let remoteReconnectTimer=null;
 let remoteConnectGeneration=0;
 let remoteReconnectAttempt=0;
-function scheduleRemoteReconnect(immediate=false){
+function scheduleRemoteReconnect(immediate=false,message=""){
   if(!remotePhoneMode||remoteReconnectTimer||document.visibilityState==="hidden"||navigator.onLine===false)return;
   const base=immediate?0:Math.min(10000,500*Math.pow(2,Math.min(remoteReconnectAttempt++,5)));
   const delay=base?base+Math.floor(Math.random()*250):0;
-  setNetworkStatus(delay?`Connection interrupted • retrying in ${Math.max(1,Math.ceil(delay/1000))}s…`:"Connection interrupted • rejoining…");
+  setNetworkStatus(message||(delay?`Connection interrupted • retrying in ${Math.max(1,Math.ceil(delay/1000))}s…`:"Connection interrupted • rejoining…"),!!message);
   remoteReconnectTimer=setTimeout(()=>{remoteReconnectTimer=null;connectRemotePhone()},delay);
 }
 function verifyRemotePhoneConnection(){
@@ -3036,12 +3038,15 @@ function connectRemotePhone(){
   hostConnection=null;
   networkPeer=null;
   setNetworkStatus(remoteRecoveryReady?"Reconnecting to the host…":"Connecting to the host…");
-  networkPeer=new Peer(undefined,{debug:0});
-  const fail=()=>{if(generation===remoteConnectGeneration)scheduleRemoteReconnect()};
+  networkPeer=new Peer(undefined,WHF_NETWORK.peerOptions());WHF_NETWORK.watchPeer(networkPeer,"timeline-phone-peer");
+  WHF_NETWORK.peerOpenTimeout(networkPeer,"timeline-phone-peer",stage=>{if(generation===remoteConnectGeneration)scheduleRemoteReconnect(false,`Could not register phone: ${stage} • retrying…`)},10000);
+  const fail=error=>{if(generation===remoteConnectGeneration)scheduleRemoteReconnect(false,error?`Connection failed: ${WHF_NETWORK.errorText(error)} • retrying…`:"")};
   networkPeer.on("open",()=>{
     if(generation!==remoteConnectGeneration)return;
     hostConnection=networkPeer.connect(peerRoomId(roomCode),{reliable:true,serialization:"json",metadata:{role:"phone"}});
     const connection=hostConnection;
+    WHF_NETWORK.watchConnection(connection,"timeline-phone-data");
+    WHF_NETWORK.connectionTimeout(connection,"timeline-phone-data",stage=>{if(generation===remoteConnectGeneration&&connection===hostConnection)scheduleRemoteReconnect(false,`Could not reach host: ${stage} • retrying…`)},15000);
     connection.on("open",()=>{
       if(generation!==remoteConnectGeneration||connection!==hostConnection)return;
       remoteReconnectAttempt=0;
