@@ -197,7 +197,7 @@ function renderHost(){
 }
 function renderScores(){
   const box=document.getElementById("scores");box.innerHTML="";
-  players.forEach((p,i)=>{const el=document.createElement("div");el.className="player"+(i===activePlayer?" active":"")+((p.correctStreak||0)>=3?" on-fire":"")+((p.wrongStreak||0)>=3?" cold":"");el.dataset.player=i;el.onclick=()=>setActivePlayer(i);el.innerHTML=`<div class="player-avatar">${avatarIcon(p.avatar)}</div><div class="player-name">${escapeHtml(p.name)}</div><div class="score">${money(p.score)}</div><div class="player-meta">${escapeHtml(streakLabel(p))}</div><div class="score-controls"><button class="mini red" onclick="event.stopPropagation();adjustScore(${i},-100)">−100</button><button class="mini green" onclick="event.stopPropagation();adjustScore(${i},100)">+100</button></div>`;box.appendChild(el)});
+  players.forEach((p,i)=>{const el=document.createElement("div");el.className="player"+(i===activePlayer?" active":"")+((p.correctStreak||0)>=3?" on-fire":"")+((p.wrongStreak||0)>=3?" cold":"");el.dataset.player=i;el.onclick=()=>setActivePlayer(i);el.innerHTML=`<div class="player-avatar">${avatarIcon(p.avatar)}</div><div class="player-name">${escapeHtml(p.name)}</div><div class="score">${money(p.score)}</div><div class="player-meta">${escapeHtml(streakLabel(p))}</div><div class="score-controls"><button class="mini red" onclick="event.stopPropagation();adjustScore(${i},-100)">−100</button><button class="mini green" onclick="event.stopPropagation();adjustScore(${i},100)">+100</button></div>`;const remove=document.createElement("button");remove.className="mini red";remove.textContent="Remove";remove.onclick=event=>{event.stopPropagation();hostRemoveClassicPlayer(i)};el.querySelector(".score-controls")?.appendChild(remove);box.appendChild(el)});
 }
 function usedWinners(rec){if(!rec||!rec.winners?.length)return "No one";return rec.winners.join(", ")}
 function renderBoard(){
@@ -308,6 +308,15 @@ function removeClassicPlayer(index,ctx){
   renderHost();broadcastState();
   if(current&&!questionRevealed&&allSubmitted())revealQuestion(false);
   return removed;
+}
+function hostRemoveClassicPlayer(index){
+  const player=players[index];if(!player)return;
+  if(!confirm(`Remove ${player.name} from this game?`))return;
+  const ctx=[...remoteContexts.values()].find(context=>context.playerIndex===index);
+  const removed=removeClassicPlayer(index,ctx);
+  if(!removed)return;
+  if(ctx){try{ctx.conn.send({type:"removed-from-game"})}catch{}setTimeout(()=>{try{ctx.conn.close()}catch{}},80)}
+  toast(`${removed.name} was removed`,`neutral`);
 }
 function handleRemoteAction(ctx,action){
   if(!action||typeof action!=="object")return;
@@ -429,7 +438,7 @@ function connectPhoneToHost(room,force=false){
   const stale=()=>generation!==phoneConnectionGeneration||phoneConn!==conn;
   WHF_NETWORK.watchConnection(conn,"classic-phone-data");WHF_NETWORK.connectionTimeout(conn,"classic-phone-data",stage=>{if(!stale())schedulePhoneReconnect(room,`Could not reach host: ${stage} • retrying…`)},15000);
   conn.on("open",()=>{if(stale())return;phoneReconnectAttempt=0;document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connected`;document.getElementById("joinStatus").textContent="";const token=phoneTokenForRoom(room);if(token)conn.send({type:"rejoin",token});else conn.send({type:"sync"})});
-  conn.on("data",msg=>{if(stale())return;if(msg?.type==="state"){phoneState=msg;renderPhone()}else if(msg?.type==="joined"){if(msg.token)savePhoneToken(room,msg.token)}else if(msg?.type==="left"){clearPhoneToken(room);phoneLeaving=true;phoneState=null;document.getElementById("gameCard").style.display="none";document.getElementById("joinCard").style.display="block";document.getElementById("joinStatus").textContent="You left this game.";try{conn.close();phonePeer?.destroy()}catch{}}else if(msg?.type==="join-error")document.getElementById("joinStatus").textContent=msg.message||"Could not join."});
+  conn.on("data",msg=>{if(stale())return;if(msg?.type==="state"){phoneState=msg;renderPhone()}else if(msg?.type==="joined"){if(msg.token)savePhoneToken(room,msg.token)}else if(msg?.type==="left"||msg?.type==="removed-from-game"){clearPhoneToken(room);phoneLeaving=true;phoneState=null;document.getElementById("gameCard").style.display="none";document.getElementById("joinCard").style.display="block";document.getElementById("joinStatus").textContent=msg?.type==="removed-from-game"?"You were removed from this game.":"You left this game.";try{conn.close();phonePeer?.destroy()}catch{}}else if(msg?.type==="join-error")document.getElementById("joinStatus").textContent=msg.message||"Could not join."});
   conn.on("close",()=>{if(stale())return;phoneConn=null;schedulePhoneReconnect(room)});conn.on("error",()=>{if(stale())return;schedulePhoneReconnect(room)});
 }
 function createPhonePeer(room){

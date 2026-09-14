@@ -2806,6 +2806,26 @@ function removeTimelinePlayer(index,entry){
   return removed;
 }
 
+function hostRemoveTimelinePlayer(index){
+  const player=players[index];if(!player||index<0||index>=playerCount)return;
+  if(!confirm(`Remove ${player.name} from this game?`))return;
+  const entry=[...remoteConnections.values()].find(context=>context.playerIndex===index);
+  const removed=removeTimelinePlayer(index,entry);
+  if(!removed)return;
+  if(entry){try{entry.conn.send({type:"removed-from-game"})}catch{}setTimeout(()=>{try{entry.conn.close()}catch{}},80)}
+  showToast(`${removed.name} was removed`,`neutral`);
+}
+
+function hostRemoveTimelinePlayer(index){
+  const player=players[index];if(!player||index<0||index>=playerCount)return;
+  if(!confirm(`Remove ${player.name} from this game?`))return;
+  const entry=[...remoteConnections.values()].find(context=>context.playerIndex===index);
+  const removed=removeTimelinePlayer(index,entry);
+  if(!removed)return;
+  if(entry){try{entry.conn.send({type:"removed-from-game"})}catch{}setTimeout(()=>{try{entry.conn.close()}catch{}},80)}
+  showToast(`${removed.name} was removed`,`neutral`);
+}
+
 function handleRemoteAction(entry,msg){
   if(!entry||!msg||msg.type!=="action")return;
   entry.lastSeen=Date.now();
@@ -3062,12 +3082,12 @@ function connectRemotePhone(){
         document.getElementById("controllerPreview").classList.add("showing");
         document.body.classList.add("phone-preview-open");
         setNetworkStatus("Connected to host");
-      }else if(msg?.type==="left"){
+      }else if(msg?.type==="left"||msg?.type==="removed-from-game"){
         try{localStorage.removeItem(remoteProfileKey());sessionStorage.removeItem(remoteProfileKey())}catch(e){}
         joinedPhonePlayerIndex=null;remoteRecoveryReady=false;remoteLeaving=true;
         document.getElementById("controllerPreview").classList.remove("showing");document.body.classList.remove("phone-preview-open");
         document.getElementById("phoneJoin").classList.add("showing");document.getElementById("joinNote").textContent="You left this game. You may join again while the lobby is open.";
-        setNetworkStatus("Left the game");try{connection.close();networkPeer?.destroy()}catch(e){}
+        setNetworkStatus(msg?.type==="removed-from-game"?"You were removed from this game":"Left the game");try{connection.close();networkPeer?.destroy()}catch(e){}
       }else if(msg?.type==="resume-ok"){
         remoteReconnectAttempt=0;setNetworkStatus("Connected to host");
       }else if(msg?.type==="join-error"){
@@ -3878,8 +3898,10 @@ function renderPlayers(){
       <div class="score-controls">
         <button class="mini green" onclick="adjustScore(${i},100)">+100</button>
         <button class="mini red" onclick="adjustScore(${i},-100)">−100</button>
+        <button class="mini red" onclick="event.stopPropagation();hostRemoveTimelinePlayer(${i})">Remove</button>
       </div>`;
     wrap.appendChild(p);
+    if(i<playerCount){const remove=document.createElement("button");remove.className="mini red";remove.textContent="Remove";remove.onclick=event=>{event.stopPropagation();hostRemoveTimelinePlayer(i)};p.querySelector(".score-controls")?.appendChild(remove)}
   }
 }
 
