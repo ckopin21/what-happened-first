@@ -43,6 +43,34 @@ if(!html.includes('Choose the next question. Everyone will answer it.'))throw ne
 if(!/phoneAnswerInput[\s\S]*phoneHintAction[\s\S]*phone-submit/.test(html))throw new Error('Phone answer/hint/submit order is incorrect');
 if(!html.includes('join-avatar{width:100%!important;min-width:0!important'))throw new Error('Phone avatar overflow fix missing');
 if(!html.includes('CLASSIC_FULL_PHONE_PREVIEW_V1')||!html.includes('classicPreviewJoin')||!html.includes('PHONE CONNECTED • PREVIEW ONLY'))throw new Error('Full Classic phone preview missing');
+
+const regressionIssues=[];
+const requirePattern=(name,pattern)=>{if(!pattern.test(html))regressionIssues.push(name)};
+requirePattern('explicit lobby/start state',/(?:gameStarted|gamePhase|lobbyState)/);
+requirePattern('host start action',/function\s+(?:startGame|hostStartGame)\s*\(/);
+const remoteSelectDirectGate=/action\.type\s*===\s*["']select["'][\s\S]{0,240}(?:gameStarted|gamePhase|lobbyState)/.test(html);
+const remoteSelectDelegatedGate=/action\.type\s*===\s*["']select["'][^\n]*openClue\(/.test(html)&&/function\s+openClue\s*\([^)]*\)\s*\{[^\n]*(?:gameStarted|gamePhase|lobbyState)/.test(html);
+const remoteSelectCentralGate=/function\s+handleRemoteAction[\s\S]{0,2200}if\s*\(\s*!gameStarted[\s\S]{0,1000}action\.type\s*===\s*["']select["']/.test(html);
+if(!remoteSelectDirectGate&&!remoteSelectDelegatedGate&&!remoteSelectCentralGate)regressionIssues.push('remote selection start gate');
+requirePattern('persistent reconnect token',/localStorage\.getItem\([\s\S]{0,160}(?:token|TOKEN)/i);
+requirePattern('validated reconnect token',/function\s+safeToken\s*\(/);
+requirePattern('token-based player reclaim',/findIndex\([^)]*\.token\s*===\s*token/);
+requirePattern('duplicate connection displacement or binding',/(?:replace|supersed|previous|existing|duplicate|playerConnections|connectionByPlayer)/i);
+requirePattern('state resync after reconnect',/(?:rejoin|resume)[\s\S]{0,300}(?:sendState|broadcastState)/);
+requirePattern('lobby state sent to phones',/!gameStarted[^\n]*mode\s*:\s*["']lobby["']/);
+requirePattern('stale action epoch validation',/action\.gameEpoch\s*!==\s*gameEpoch/);
+requirePattern('per-question action nonce validation',/action\.actionNonce\s*!==\s*actionNonce/);
+requirePattern('generation guard on reconnect callbacks',/(?:phoneConnectionGeneration|connectionGeneration)[\s\S]{0,500}stale/);
+requirePattern('visibility recovery',/visibilitychange/);
+requirePattern('page restore recovery',/pageshow/);
+requirePattern('online recovery',/addEventListener\(["']online["']/);
+requirePattern('stale connection cleanup',/conn\.on\(["']close["'][\s\S]{0,180}(?:delete|cleanup|remove)/);
+requirePattern('duplicate answer prevention',/submissions\.has\(i\)/);
+requirePattern('duplicate scoring prevention',/questionResolved/);
+requirePattern('new game keeps roster',/function\s+newGame\s*\([^)]*\)\s*\{(?![\s\S]{0,500}players\s*=\s*\[)/);
+requirePattern('reset clears roster',/function\s+resetGame\s*\([^)]*\)\s*\{[\s\S]{0,500}players\s*=\s*\[\]/);
+if(/action\.(?:score|playerIndex)|action\.type\s*===\s*["'](?:score|set-state|set-player)["']/.test(html))regressionIssues.push('phone action must not carry score/player authority');
+if(regressionIssues.length)throw new Error(`Classic regression checks failed:\n- ${regressionIssues.join('\n- ')}`);
 // CLASSIC_PARITY_V2_AUDIT
 // CLASSIC_DEVTOOLS_AUDIT
 console.log(`Classic Jeopardy audit passed: ${pack.genre||pack.id}, ${pack.categories.length} categories`);

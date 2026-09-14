@@ -1,6 +1,8 @@
 const fs = require("fs");
+const path = require("path");
 
 const file = process.argv[2];
+if (!file) throw new Error("Usage: node work/audit-game.js outputs/dog-jeopardy.html");
 const html = fs.readFileSync(file, "utf8");
 const script = html.split("<script>")[1]?.split("</script>")[0];
 if (!script) throw new Error("Inline game script not found");
@@ -56,10 +58,71 @@ const definedFunctions = new Set([...script.matchAll(/function\s+([A-Za-z_$][\w$
 const handlers = [...html.matchAll(/\sonclick="([A-Za-z_$][\w$]*)\s*\(/g)].map((match) => match[1]);
 const missingHandlers = [...new Set(handlers.filter((handler) => !definedFunctions.has(handler)))];
 
+// Asset regression checks intentionally resolve paths relative to the page, just as a
+// browser does on GitHub Pages. This catches both a missing file and the historically
+// easy-to-miss `image`/`src` avatar property mismatch.
+const assetReferences = [...new Set([...html.matchAll(/["']((?:\.\.\/)?assets\/[^"'?]+)(?:\?[^"']*)?["']/g)].map(match => match[1]))];
+const assetIssues = [];
+for (const reference of assetReferences) {
+  const resolved = path.resolve(path.dirname(file), reference);
+  if (!fs.existsSync(resolved)) {
+    assetIssues.push({ reference, issue: "missing file" });
+    continue;
+  }
+  const bytes = fs.readFileSync(resolved);
+  if (!bytes.length) assetIssues.push({ reference, issue: "empty file" });
+  if (/\.svg$/i.test(resolved)) {
+    const svg = bytes.toString("utf8").replace(/^\uFEFF/, "");
+    if (!/^\s*<svg\b/i.test(svg) || !/<\/svg>\s*$/i.test(svg) || !/\bviewBox=["'][^"']+["']/i.test(svg)) {
+      assetIssues.push({ reference, issue: "invalid SVG wrapper or missing viewBox" });
+    }
+    if (/<(?:image|script)\b|\b(?:href|src)=["'](?:https?:|data:)/i.test(svg)) {
+      assetIssues.push({ reference, issue: "SVG embeds an external/data resource" });
+    }
+  }
+}
+const avatarSource = script.match(/const avatarOptions\s*=\s*(\[[\s\S]*?\]);/)?.[1];
+if (!avatarSource) assetIssues.push({ reference: "avatarOptions", issue: "avatar declaration missing" });
+else {
+  const avatars = new Function(`return ${avatarSource}`)();
+  avatars.forEach((avatar, index) => {
+    if (!avatar.name || typeof avatar.src !== "string" || !avatar.src) {
+      assetIssues.push({ reference: `avatarOptions[${index}]`, issue: "must define name and src" });
+    }
+  });
+}
+
+const regressionIssues = [];
+const requirePattern = (name, pattern) => {
+  if (!pattern.test(script)) regressionIssues.push(name);
+};
+requirePattern("explicit lobby/start state", /(?:gameStarted|gamePhase|lobbyState)/);
+requirePattern("host start action", /function\s+(?:startGame|hostStartGame)\s*\(/);
+requirePattern("start gate on remote clue selection", /action\s*===\s*["']select["'][\s\S]{0,240}(?:gameStarted|gamePhase|lobbyState)/);
+requirePattern("persistent reconnect token", /localStorage\.getItem\([\s\S]{0,160}(?:token|TOKEN)/i);
+requirePattern("token validation", /function\s+(?:safeToken|validToken|normalizeToken)\s*\(/);
+requirePattern("token-based player reclaim", /(?:remotePlayerTokens\.get|findIndex\([^)]*token)/);
+requirePattern("duplicate connection displacement or binding", /(?:replace|supersed|previous|existing|duplicate|playerConnections|connectionByPlayer)/i);
+requirePattern("state resync after reconnect", /(?:resume|rejoin)[\s\S]{0,300}(?:broadcastGameState|sendNetworkSnapshot|sendState)/);
+requirePattern("ordered state snapshots", /revision[\s\S]{0,300}(?:appliedNetworkRevision|lastAppliedRevision)/);
+requirePattern("idempotent remote intents", /intentId[\s\S]{0,500}(?:recentRemoteIntents|seenIntents|processedIntents)/);
+requirePattern("visibility recovery", /visibilitychange/);
+requirePattern("page restore recovery", /pageshow/);
+requirePattern("online recovery", /addEventListener\(["']online["']/);
+requirePattern("stale connection cleanup", /conn\.on\(["']close["'][\s\S]{0,180}(?:delete|cleanup|remove)/);
+requirePattern("epoch guard for delayed work", /gameEpoch/);
+requirePattern("duplicate scoring guard", /questionResolved/);
+requirePattern("lobby state sent to phones", /gameStarted[\s\S]{0,500}(?:Waiting for host|lobby)/i);
+requirePattern("new game keeps roster", /function\s+newGame\s*\([^)]*\)\s*\{[\s\S]{0,120}(?:resetGameState\(true\)|resetGameState\([^)]*keep)/);
+requirePattern("full reset clears roster", /function\s+resetGame\s*\([^)]*\)\s*\{[\s\S]{0,120}(?:resetGameState\(false\)|playerCount\s*=\s*0)/);
+if (/\{\s*(?:score|playerIndex)\s*:/.test(script.match(/function\s+sendRemoteAction[\s\S]*?\n\}/)?.[0] || "")) {
+  regressionIssues.push("phone intent helper must not send score/playerIndex authority");
+}
+
 const specials=categories.flatMap((category)=>category.clues.map((clue,row)=>({category:category.name,row,clue}))).filter(x=>x.clue.special);
 if(specials.length!==5||specials.some(x=>x.row!==4||!x.clue.fq||!x.clue.fa)) throw new Error("Expected five playable 500-point follow-up clues");
 if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!(html.includes("AVATAR_CENTERING_V12")||html.includes("AVATAR_NEW_VECTOR_ART_V14"))) throw new Error("Randomized follow-up/avatar centering fix missing");
-if(!html.includes("shuffledPrimaryChoices")||!html.includes("primaryChoicesForCurrent")||!html.includes("choiceOrder:Array.isArray(current.choiceOrder)")||!html.includes('broadcastGameState(true);\n      showToast("Primary answer correct"')) throw new Error("Primary choice shuffle or follow-up broadcast fix missing");
+if(!html.includes("shuffledPrimaryChoices")||!html.includes("primaryChoicesForCurrent")||!/choiceOrder\s*:\s*Array\.isArray\(current\.choiceOrder\)/.test(html)||!/broadcastGameState\(true\)\s*;\s*showToast\(["']Primary answer correct["']/.test(html)) throw new Error("Primary choice shuffle or follow-up broadcast fix missing");
 if(!html.includes("PHONE_SCROLL_CHOICE_FIX_V7")||!html.includes("primaryCorrectSideBag")||!html.includes("buildPrimaryChoiceOrder")||!html.includes("nextPrimaryCorrectSide")) throw new Error("Phone scrolling or balanced primary answer-side randomization missing");
 if(!html.includes("DAILY_STATIC_WAGER_V11")||!html.includes("PHONE_HORIZONTAL_GUTTER_FIX_V11")) throw new Error("Static Daily Double wager or mobile gutter fix missing");
 for(const amount of [100,200,300,400,500,1000]){if(!html.includes("confirmDailyWager("+amount+")")||!html.includes("phoneConfirmDailyWager("+amount+")"))throw new Error("Missing static Daily Double wager "+amount)}
@@ -75,7 +138,9 @@ const results = {
   duplicateIds,
   missingIds,
   missingHandlers,
+  assets: { references: assetReferences.length, issues: assetIssues },
+  regressionIssues,
 };
 
 console.log(JSON.stringify(results, null, 2));
-if (questionIssues.length || followupIssues.length || hintIssues.length || duplicateIds.length || missingIds.length || missingHandlers.length) process.exitCode = 1;
+if (questionIssues.length || followupIssues.length || hintIssues.length || duplicateIds.length || missingIds.length || missingHandlers.length || assetIssues.length || regressionIssues.length) process.exitCode = 1;
