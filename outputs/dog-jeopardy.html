@@ -2553,6 +2553,7 @@ let devForcedMultiplier=0;
 let devForceDaily=false;
 let lastChanceAwarded=false;
 let lastChancePlayerIndex=null;
+let lastChancePlayerId=null;
 let lastChancePending=false;
 
 
@@ -2731,7 +2732,7 @@ function makeNetworkSnapshot(){
   const followAnswerVisible=!!document.getElementById("followAnswer")?.classList.contains("visible");
   return {
     type:"state",revision:networkRevision,gameStarted,playerCount,activePlayer,used:[...used],gameFinished,hintUsed,questionResolved,pack:{id:TIMELINE_PACK.id,name:TIMELINE_PACK.name,genre:TIMELINE_PACK.genre},
-    selectedChoice,submittedChoice,choiceLocked,lastChancePending,lastChancePlayerIndex,
+    selectedChoice,submittedChoice,choiceLocked,lastChancePending,lastChancePlayerIndex,lastChancePlayerId,
     multiplier:currentMultiplier(),modalShowing:!!document.getElementById("modal")?.classList.contains("showing"),
     players:players.slice(0,playerCount).map(p=>({playerId:p.playerId,name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatarIndex:avatarIndexFor(p.avatar)})),
     current:current?{key:current.key,base:current.base,mult:current.mult,value:current.value,lastChanceMult:current.lastChanceMult,isDaily:!!current.isDaily,choiceOrder:Array.isArray(current.choiceOrder)?current.choiceOrder.slice():[],item:{q:current.item.q,h:current.item.h,a:current.item.a,choices:current.item.choices,special:!!current.item.special,fq:current.item.fq,fa:current.item.fa,fchoices:current.item.fchoices,fcorrect:current.item.fcorrect,fc:Array.isArray(current.followOrder)?current.followOrder:followupChoicesFor(current.item)},followChoice:Number.isInteger(current.followChoice)?current.followChoice:null,followOrder:Array.isArray(current.followOrder)?current.followOrder:null}:null,
@@ -2783,13 +2784,13 @@ function removeTimelinePlayer(index,entry){
   if((wasActive&&(current||pendingDaily))||leavesTie){
     current=null;pendingDaily=null;primaryBanked=false;reviewMode=false;hintUsed=false;questionResolved=false;selectedChoice=null;submittedChoice=null;choiceLocked=false;
     document.getElementById("modal")?.classList.remove("showing");document.getElementById("dailyModal")?.classList.remove("showing");document.getElementById("tiebreaker")?.classList.remove("showing");
-    tiePlayers=[];tieActive=false;tieResolved=false;tieAnswered=new Set();tieWinnerIndex=null;lastChancePending=false;lastChancePlayerIndex=null;
+    tiePlayers=[];tieActive=false;tieResolved=false;tieAnswered=new Set();tieWinnerIndex=null;lastChancePending=false;lastChancePlayerIndex=null;lastChancePlayerId=null;
   }
   const removed=players[index];
   for(let i=index;i<playerCount-1;i++)players[i]=players[i+1];
   players[playerCount-1]=makePlayer({name:`Player ${playerCount}`,score:0,streak:0,lossStreak:0,avatar:""});
   playerCount--;
-  if(lastChancePlayerIndex===index){lastChancePending=false;lastChancePlayerIndex=null}else if(lastChancePlayerIndex>index)lastChancePlayerIndex--;
+  if(lastChancePlayerId===removed.playerId){lastChancePending=false;lastChancePlayerIndex=null;lastChancePlayerId=null}
   playerTempStatus.splice(index,1);playerTempStatus.push(null);
   remotePlayerTokens.forEach((mapped,token)=>{if(mapped===index)remotePlayerTokens.delete(token);else if(mapped>index)remotePlayerTokens.set(token,mapped-1)});
   remoteConnections.forEach(ctx=>{if(ctx===entry){ctx.playerIndex=null;ctx.playerId=null;ctx.token=null}else if(ctx.playerIndex>index)ctx.playerIndex--});
@@ -2928,6 +2929,7 @@ function applyRemoteSnapshot(s){
   submittedChoice=s.submittedChoice||null;choiceLocked=!!s.choiceLocked;lastChancePending=!!s.lastChancePending;lastChancePlayerIndex=s.lastChancePlayerIndex;
   remotePhaseMultiplier=Number(s.multiplier)||1;
   (s.players||[]).forEach((p,i)=>{players[i]=makePlayer({playerId:p.playerId,name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatar:avatarOptions[p.avatarIndex]?.src||""})});
+  lastChancePlayerId=s.lastChancePlayerId||players[lastChancePlayerIndex]?.playerId||null;
   current=s.current?{...s.current,item:{...s.current.item}}:null;
   pendingDaily=s.pendingDaily?{...s.pendingDaily}:null;
   tieActive=!!s.tie?.active;tieResolved=!!s.tie?.resolved;tieQuestionIndex=s.tie?.questionIndex??-1;
@@ -3426,7 +3428,7 @@ function updatePhoneStreakVisual(){
   const phoneIndex=joinedPhonePlayerIndex ?? activePlayer;
   const p=players[phoneIndex];
   wrap.classList.remove("on-fire","on-cold","last-chance");
-  if(lastChancePending && lastChancePlayerIndex===phoneIndex) wrap.classList.add("last-chance");
+  if(lastChancePending && players[phoneIndex]?.playerId===lastChancePlayerId) wrap.classList.add("last-chance");
   badge.style.display="none";
   badge.className="phone-streak-badge";
 
@@ -3887,7 +3889,7 @@ function renderPlayers(){
   wrap.innerHTML="";
   for(let i=0;i<5;i++){
     const p=document.createElement("div");
-    p.className="player"+(i===activePlayer?" active":"")+(i>=playerCount?" hidden":"")+(players[i].streak>=3?" on-fire":"")+(players[i].lossStreak>=3?" on-cold":"")+(lastChancePending && lastChancePlayerIndex===i?" last-chance":"");
+    p.className="player"+(i===activePlayer?" active":"")+(i>=playerCount?" hidden":"")+(players[i].streak>=3?" on-fire":"")+(players[i].lossStreak>=3?" on-cold":"")+(lastChancePending && players[i]?.playerId===lastChancePlayerId?" last-chance":"");
     p.id="player"+i;
     p.onclick=e=>{
       if(e.target.closest(".score-controls")) return;
@@ -4295,7 +4297,7 @@ function finalizeQuestion(delta,wasCorrect,outcome){
   current.item.player=activePlayer;
   current.item.winnerName = wasCorrect ? p.name : "No winner";
 
-  if(current.lastChanceMult>1 && activePlayer===lastChancePlayerIndex){
+  if(current.lastChanceMult>1 && players[activePlayer]?.playerId===lastChancePlayerId){
     lastChancePending=false;
   }
 
@@ -4444,7 +4446,7 @@ function devPreview(kind){
       return;
     }
     lastChanceAwarded=true;
-    lastChancePlayerIndex=activePlayer;
+    lastChancePlayerIndex=activePlayer;lastChancePlayerId=players[activePlayer]?.playerId||null;
     lastChancePending=true;
     setDevArmed(`DEV: LAST CHANCE ACTIVE FOR ${players[activePlayer].name.toUpperCase()}`);
     showLastChanceAnnouncement(activePlayer);
@@ -4529,7 +4531,7 @@ function maybeTriggerLastChance(){
   }
 
   lastChanceAwarded=true;
-  lastChancePlayerIndex=pick;
+  lastChancePlayerIndex=pick;lastChancePlayerId=players[pick]?.playerId||null;
   lastChancePending=true;
   showLastChanceAnnouncement(pick);
   renderPlayers();
@@ -4549,7 +4551,7 @@ function showLastChanceAnnouncement(i){
 }
 
 function lastChanceMultiplierForPlayer(i){
-  return lastChancePending && lastChancePlayerIndex===i ? 2 : 1;
+  return lastChancePending && players[i]?.playerId===lastChancePlayerId ? 2 : 1;
 }
 
 function checkPhaseTransition(){
@@ -4858,7 +4860,7 @@ function resetGameState(keepPlayers){
   selectedJoinAvatar=0;
   lastPhase=1; pendingDaily=null; tiePlayers=[];
   tieQuestionIndex=-1; tieActive=false; tieResolved=false; tieAnswered=new Set(); tieWinnerIndex=null; developerTieBreaker=false;
-  lastChanceAwarded=false; lastChancePlayerIndex=null; lastChancePending=false;
+  lastChanceAwarded=false; lastChancePlayerIndex=null; lastChancePlayerId=null; lastChancePending=false;
   devForcedMultiplier=0; devForceDaily=false; setDevArmed("");
   document.getElementById("modal").classList.remove("showing");
   document.getElementById("dailyModal").classList.remove("showing");

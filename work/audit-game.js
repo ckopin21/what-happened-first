@@ -119,6 +119,8 @@ requirePattern("persistent reconnect token", /localStorage\.getItem\([\s\S]{0,16
 requirePattern("token validation", /function\s+(?:safeToken|validToken|normalizeToken)\s*\(/);
 requirePattern("token-based player reclaim", /(?:remotePlayerTokens\.get|findIndex\([^)]*token)/);
 requirePattern("Timeline connection identity binding", /entry\.playerId=players\[idx\]\.playerId/);
+requirePattern("Last Chance identity state", /let lastChancePlayerId=null/);
+requirePattern("Last Chance identity comparison", /players\[i\]\?\.playerId===lastChancePlayerId/);
 requirePattern("duplicate connection displacement or binding", /(?:replace|supersed|previous|existing|duplicate|playerConnections|connectionByPlayer)/i);
 requirePattern("state resync after reconnect", /(?:resume|rejoin)[\s\S]{0,300}(?:broadcastGameState|sendNetworkSnapshot|sendState)/);
 requirePattern("ordered state snapshots", /revision[\s\S]{0,300}(?:appliedNetworkRevision|lastAppliedRevision)/);
