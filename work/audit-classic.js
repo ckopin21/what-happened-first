@@ -41,6 +41,7 @@ if(!/phoneAnswerInput[\s\S]*phoneHintAction[\s\S]*phone-submit/.test(html))throw
 if(!html.includes('join-avatar{width:100%!important;min-width:0!important'))throw new Error('Phone avatar overflow fix missing');
 if(!html.includes('CLASSIC_FULL_PHONE_PREVIEW_V1')||!html.includes('classicPreviewJoin')||!html.includes('PHONE CONNECTED • PREVIEW ONLY'))throw new Error('Full Classic phone preview missing');
 if(!html.includes('href="../index.html"')||!html.includes('>Game Modes</a>'))throw new Error('Classic Game Modes navigation missing');
+if(!html.includes('onclick="removeClassicPhonePlayer()"')||!html.includes('>Remove</button>')||!/function removeClassicPhonePlayer\(/.test(html))throw new Error('Classic phone Remove control missing');
 
 const regressionIssues=[];
 const requirePattern=(name,pattern)=>{if(!pattern.test(html))regressionIssues.push(name)};

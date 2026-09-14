@@ -705,6 +705,9 @@ body.fullscreen-game .player.on-cold:before{
   font-size:24px;
   line-height:1;
 }
+.phone-topbar .phone-profile-action{width:auto;min-width:48px;height:38px;padding:0 10px;border-radius:10px;font-size:13px}
+.phone-topbar .phone-profile-action.phone-remove{min-width:66px}
+.phone-close.phone-remove{background:var(--bad);color:#fff;font-size:13px;font-weight:1000}
 .phone-player{
   margin-top:18px;
   font-size:30px;
@@ -2402,8 +2405,8 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
         <div class="phone-room">Room <span id="phoneRoomCode">----</span></div>
       </div>
       <button class="phone-close" onclick="closeControllerPreview()">×</button>
-      <button class="phone-close" id="phoneProfileBtn" onclick="editTimelinePhoneProfile()" title="Edit Profile">Edit</button>
-      <button class="phone-close" id="phoneLeaveBtn" onclick="leavePhoneGame()" title="Leave Game">Leave</button>
+      <button class="phone-close phone-profile-action" id="phoneProfileBtn" onclick="editTimelinePhoneProfile()" title="Edit Profile">Edit</button>
+      <button class="phone-close phone-profile-action phone-remove" id="phoneRemoveBtn" onclick="removeTimelinePhonePlayer()" title="Remove yourself from this game">Remove</button>
     </div>
 
     <div class="phone-player-wrap" id="phonePlayerWrap">
@@ -4794,10 +4797,14 @@ async function switchTimelinePack(id){
 }
 
 function leavePhoneGame(){
+  removeTimelinePhonePlayer();
+}
+
+function removeTimelinePhonePlayer(){
   if(!remotePhoneMode||!Number.isInteger(joinedPhonePlayerIndex)||!hostConnection?.open)return;
-  if(!confirm("Leave this game?"))return;
+  if(!confirm("Remove yourself from this game?"))return;
   remoteLeaving=true;
-  setNetworkStatus("Leaving game…");
+  setNetworkStatus("Removing you from the game…");
   sendRemoteAction("leave");
 }
 

@@ -148,6 +148,7 @@ if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!
 if(!html.includes("shuffledPrimaryChoices")||!html.includes("primaryChoicesForCurrent")||!/choiceOrder\s*:\s*Array\.isArray\(current\.choiceOrder\)/.test(html)||!/broadcastGameState\(true\)\s*;\s*showToast\(["']Primary answer correct["']/.test(html)) throw new Error("Primary choice shuffle or follow-up broadcast fix missing");
 if ((script.match(/textContent=\"Edit\"/g)||[]).length !== 1) throw new Error("Timeline must render exactly one Edit control per player");
 if (!/function editTimelinePlayer\([\s\S]*?window\.WHF_PROFILE_EDITOR\?\.open/.test(script) || !/function editTimelinePhoneProfile\([\s\S]*?window\.WHF_PROFILE_EDITOR\?\.open/.test(script)) throw new Error("Timeline Edit controls must open the shared profile editor");
+if (!html.includes('id="phoneRemoveBtn"') || !/function removeTimelinePhonePlayer\(/.test(script)) throw new Error("Timeline phone Remove control missing");
 if (!html.includes('href="../index.html"') || !html.includes('>Game Modes</a>')) throw new Error("Timeline Game Modes navigation missing");
 if(!html.includes("PHONE_SCROLL_CHOICE_FIX_V7")||!html.includes("primaryCorrectSideBag")||!html.includes("buildPrimaryChoiceOrder")||!html.includes("nextPrimaryCorrectSide")) throw new Error("Phone scrolling or balanced primary answer-side randomization missing");
 if(!html.includes("DAILY_STATIC_WAGER_V11")||!html.includes("PHONE_HORIZONTAL_GUTTER_FIX_V11")) throw new Error("Static Daily Double wager or mobile gutter fix missing");
