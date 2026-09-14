@@ -9,6 +9,13 @@
       "genre": "General Knowledge",
       "answerType": "open-ended",
       "file": "../catalog/general-knowledge-v3.json"
+    },
+    {
+      "id": "general-knowledge-v4",
+      "name": "General Knowledge II",
+      "genre": "General Knowledge",
+      "answerType": "open-ended",
+      "file": "../catalog/general-knowledge-v4.json"
     }
   ]
 }
