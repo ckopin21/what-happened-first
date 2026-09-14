@@ -482,6 +482,246 @@
       "category": "Words & Language"
     },
     {
+      "id": "classic-v4-ancient-world-100",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What writing system of picture-like symbols is most associated with ancient Egypt?",
+      "answer": "Hieroglyphs",
+      "category": "Ancient World"
+    },
+    {
+      "id": "classic-v4-ancient-world-200",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What Roman city was buried by Mount Vesuvius in AD 79?",
+      "answer": "Pompeii",
+      "category": "Ancient World"
+    },
+    {
+      "id": "classic-v4-ancient-world-300",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Which philosopher tutored Alexander the Great?",
+      "answer": "Aristotle",
+      "category": "Ancient World"
+    },
+    {
+      "id": "classic-v4-ancient-world-400",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "The Parthenon stands on the Acropolis of what ancient Greek city?",
+      "answer": "Athens",
+      "category": "Ancient World"
+    },
+    {
+      "id": "classic-v4-ancient-world-500",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Which Carthaginian general crossed the Alps with war elephants during the Second Punic War?",
+      "answer": "Hannibal",
+      "category": "Ancient World"
+    },
+    {
+      "id": "classic-v4-ancient-world-500-followup",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "In what year BC did Hannibal cross the Alps into Italy?",
+      "answer": "218 BC",
+      "category": "Ancient World"
+    },
+    {
+      "id": "classic-v4-books-stories-100",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Who wrote Charlotte's Web?",
+      "answer": "E. B. White",
+      "category": "Books & Stories"
+    },
+    {
+      "id": "classic-v4-books-stories-200",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What surname do Meg, Jo, Beth, and Amy share in Little Women?",
+      "answer": "March",
+      "category": "Books & Stories"
+    },
+    {
+      "id": "classic-v4-books-stories-300",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Which novel begins with the line “Call me Ishmael”?",
+      "answer": "Moby-Dick",
+      "category": "Books & Stories"
+    },
+    {
+      "id": "classic-v4-books-stories-400",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Which author created the detective Hercule Poirot?",
+      "answer": "Agatha Christie",
+      "category": "Books & Stories"
+    },
+    {
+      "id": "classic-v4-books-stories-500",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What fictional town is the central setting of One Hundred Years of Solitude?",
+      "answer": "Macondo",
+      "category": "Books & Stories"
+    },
+    {
+      "id": "classic-v4-books-stories-500-followup",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Who wrote One Hundred Years of Solitude?",
+      "answer": "Gabriel García Márquez",
+      "category": "Books & Stories"
+    },
+    {
+      "id": "classic-v4-earth-weather-100",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What instrument is used to measure temperature?",
+      "answer": "Thermometer",
+      "category": "Earth & Weather"
+    },
+    {
+      "id": "classic-v4-earth-weather-200",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Which layer of Earth's atmosphere contains most of the planet's weather?",
+      "answer": "Troposphere",
+      "category": "Earth & Weather"
+    },
+    {
+      "id": "classic-v4-earth-weather-300",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What scale classifies hurricanes from Category 1 through Category 5 based on sustained wind speed?",
+      "answer": "Saffir-Simpson Hurricane Wind Scale",
+      "category": "Earth & Weather"
+    },
+    {
+      "id": "classic-v4-earth-weather-400",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What is the point inside Earth where an earthquake rupture begins called?",
+      "answer": "Hypocenter",
+      "category": "Earth & Weather"
+    },
+    {
+      "id": "classic-v4-earth-weather-500",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What magnitude scale is widely used for large earthquakes because it is based on seismic moment?",
+      "answer": "Moment magnitude scale",
+      "category": "Earth & Weather"
+    },
+    {
+      "id": "classic-v4-earth-weather-500-followup",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What instrument records seismic waves from earthquakes?",
+      "answer": "Seismograph",
+      "category": "Earth & Weather"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-100",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Big Ben is in what city?",
+      "answer": "London",
+      "category": "Famous Landmarks"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-200",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Christ the Redeemer overlooks what Brazilian city?",
+      "answer": "Rio de Janeiro",
+      "category": "Famous Landmarks"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-300",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Petra is in what modern-day country?",
+      "answer": "Jordan",
+      "category": "Famous Landmarks"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-400",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Angkor Wat is in what modern-day country?",
+      "answer": "Cambodia",
+      "category": "Famous Landmarks"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-500",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "The Alhambra palace-fortress overlooks what Spanish city?",
+      "answer": "Granada",
+      "category": "Famous Landmarks"
+    },
+    {
+      "id": "classic-v4-famous-landmarks-500-followup",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Granada is in what autonomous community of Spain?",
+      "answer": "Andalusia",
+      "category": "Famous Landmarks"
+    },
+    {
+      "id": "classic-v4-music-stage-100",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "How many keys are on a standard full-size modern piano?",
+      "answer": "88",
+      "category": "Music & Stage"
+    },
+    {
+      "id": "classic-v4-music-stage-200",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What musical term means to gradually get louder?",
+      "answer": "Crescendo",
+      "category": "Music & Stage"
+    },
+    {
+      "id": "classic-v4-music-stage-300",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "Which composer wrote The Four Seasons?",
+      "answer": "Antonio Vivaldi",
+      "category": "Music & Stage"
+    },
+    {
+      "id": "classic-v4-music-stage-400",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "What is the highest standard female classical singing voice?",
+      "answer": "Soprano",
+      "category": "Music & Stage"
+    },
+    {
+      "id": "classic-v4-music-stage-500",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "In Mozart's The Magic Flute, which character sings the famous aria “Der Hölle Rache”?",
+      "answer": "Queen of the Night",
+      "category": "Music & Stage"
+    },
+    {
+      "id": "classic-v4-music-stage-500-followup",
+      "packId": "general-knowledge-v4",
+      "mode": "classic",
+      "question": "The Magic Flute was originally written with a libretto in what language?",
+      "answer": "German",
+      "category": "Music & Stage"
+    },
+    {
       "id": "timeline-telegraph-suez-400",
       "packId": "timeline-general-knowledge-v3",
       "mode": "timeline",
@@ -1208,6 +1448,246 @@
       "question": "In what year did Falcon 1 first reach orbit?",
       "answer": "2008 — Falcon 1 reached orbit in September 2008.",
       "category": "Technology"
+    },
+    {
+      "id": "timeline-v4-movies-music-100",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Jaws opened in theaters, or Rocky opened in theaters?",
+      "answer": "Jaws opened in theaters first",
+      "category": "Movies & Music"
+    },
+    {
+      "id": "timeline-v4-movies-music-200",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Back to the Future opened in theaters, or Top Gun opened in theaters?",
+      "answer": "Back to the Future opened in theaters first",
+      "category": "Movies & Music"
+    },
+    {
+      "id": "timeline-v4-movies-music-300",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Nirvana released Nevermind, or Disney's Beauty and the Beast opened in U.S. theaters?",
+      "answer": "Nirvana released Nevermind first",
+      "category": "Movies & Music"
+    },
+    {
+      "id": "timeline-v4-movies-music-400",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: The Sopranos premiered on HBO, or The Matrix opened in U.S. theaters?",
+      "answer": "The Sopranos premiered on HBO first",
+      "category": "Movies & Music"
+    },
+    {
+      "id": "timeline-v4-movies-music-500",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Finding Nemo opened in U.S. theaters, or Pirates of the Caribbean: The Curse of the Black Pearl opened in U.S. theaters?",
+      "answer": "Finding Nemo opened in U.S. theaters first",
+      "category": "Movies & Music"
+    },
+    {
+      "id": "timeline-v4-movies-music-500-followup",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which animation studio produced Finding Nemo?",
+      "answer": "Pixar — Finding Nemo was produced by Pixar Animation Studios.",
+      "category": "Movies & Music"
+    },
+    {
+      "id": "timeline-v4-space-exploration-100",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Apollo 11 landed humans on the Moon, or Mariner 9 became the first spacecraft to orbit Mars?",
+      "answer": "Apollo 11 landed humans on the Moon first",
+      "category": "Space & Exploration"
+    },
+    {
+      "id": "timeline-v4-space-exploration-200",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Viking 1 landed on Mars, or Voyager 1 launched?",
+      "answer": "Viking 1 landed on Mars first",
+      "category": "Space & Exploration"
+    },
+    {
+      "id": "timeline-v4-space-exploration-300",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Mars Pathfinder landed on Mars, or the first module of the International Space Station was launched?",
+      "answer": "Mars Pathfinder landed on Mars first",
+      "category": "Space & Exploration"
+    },
+    {
+      "id": "timeline-v4-space-exploration-400",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Cassini entered orbit around Saturn, or the Huygens probe landed on Titan?",
+      "answer": "Cassini entered orbit around Saturn first",
+      "category": "Space & Exploration"
+    },
+    {
+      "id": "timeline-v4-space-exploration-500",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: New Horizons launched toward Pluto, or Pluto was reclassified as a dwarf planet?",
+      "answer": "New Horizons launched toward Pluto first",
+      "category": "Space & Exploration"
+    },
+    {
+      "id": "timeline-v4-space-exploration-500-followup",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "In what year did New Horizons make its historic flyby of Pluto?",
+      "answer": "2015 — New Horizons flew past Pluto in July 2015.",
+      "category": "Space & Exploration"
+    },
+    {
+      "id": "timeline-v4-sports-100",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the first Masters Tournament was held, or the first NCAA men's basketball tournament was held?",
+      "answer": "the first Masters Tournament was held first",
+      "category": "Sports"
+    },
+    {
+      "id": "timeline-v4-sports-200",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Roger Maris hit his 61st home run of the 1961 season, or Wilt Chamberlain scored 100 points in an NBA game?",
+      "answer": "Roger Maris hit his 61st home run first",
+      "category": "Sports"
+    },
+    {
+      "id": "timeline-v4-sports-300",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the Battle of the Sexes tennis match, or Hank Aaron broke Babe Ruth's career home run record?",
+      "answer": "the Battle of the Sexes tennis match first",
+      "category": "Sports"
+    },
+    {
+      "id": "timeline-v4-sports-400",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the U.S. Dream Team won Olympic basketball gold, or UFC 1 was held?",
+      "answer": "the U.S. Dream Team won Olympic basketball gold first",
+      "category": "Sports"
+    },
+    {
+      "id": "timeline-v4-sports-500",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Kobe Bryant scored 81 points in an NBA game, or Italy won the 2006 FIFA World Cup?",
+      "answer": "Kobe Bryant scored 81 points in an NBA game first",
+      "category": "Sports"
+    },
+    {
+      "id": "timeline-v4-sports-500-followup",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Against which team did Kobe Bryant score 81 points?",
+      "answer": "Toronto Raptors — Bryant scored 81 against Toronto.",
+      "category": "Sports"
+    },
+    {
+      "id": "timeline-v4-technology-100",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the original Macintosh was introduced, or Windows 1.0 was released?",
+      "answer": "the original Macintosh was introduced first",
+      "category": "Technology"
+    },
+    {
+      "id": "timeline-v4-technology-200",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Photoshop 1.0 was released, or the first Linux kernel version was released?",
+      "answer": "Photoshop 1.0 was released first",
+      "category": "Technology"
+    },
+    {
+      "id": "timeline-v4-technology-300",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: Google Chrome was first released, or WhatsApp was founded?",
+      "answer": "Google Chrome was first released first",
+      "category": "Technology"
+    },
+    {
+      "id": "timeline-v4-technology-400",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: GitHub officially launched, or Dropbox launched to the public?",
+      "answer": "GitHub officially launched first",
+      "category": "Technology"
+    },
+    {
+      "id": "timeline-v4-technology-500",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the Nintendo Switch launched, or Microsoft Teams became generally available?",
+      "answer": "the Nintendo Switch launched first",
+      "category": "Technology"
+    },
+    {
+      "id": "timeline-v4-technology-500-followup",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "On what date did the Nintendo Switch launch?",
+      "answer": "March 3, 2017 — the Nintendo Switch launched worldwide on March 3, 2017.",
+      "category": "Technology"
+    },
+    {
+      "id": "timeline-v4-world-history-100",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the Great Fire of London, or the Salem witch trials began?",
+      "answer": "the Great Fire of London first",
+      "category": "World History"
+    },
+    {
+      "id": "timeline-v4-world-history-200",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the Louisiana Purchase was completed, or the Battle of Trafalgar was fought?",
+      "answer": "the Louisiana Purchase was completed first",
+      "category": "World History"
+    },
+    {
+      "id": "timeline-v4-world-history-300",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the United States purchased Alaska from Russia, or the Meiji Restoration began in Japan?",
+      "answer": "the United States purchased Alaska from Russia first",
+      "category": "World History"
+    },
+    {
+      "id": "timeline-v4-world-history-400",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the Berlin Wall fell, or Nelson Mandela was released from prison?",
+      "answer": "the Berlin Wall fell first",
+      "category": "World History"
+    },
+    {
+      "id": "timeline-v4-world-history-500",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "Which happened first: the Soviet Union dissolved, or the Maastricht Treaty was signed?",
+      "answer": "the Soviet Union dissolved first",
+      "category": "World History"
+    },
+    {
+      "id": "timeline-v4-world-history-500-followup",
+      "packId": "timeline-general-knowledge-v4",
+      "mode": "timeline",
+      "question": "In which country was the Maastricht Treaty signed?",
+      "answer": "The Netherlands — the treaty was signed in Maastricht, Netherlands.",
+      "category": "World History"
     }
   ]
 }
