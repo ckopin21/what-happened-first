@@ -58,7 +58,7 @@ const missingHandlers = [...new Set(handlers.filter((handler) => !definedFunctio
 
 const specials=categories.flatMap((category)=>category.clues.map((clue,row)=>({category:category.name,row,clue}))).filter(x=>x.clue.special);
 if(specials.length!==5||specials.some(x=>x.row!==4||!x.clue.fq||!x.clue.fa)) throw new Error("Expected five playable 500-point follow-up clues");
-if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!html.includes("AVATAR_CENTERING_V12")) throw new Error("Randomized follow-up/avatar centering fix missing");
+if(!html.includes("shuffledFollowupChoices")||!html.includes("follow-choice")||!html.includes("phoneFollowChoices")||!(html.includes("AVATAR_CENTERING_V12")||html.includes("AVATAR_NEW_VECTOR_ART_V14"))) throw new Error("Randomized follow-up/avatar centering fix missing");
 if(!html.includes("shuffledPrimaryChoices")||!html.includes("primaryChoicesForCurrent")||!html.includes("choiceOrder:Array.isArray(current.choiceOrder)")||!html.includes('broadcastGameState(true);\n      showToast("Primary answer correct"')) throw new Error("Primary choice shuffle or follow-up broadcast fix missing");
 if(!html.includes("PHONE_SCROLL_CHOICE_FIX_V7")||!html.includes("primaryCorrectSideBag")||!html.includes("buildPrimaryChoiceOrder")||!html.includes("nextPrimaryCorrectSide")) throw new Error("Phone scrolling or balanced primary answer-side randomization missing");
 if(!html.includes("DAILY_STATIC_WAGER_V11")||!html.includes("PHONE_HORIZONTAL_GUTTER_FIX_V11")) throw new Error("Static Daily Double wager or mobile gutter fix missing");
