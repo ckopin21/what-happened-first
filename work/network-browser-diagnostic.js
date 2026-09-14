@@ -90,6 +90,7 @@ async function runGame(host,phone,file,kind){
   const computed=await phone.cdp.eval(kind==="timeline"?"peerRoomId(roomCode)":"hostPeerId(phoneRoom)");
   await phone.cdp.eval(kind==="timeline"?"document.getElementById('joinName').value='Diagnostic Player';joinPhoneGame();true":"document.getElementById('nameInput').value='Diagnostic Player';joinGame();true");
   const joined=await waitFor(host.cdp,kind==="timeline"?"playerCount===1":"players.length===1",8000);
+  const identityBound=await host.cdp.eval(kind==="timeline"?"[...remoteConnections.values()].some(ctx=>ctx.playerId&&ctx.playerId===players[0]?.playerId)":"[...remoteContexts.values()].some(ctx=>ctx.playerId&&ctx.playerId===players[0]?.playerId)");
   const beforeReloadCount=await host.cdp.eval(kind==="timeline"?"playerCount":"players.length");
   await phone.cdp.send("Page.navigate",{url:`${phoneUrl}&reload=1`});
   await waitFor(phone.cdp,"document.readyState==='complete'");
@@ -108,7 +109,7 @@ async function runGame(host,phone,file,kind){
   const removed=await waitFor(host.cdp,kind==="timeline"?"playerCount===0":"players.length===0",8000);
   const removalPhoneState=await phone.cdp.eval(kind==="timeline"?"({leaving:remoteLeaving,status:document.getElementById('networkStatus')?.textContent||''})":"({leaving:phoneLeaving,status:document.getElementById('joinStatus')?.textContent||''})");
   const hostRemovalMessage=/removed/i.test(removalPhoneState.status);
-  const report={kind,file,room,expectedHostPeerId:expected,phoneComputedHostPeerId:computed,idsMatch:expected===computed,joined,reconnected,beforeReloadCount,afterReloadCount,noDuplicatePlayer:beforeReloadCount===1&&afterReloadCount===1,left,stayedLeft,rejoinedForRemoval,removed,hostRemovalMessage,host:await state(host.cdp,kind),phone:await state(phone.cdp,kind),hostEvents:host.cdp.events.map(eventSummary),phoneEvents:phone.cdp.events.map(eventSummary)};
+  const report={kind,file,room,expectedHostPeerId:expected,phoneComputedHostPeerId:computed,idsMatch:expected===computed,joined,identityBound,reconnected,beforeReloadCount,afterReloadCount,noDuplicatePlayer:beforeReloadCount===1&&afterReloadCount===1,left,stayedLeft,rejoinedForRemoval,removed,hostRemovalMessage,host:await state(host.cdp,kind),phone:await state(phone.cdp,kind),hostEvents:host.cdp.events.map(eventSummary),phoneEvents:phone.cdp.events.map(eventSummary)};
   console.log(JSON.stringify(report,null,2));
   host.cdp.events.length=0;phone.cdp.events.length=0;
   return report;
@@ -120,7 +121,7 @@ async function runGame(host,phone,file,kind){
   try{
     const timeline=await runGame(host,phone,"dog-jeopardy.html","timeline");
     const classic=await runGame(host,phone,"classic-jeopardy.html","classic");
-    if(!timeline.phone.dataOpen||!classic.phone.dataOpen||!timeline.joined||!classic.joined||!timeline.reconnected||!classic.reconnected||!timeline.noDuplicatePlayer||!classic.noDuplicatePlayer||!timeline.left||!classic.left||!timeline.stayedLeft||!classic.stayedLeft||!timeline.rejoinedForRemoval||!classic.rejoinedForRemoval||!timeline.removed||!classic.removed||!timeline.hostRemovalMessage||!classic.hostRemovalMessage)process.exitCode=2;
+    if(!timeline.phone.dataOpen||!classic.phone.dataOpen||!timeline.joined||!classic.joined||!timeline.identityBound||!classic.identityBound||!timeline.reconnected||!classic.reconnected||!timeline.noDuplicatePlayer||!classic.noDuplicatePlayer||!timeline.left||!classic.left||!timeline.stayedLeft||!classic.stayedLeft||!timeline.rejoinedForRemoval||!classic.rejoinedForRemoval||!timeline.removed||!classic.removed||!timeline.hostRemovalMessage||!classic.hostRemovalMessage)process.exitCode=2;
   }finally{
     host.cdp.close();phone.cdp.close();host.child.kill();phone.child.kill();
     await delay(500);
