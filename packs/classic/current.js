@@ -1,65 +1,45 @@
-// Classic Jeopardy question content lives in this one file so the genre can be
-// swapped without touching the game engine. Ask ChatGPT to replace this pack
-// with a new theme while preserving the schema below.
+// Fresh Classic Jeopardy pack. Keep this schema stable so the engine can swap content safely.
 window.CLASSIC_JEOPARDY_PACK = {
-  id: "general-knowledge-v1",
+  id: "general-knowledge-v2",
   title: "CLASSIC JEOPARDY",
   subtitle: "Everyone answers every clue.",
   genre: "General Knowledge",
-  rules: {
-    wrongMultiplier: 0,
-    hintMultiplier: 0.5
-  },
+  rules: { wrongMultiplier: 0, hintMultiplier: 0.5 },
   categories: [
-    {
-      name: "World Geography",
-      clues: [
-        { value: 100, question: "What is the capital of Japan?", answer: "Tokyo", aliases: ["Tokyo"], hint: "It is Japan's largest city." },
-        { value: 200, question: "What river runs through Paris?", answer: "The Seine", aliases: ["Seine", "The Seine"], hint: "Its name begins with S." },
-        { value: 300, question: "Marrakech is a major city in what country?", answer: "Morocco", aliases: ["Morocco"], hint: "This North African country borders Algeria." },
-        { value: 400, question: "What is the largest country in the world by land area?", answer: "Russia", aliases: ["Russia", "Russian Federation"], hint: "It spans Europe and Asia." },
-        { value: 500, question: "What South American country has Portuguese as its official language?", answer: "Brazil", aliases: ["Brazil"], hint: "It is the continent's largest country.", followup: { question: "What is the capital of Brazil?", answer: "Brasília", aliases: ["Brasilia", "Brasília"], hint: "It replaced Rio de Janeiro as the capital in 1960." } }
-      ]
-    },
-    {
-      name: "History",
-      clues: [
-        { value: 100, question: "Who was the first president of the United States?", answer: "George Washington", aliases: ["George Washington", "Washington"], hint: "He also commanded the Continental Army." },
-        { value: 200, question: "What civilization built Machu Picchu?", answer: "The Inca", aliases: ["Inca", "The Inca", "Incan", "Inca Empire"], hint: "Their empire was centered in Peru." },
-        { value: 300, question: "What 1215 document limited the power of the English king?", answer: "Magna Carta", aliases: ["Magna Carta", "The Magna Carta"], hint: "It was sealed by King John." },
-        { value: 400, question: "What Roman city was buried by Mount Vesuvius in AD 79?", answer: "Pompeii", aliases: ["Pompeii"], hint: "Its ruins are near modern Naples." },
-        { value: 500, question: "Mansa Musa ruled what West African empire?", answer: "The Mali Empire", aliases: ["Mali", "Mali Empire", "The Mali Empire"], hint: "Its name is also a modern country.", followup: { question: "Mansa Musa made his famous 1324 pilgrimage to what holy city?", answer: "Mecca", aliases: ["Mecca", "Makkah"], hint: "It is Islam's holiest city." } }
-      ]
-    },
-    {
-      name: "Science",
-      clues: [
-        { value: 100, question: "What is the common name for H₂O?", answer: "Water", aliases: ["Water"], hint: "You drink it every day." },
-        { value: 200, question: "What planet is famous for the Great Red Spot?", answer: "Jupiter", aliases: ["Jupiter"], hint: "It is the largest planet in our solar system." },
-        { value: 300, question: "What process lets plants convert light energy into chemical energy?", answer: "Photosynthesis", aliases: ["Photosynthesis"], hint: "It uses sunlight, water, and carbon dioxide." },
-        { value: 400, question: "What element has atomic number 79?", answer: "Gold", aliases: ["Gold", "Au"], hint: "Its chemical symbol is Au." },
-        { value: 500, question: "What scientist formulated the three laws of motion?", answer: "Isaac Newton", aliases: ["Isaac Newton", "Newton", "Sir Isaac Newton"], hint: "He is also associated with universal gravitation.", followup: { question: "What 1687 work did Newton publish that presented his laws of motion?", answer: "Principia Mathematica", aliases: ["Principia", "Principia Mathematica", "Philosophiae Naturalis Principia Mathematica"], hint: "Its shortened title is usually just Principia." } }
-      ]
-    },
-    {
-      name: "Pop Culture",
-      clues: [
-        { value: 100, question: "What is the name of the cowboy toy in Toy Story?", answer: "Woody", aliases: ["Woody", "Sheriff Woody"], hint: "Tom Hanks voices him." },
-        { value: 200, question: "What school of witchcraft and wizardry does Harry Potter attend?", answer: "Hogwarts", aliases: ["Hogwarts", "Hogwarts School of Witchcraft and Wizardry"], hint: "Its houses include Gryffindor and Slytherin." },
-        { value: 300, question: "What blue video game character is known for collecting rings at high speed?", answer: "Sonic the Hedgehog", aliases: ["Sonic", "Sonic the Hedgehog"], hint: "He is Sega's mascot." },
-        { value: 400, question: "What artist released the hit song “Shake It Off”?", answer: "Taylor Swift", aliases: ["Taylor Swift", "Swift"], hint: "The song appeared on the album 1989." },
-        { value: 500, question: "What TV series is set around Hawkins, Indiana and the Upside Down?", answer: "Stranger Things", aliases: ["Stranger Things"], hint: "Eleven is one of its main characters.", followup: { question: "What tabletop role-playing game do the kids frequently play in Stranger Things?", answer: "Dungeons & Dragons", aliases: ["Dungeons and Dragons", "Dungeons & Dragons", "D&D", "DnD"], hint: "The Demogorgon gets its nickname from this game." } }
-      ]
-    },
-    {
-      name: "Sports",
-      clues: [
-        { value: 100, question: "How many points is a touchdown worth before the extra point attempt?", answer: "Six", aliases: ["6", "Six", "6 points", "Six points"], hint: "It is one more than five." },
-        { value: 200, question: "The FIFA World Cup is normally held every how many years?", answer: "Four", aliases: ["4", "Four", "4 years", "Four years"], hint: "It matches the Summer Olympic cycle." },
-        { value: 300, question: "Who was the first gymnast to receive a perfect 10 at the Olympics?", answer: "Nadia Comăneci", aliases: ["Nadia Comaneci", "Nadia Comăneci", "Comaneci", "Comăneci"], hint: "She competed for Romania in 1976." },
-        { value: 400, question: "What NBA franchise plays its home games in Toronto?", answer: "Toronto Raptors", aliases: ["Toronto Raptors", "Raptors", "The Raptors"], hint: "Their name references a dinosaur." },
-        { value: 500, question: "How many tournaments make up a calendar-year Grand Slam in tennis?", answer: "Four", aliases: ["4", "Four", "4 tournaments", "Four tournaments"], hint: "Australian, French, Wimbledon, and US.", followup: { question: "Which Grand Slam tournament is played on clay courts?", answer: "The French Open", aliases: ["French Open", "The French Open", "Roland Garros", "Roland-Garros"], hint: "It is held in Paris." } }
-      ]
-    }
+    { name: "World Geography", clues: [
+      { value:100, question:"What is the capital of Canada?", answer:"Ottawa", aliases:["Ottawa"], hint:"It is in Ontario, but it is not Toronto." },
+      { value:200, question:"What strait separates southern Spain from northern Morocco?", answer:"Strait of Gibraltar", aliases:["Strait of Gibraltar","Gibraltar Strait","Gibraltar"], hint:"It links the Atlantic Ocean with the Mediterranean Sea." },
+      { value:300, question:"Salar de Uyuni, the world's largest salt flat, is in what country?", answer:"Bolivia", aliases:["Bolivia"], hint:"It is a landlocked country in western South America." },
+      { value:400, question:"Ulaanbaatar is the capital of what country?", answer:"Mongolia", aliases:["Mongolia"], hint:"This country lies between Russia and China." },
+      { value:500, question:"What river forms a large portion of the border between Texas and Mexico?", answer:"Rio Grande", aliases:["Rio Grande","The Rio Grande","Rio Bravo","Rio Bravo del Norte"], hint:"It flows southeast toward the Gulf of Mexico.", followup:{ question:"What name is commonly used for the Rio Grande in Mexico?", answer:"Rio Bravo", aliases:["Rio Bravo","Rio Bravo del Norte","Río Bravo","Río Bravo del Norte"], hint:"Its Spanish name includes a word meaning fierce or brave." } }
+    ]},
+    { name: "History", clues: [
+      { value:100, question:"What civilization built Chichén Itzá?", answer:"Maya", aliases:["Maya","Mayans","Mayan civilization","The Maya"], hint:"This civilization flourished in Mesoamerica." },
+      { value:200, question:"What war was formally ended between Germany and the Allied powers by the Treaty of Versailles?", answer:"World War I", aliases:["World War I","WWI","World War 1","First World War","The Great War"], hint:"The treaty was signed in 1919." },
+      { value:300, question:"Suleiman the Magnificent ruled what empire?", answer:"Ottoman Empire", aliases:["Ottoman Empire","The Ottoman Empire","Ottomans"], hint:"Its capital was Constantinople during his reign." },
+      { value:400, question:"What English ship carried the Pilgrims to New England in 1620?", answer:"Mayflower", aliases:["Mayflower","The Mayflower"], hint:"Its passengers established Plymouth Colony." },
+      { value:500, question:"Which leader crowned himself Emperor of the French in 1804?", answer:"Napoleon Bonaparte", aliases:["Napoleon","Napoleon Bonaparte","Bonaparte","Napoleon I"], hint:"He rose to power after the French Revolution.", followup:{ question:"On what island did Napoleon spend his final exile?", answer:"Saint Helena", aliases:["Saint Helena","St Helena","St. Helena"], hint:"It is a remote island in the South Atlantic." } }
+    ]},
+    { name: "Science", clues: [
+      { value:100, question:"What gas do plants absorb from the atmosphere during photosynthesis?", answer:"Carbon dioxide", aliases:["Carbon dioxide","CO2","CO₂"], hint:"Humans exhale this gas." },
+      { value:200, question:"What SI unit measures electric current?", answer:"Ampere", aliases:["Ampere","Amp","Amps","Amperes"], hint:"Its symbol is A." },
+      { value:300, question:"What is the largest organ of the human body?", answer:"Skin", aliases:["Skin","The skin"], hint:"It forms the body's outer protective barrier." },
+      { value:400, question:"What type of blood vessel carries blood away from the heart?", answer:"Artery", aliases:["Artery","Arteries"], hint:"The aorta is the largest example." },
+      { value:500, question:"What is the boundary around a black hole beyond which nothing can escape called?", answer:"Event horizon", aliases:["Event horizon","The event horizon"], hint:"Crossing this boundary prevents even light from returning.", followup:{ question:"What theoretical radiation from black holes is named after a physicist?", answer:"Hawking radiation", aliases:["Hawking radiation","Hawking"], hint:"It is named for Stephen Hawking." } }
+    ]},
+    { name: "Entertainment", clues: [
+      { value:100, question:"What is the name of Mario's brother in Nintendo games?", answer:"Luigi", aliases:["Luigi","Luigi Mario"], hint:"He traditionally wears green." },
+      { value:200, question:"What fictional continent contains King's Landing in Game of Thrones?", answer:"Westeros", aliases:["Westeros"], hint:"Most of the Seven Kingdoms are located there." },
+      { value:300, question:"Who directed Inception, Interstellar, and Oppenheimer?", answer:"Christopher Nolan", aliases:["Christopher Nolan","Nolan"], hint:"He also directed The Dark Knight trilogy." },
+      { value:400, question:"What band released the 1977 album Rumours?", answer:"Fleetwood Mac", aliases:["Fleetwood Mac"], hint:"The album includes Dreams and Go Your Own Way." },
+      { value:500, question:"What 2019 South Korean film became the first non-English-language movie to win the Academy Award for Best Picture?", answer:"Parasite", aliases:["Parasite"], hint:"It is a dark comedy-thriller centered on two families.", followup:{ question:"Who directed Parasite?", answer:"Bong Joon-ho", aliases:["Bong Joon-ho","Bong Joon Ho","Bong"], hint:"The director also made Snowpiercer and Okja." } }
+    ]},
+    { name: "Sports", clues: [
+      { value:100, question:"How many players from one team are on the court at a time in basketball?", answer:"Five", aliases:["5","Five","5 players","Five players"], hint:"A full lineup includes two guards, two forwards, and a center." },
+      { value:200, question:"What trophy is awarded to the NHL champion?", answer:"Stanley Cup", aliases:["Stanley Cup","The Stanley Cup"], hint:"It is one of the oldest championship trophies in North American sports." },
+      { value:300, question:"Which country won the 2010 FIFA World Cup?", answer:"Spain", aliases:["Spain"], hint:"Its winning goal in the final came during extra time." },
+      { value:400, question:"Which boxer was famously nicknamed 'The Greatest'?", answer:"Muhammad Ali", aliases:["Muhammad Ali","Ali","Cassius Clay"], hint:"He was born Cassius Clay." },
+      { value:500, question:"Who achieved tennis's only calendar-year Golden Slam in singles, in 1988?", answer:"Steffi Graf", aliases:["Steffi Graf","Graf"], hint:"She won all four majors plus Olympic singles gold that year.", followup:{ question:"Which city hosted the 1988 Summer Olympics where she completed the Golden Slam?", answer:"Seoul", aliases:["Seoul","Seoul, South Korea"], hint:"The Games were held in South Korea." } }
+    ]}
   ]
 };
