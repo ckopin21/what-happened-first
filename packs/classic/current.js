@@ -1,6 +1,7 @@
 // Fresh Classic Jeopardy pack. Keep this schema stable so the engine can swap content safely.
 window.CLASSIC_JEOPARDY_PACK = {
   id: "general-knowledge-v3",
+  name: "General Knowledge",
   title: "CLASSIC JEOPARDY",
   subtitle: "Everyone answers every clue.",
   genre: "General Knowledge",
@@ -43,3 +44,5 @@ window.CLASSIC_JEOPARDY_PACK = {
     ]}
   ]
 };
+window.CLASSIC_QUESTION_PACKS=window.CLASSIC_QUESTION_PACKS||{};
+window.CLASSIC_QUESTION_PACKS[window.CLASSIC_JEOPARDY_PACK.id]=window.CLASSIC_JEOPARDY_PACK;

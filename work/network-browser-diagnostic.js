@@ -95,7 +95,11 @@ async function runGame(host,phone,file,kind){
   await waitFor(phone.cdp,"document.readyState==='complete'");
   const reconnected=await waitFor(phone.cdp,kind==="timeline"?"hostConnection?.open===true&&joinedPhonePlayerIndex===0":"phoneConn?.open===true&&phoneState?.playerIndex===0",20000);
   const afterReloadCount=await host.cdp.eval(kind==="timeline"?"playerCount":"players.length");
-  const report={kind,file,room,expectedHostPeerId:expected,phoneComputedHostPeerId:computed,idsMatch:expected===computed,joined,reconnected,beforeReloadCount,afterReloadCount,noDuplicatePlayer:beforeReloadCount===1&&afterReloadCount===1,host:await state(host.cdp,kind),phone:await state(phone.cdp,kind),hostEvents:host.cdp.events.map(eventSummary),phoneEvents:phone.cdp.events.map(eventSummary)};
+  await phone.cdp.eval(kind==="timeline"?"window.confirm=()=>true;leavePhoneGame();true":"window.confirm=()=>true;leaveClassicGame();true");
+  const left=await waitFor(host.cdp,kind==="timeline"?"playerCount===0":"players.length===0",8000);
+  await delay(1200);
+  const stayedLeft=await host.cdp.eval(kind==="timeline"?"playerCount===0":"players.length===0");
+  const report={kind,file,room,expectedHostPeerId:expected,phoneComputedHostPeerId:computed,idsMatch:expected===computed,joined,reconnected,beforeReloadCount,afterReloadCount,noDuplicatePlayer:beforeReloadCount===1&&afterReloadCount===1,left,stayedLeft,host:await state(host.cdp,kind),phone:await state(phone.cdp,kind),hostEvents:host.cdp.events.map(eventSummary),phoneEvents:phone.cdp.events.map(eventSummary)};
   console.log(JSON.stringify(report,null,2));
   host.cdp.events.length=0;phone.cdp.events.length=0;
   return report;
@@ -107,7 +111,7 @@ async function runGame(host,phone,file,kind){
   try{
     const timeline=await runGame(host,phone,"dog-jeopardy.html","timeline");
     const classic=await runGame(host,phone,"classic-jeopardy.html","classic");
-    if(!timeline.phone.dataOpen||!classic.phone.dataOpen||!timeline.joined||!classic.joined||!timeline.reconnected||!classic.reconnected||!timeline.noDuplicatePlayer||!classic.noDuplicatePlayer)process.exitCode=2;
+    if(!timeline.phone.dataOpen||!classic.phone.dataOpen||!timeline.joined||!classic.joined||!timeline.reconnected||!classic.reconnected||!timeline.noDuplicatePlayer||!classic.noDuplicatePlayer||!timeline.left||!classic.left||!timeline.stayedLeft||!classic.stayedLeft)process.exitCode=2;
   }finally{
     host.cdp.close();phone.cdp.close();host.child.kill();phone.child.kill();
     await delay(500);

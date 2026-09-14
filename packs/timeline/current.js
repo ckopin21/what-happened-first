@@ -2,6 +2,7 @@
 // this file is content only and can be swapped through QUESTION_WORKFLOW.md.
 window.TIMELINE_JEOPARDY_PACK = {
   id: "timeline-general-knowledge-v3",
+  name: "General Knowledge",
   title: "WHAT HAPPENED FIRST?",
   subtitle: "Pick the earlier event.",
   genre: "Timeline",
@@ -43,3 +44,5 @@ window.TIMELINE_JEOPARDY_PACK = {
     ]}
   ]
 };
+window.TIMELINE_QUESTION_PACKS=window.TIMELINE_QUESTION_PACKS||{};
+window.TIMELINE_QUESTION_PACKS[window.TIMELINE_JEOPARDY_PACK.id]=window.TIMELINE_JEOPARDY_PACK;

@@ -7,7 +7,7 @@
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js'"></script>
 <script src="../assets/network/peer-network.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="../packs/classic/current.js"></script>
+<script src="../packs/classic/manifest.js"></script>
 <style>
 *{box-sizing:border-box}
 :root{--bg:#061725;--panel:#0c324d;--panel2:#14577d;--accent:#ffd166;--good:#34d06f;--bad:#f05252;--text:#fff;--muted:#a9bfd1;--safe-top:env(safe-area-inset-top,0px);--safe-right:env(safe-area-inset-right,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--phone-top:0px;--phone-height:100dvh;--cat-count:5}
@@ -57,6 +57,7 @@ body.dev-mode #devFab{display:block!important}.dev-panel{position:fixed;right:16
   <section class="setup">
     <div class="setup-row">
       <div class="host-player-count"><b>Players:</b> <span id="hostPlayerCount">0 / 5</span></div>
+      <label>Question Pack <select id="classicPackSelect" onchange="switchClassicPack(this.value)"></select></label>
       <button class="blue" onclick="openClassicAddPlayer()">Add Player</button>
       <button class="blue" onclick="openClassicPhonePreview()">Player Phone Preview</button>
       <a class="mode-link" href="../index.html">Game Modes</a>
@@ -127,13 +128,13 @@ body.dev-mode #devFab{display:block!important}.dev-panel{position:fixed;right:16
 </div>
 <div class="dev-preview-overlay" id="devPreviewOverlay"><div class="dev-preview-card"><div class="dev-preview-icon" id="devPreviewIcon"></div><div class="dev-preview-title" id="devPreviewTitle"></div><div class="dev-preview-sub" id="devPreviewSub"></div><button class="white" onclick="closeDevPreview()">Close Preview</button></div></div>
 
-<section class="phone-root" id="phoneRoot"><div class="phone-shell"><div class="phone-brand"><h2 id="phoneTitle">CLASSIC JEOPARDY</h2><p id="phoneRoomLabel">Connecting…</p></div><div class="phone-card" id="joinCard"><h2>Join the game</h2><input class="phone-input" id="nameInput" maxlength="24" placeholder="Your name" autocomplete="name"><div class="phone-small" style="margin-top:12px;font-weight:900">Choose an avatar</div><div class="join-avatar-grid" id="joinAvatarGrid"></div><button class="blue phone-btn" onclick="joinGame()">Join Game</button><div class="phone-status" id="joinStatus"></div></div><div class="phone-card" id="gameCard" style="display:none"><div class="phone-player"><div class="phone-player-main"><div class="phone-avatar" id="phoneAvatar">🐶</div><div><div class="phone-name" id="phoneName">Player</div><div class="phone-meta" id="phoneMeta"></div></div></div><div class="phone-score" id="phoneScore">$0</div></div><div id="phoneView"></div></div></div></section>
+<section class="phone-root" id="phoneRoot"><div class="phone-shell"><div class="phone-brand"><h2 id="phoneTitle">CLASSIC JEOPARDY</h2><p id="phoneRoomLabel">Connecting…</p></div><div class="phone-card" id="joinCard"><h2>Join the game</h2><input class="phone-input" id="nameInput" maxlength="24" placeholder="Your name" autocomplete="name"><div class="phone-small" style="margin-top:12px;font-weight:900">Choose an avatar</div><div class="join-avatar-grid" id="joinAvatarGrid"></div><button class="blue phone-btn" onclick="joinGame()">Join Game</button><div class="phone-status" id="joinStatus"></div></div><div class="phone-card" id="gameCard" style="display:none"><div class="phone-player"><div class="phone-player-main"><div class="phone-avatar" id="phoneAvatar">🐶</div><div><div class="phone-name" id="phoneName">Player</div><div class="phone-meta" id="phoneMeta"></div></div></div><div class="phone-score" id="phoneScore">$0</div></div><div id="phoneView"></div><button class="ghost phone-btn" onclick="leaveClassicGame()">Leave Game</button></div></div></section>
 <script>
-const PACK=window.CLASSIC_JEOPARDY_PACK;
+let PACK=window.CLASSIC_JEOPARDY_PACK;
 if(!PACK||!Array.isArray(PACK.categories))throw new Error("Classic Jeopardy question pack is missing or invalid.");
 const MAX_PLAYERS=5,GAME_VERSION="classic-3";
 const AVATARS=[{name:"Corgi",icon:"🐶"},{name:"Cat",icon:"🐱"},{name:"Panda",icon:"🐼"},{name:"Penguin",icon:"🐧"},{name:"Fox",icon:"🦊"},{name:"Frog",icon:"🐸"},{name:"Shark",icon:"🦈"},{name:"Duck",icon:"🦆"}];
-const categories=PACK.categories,totalQuestions=categories.reduce((n,c)=>n+c.clues.length,0);
+let categories=JSON.parse(JSON.stringify(PACK.categories)),totalQuestions=categories.reduce((n,c)=>n+c.clues.length,0);
 let players=[],used=new Set(),history=new Map(),activePlayer=0,current=null,submissions=new Map(),judgements=new Map(),hintsUsed=new Set(),questionRevealed=false,questionResolved=false,reviewRecord=null,finalShown=false,pendingDaily=null,dailyDoubleIds=new Set(),gameStarted=false,gameEpoch=0,actionNonce="lobby";
 let developerMode=false,devForcedMultiplier=0;
 let masterVolume=.70,classicHostAvatar=0,classicPreviewPlayerIndex=0,classicPreviewJoinAvatar=0;
@@ -153,6 +154,17 @@ function phaseMultiplier(){if(devForcedMultiplier===2||devForcedMultiplier===3)r
 function phaseText(){const m=phaseMultiplier();return m===3?"TRIPLE POINTS":m===2?"DOUBLE POINTS":"1× POINTS"}
 function avatarIcon(i){return AVATARS[Number.isInteger(i)&&AVATARS[i]?i:0].icon}
 function freshNonce(){return `${gameEpoch}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`}
+function classicManifestEntry(id){return (window.CLASSIC_PACK_MANIFEST?.packs||[]).find(entry=>entry.id===id)}
+function validateClassicRuntimePack(pack,entry){return !!(pack&&pack.id===entry?.id&&pack.name===entry?.name&&pack.genre===entry?.genre&&Array.isArray(pack.categories)&&pack.categories.length===5&&pack.categories.every(category=>Array.isArray(category.clues)&&category.clues.length===5))}
+function populateClassicPackSelector(){const select=document.getElementById("classicPackSelect");if(!select)return;select.innerHTML="";(window.CLASSIC_PACK_MANIFEST?.packs||[]).forEach(entry=>{const option=document.createElement("option");option.value=entry.id;option.textContent=`${entry.name} — ${entry.genre}`;select.appendChild(option)});select.value=PACK.id}
+function loadClassicPack(entry){return new Promise((resolve,reject)=>{const cached=window.CLASSIC_QUESTION_PACKS?.[entry.id];if(cached)return resolve(cached);const script=document.createElement("script");script.src=`../packs/classic/${entry.file}`;script.async=true;script.onload=()=>window.CLASSIC_QUESTION_PACKS?.[entry.id]?resolve(window.CLASSIC_QUESTION_PACKS[entry.id]):reject(new Error("Pack did not register"));script.onerror=()=>reject(new Error(`Could not load ${entry.file}`));document.head.appendChild(script)})}
+async function switchClassicPack(id){
+  if(phoneRoom)return;const entry=classicManifestEntry(id);
+  if(!entry){toast("That question pack is not installed","bad");populateClassicPackSelector();return}
+  if(entry.id===PACK.id)return;
+  if((used.size||current||gameStarted)&&!confirm(`Switch to “${entry.name}”? This will start a new game with the current players.`)){populateClassicPackSelector();return}
+  try{const next=await loadClassicPack(entry);if(!validateClassicRuntimePack(next,entry))throw new Error("Pack metadata or board shape is invalid");PACK=next;categories=JSON.parse(JSON.stringify(next.categories));totalQuestions=categories.reduce((n,c)=>n+c.clues.length,0);document.documentElement.style.setProperty("--cat-count",String(categories.length));document.getElementById("gameTitle").textContent=PACK.title||"CLASSIC JEOPARDY";document.getElementById("gameSubtitle").textContent=PACK.subtitle||"Everyone answers every question.";document.getElementById("genreLabel").textContent=PACK.genre||"Custom Pack";newGame();populateClassicPackSelector();toast(`Switched to ${PACK.name} • ${PACK.genre}`,"good")}catch(error){console.error("Classic pack switch failed",error);toast(`Could not switch pack: ${error.message||"invalid pack"}`,"bad");populateClassicPackSelector()}
+}
 function connectedForPlayer(index){for(const ctx of remoteContexts.values())if(ctx.playerIndex===index&&ctx.conn&&ctx.conn.open)return true;return false}
 function streakLabel(p){if((p.correctStreak||0)>=3)return "🔥 ON FIRE";if((p.wrongStreak||0)>=3)return "🥶 COLD STREAK";return connectedForPlayer(players.indexOf(p))?"PHONE CONNECTED":"PHONE OFFLINE"}
 
@@ -265,11 +277,27 @@ function broadcastState(){for(const ctx of remoteContexts.values())sendState(ctx
 function bindContextToPlayer(ctx,index){for(const other of remoteContexts.values()){if(other!==ctx&&other.playerIndex===index){other.playerIndex=null;try{other.conn.close()}catch{}}}ctx.playerIndex=index}
 function attachHostConnection(conn){WHF_NETWORK.watchConnection(conn,"classic-host-data");const ctx={conn,playerIndex:null,closed:false};remoteContexts.set(conn,ctx);conn.on("open",()=>sendState(ctx));conn.on("data",msg=>handleRemoteAction(ctx,msg));conn.on("close",()=>{if(ctx.closed)return;ctx.closed=true;remoteContexts.delete(conn);renderHost();broadcastState()});conn.on("error",()=>{})}
 function safeToken(raw){return typeof raw==="string"&&raw.length>=8&&raw.length<=160&&/^[A-Za-z0-9._:-]+$/.test(raw)?raw:""}
+function reindexClassicMap(map,index){const next=new Map();map.forEach((value,key)=>{if(key===index)return;if(key>index)next.set(key-1,value);else next.set(key,value)});return next}
+function reindexClassicSet(set,index){return new Set([...set].filter(key=>key!==index).map(key=>key>index?key-1:key))}
+function removeClassicPlayer(index,ctx){
+  if(!Number.isInteger(index)||!players[index])return null;
+  const removed=players[index],wasActive=index===activePlayer,wasDaily=current?.isDaily&&current.dailyPlayer===index;
+  if(wasDaily){current=null;pendingDaily=null;questionRevealed=false;questionResolved=false;document.getElementById("dailyDoubleOverlay")?.classList.remove("showing");document.getElementById("questionOverlay")?.classList.remove("showing");document.getElementById("revealOverlay")?.classList.remove("showing")}
+  players.splice(index,1);submissions=reindexClassicMap(submissions,index);judgements=reindexClassicMap(judgements,index);hintsUsed=reindexClassicSet(hintsUsed,index);
+  if(current&&!wasDaily&&current.dailyPlayer>index)current.dailyPlayer--;
+  if(pendingDaily?.playerIndex>index)pendingDaily.playerIndex--;
+  for(const other of remoteContexts.values()){if(other===ctx)other.playerIndex=null;else if(other.playerIndex>index)other.playerIndex--}
+  if(!players.length)activePlayer=0;else if(wasActive)activePlayer=index%players.length;else if(activePlayer>index)activePlayer--;
+  renderHost();broadcastState();
+  if(current&&!questionRevealed&&allSubmitted())revealQuestion(false);
+  return removed;
+}
 function handleRemoteAction(ctx,action){
   if(!action||typeof action!=="object")return;
   if(action.type==="rejoin"){const token=safeToken(action.token);const idx=players.findIndex(p=>p.token===token);if(idx>=0){bindContextToPlayer(ctx,idx);sendState(ctx);renderHost();broadcastState()}else sendState(ctx);return}
   if(action.type==="join"){const name=String(action.name||"").trim().slice(0,24),token=safeToken(action.token);let idx=token?players.findIndex(p=>p.token===token):-1;if(idx<0){if(gameStarted||!name||players.length>=MAX_PLAYERS){ctx.conn.send({type:"join-error",message:gameStarted?"This game has already started.":players.length>=MAX_PLAYERS?"Game is full.":"Enter a name."});return}idx=players.length;players.push({name,score:0,token:token||crypto.randomUUID?.()||Math.random().toString(36).slice(2),avatar:Math.max(0,Math.min(AVATARS.length-1,Number(action.avatar)||0)),correctStreak:0,wrongStreak:0})}bindContextToPlayer(ctx,idx);ctx.conn.send({type:"joined",token:players[idx].token});renderHost();broadcastState();return}
   const i=ctx.playerIndex;if(!Number.isInteger(i)||!players[i])return;
+  if(action.type==="leave"){const removed=removeClassicPlayer(i,ctx);if(removed){try{ctx.conn.send({type:"left"})}catch{}setTimeout(()=>{try{ctx.conn.close()}catch{}},80);toast(`${removed.name} left the game`,"neutral")}return}
   if(!gameStarted||action.gameEpoch!==gameEpoch||action.actionNonce!==actionNonce){sendState(ctx);return}
   if(action.type==="select"){if(!gameStarted||i!==activePlayer||current||pendingDaily)return;openClue(Number(action.ci),Number(action.qi),i);return}
   if(action.type==="daily-wager"){if(i!==activePlayer||!pendingDaily||current)return;submitDailyWager(action.wager,i);return}
@@ -346,12 +374,14 @@ function renderClassicPhonePreview(){
   const input=document.getElementById("classicPreviewAnswer"),btn=document.getElementById("classicPreviewSubmitBtn");if(input&&btn&&!connected){input.addEventListener("input",()=>btn.disabled=!input.value.trim());input.addEventListener("keydown",e=>{if(e.key==="Enter"&&!btn.disabled)classicPreviewSubmit()})}
 }
 
-function initHost(){setVolume(document.getElementById("volumeSlider")?.value??70);roomCode=randomRoomCode();pickDailyDoubles();actionNonce=freshNonce();document.getElementById("roomCode").textContent=roomCode;document.getElementById("joinUrl").textContent=getJoinUrl();renderQr();renderHost();if(location.protocol==="file:"||typeof Peer==="undefined"){document.getElementById("networkStatus").textContent="Serve this page over HTTPS/HTTP for real phone play.";return}hostPeer=new Peer(hostPeerId(roomCode),WHF_NETWORK.peerOptions());WHF_NETWORK.watchPeer(hostPeer,"classic-host-peer");WHF_NETWORK.peerOpenTimeout(hostPeer,"classic-host-peer",stage=>{document.getElementById("networkStatus").textContent=`Phone service unavailable: ${stage}`},10000);hostPeer.on("open",()=>{document.getElementById("networkStatus").textContent="Phone service ready — scan the QR or copy the link."});hostPeer.on("connection",attachHostConnection);hostPeer.on("disconnected",()=>{document.getElementById("networkStatus").textContent="Phone service reconnecting…";try{hostPeer.reconnect()}catch{}});hostPeer.on("error",err=>{document.getElementById("networkStatus").textContent=`Phone service error: ${WHF_NETWORK.errorText(err)}`})}
+function initHost(){populateClassicPackSelector();setVolume(document.getElementById("volumeSlider")?.value??70);roomCode=randomRoomCode();pickDailyDoubles();actionNonce=freshNonce();document.getElementById("roomCode").textContent=roomCode;document.getElementById("joinUrl").textContent=getJoinUrl();renderQr();renderHost();if(location.protocol==="file:"||typeof Peer==="undefined"){document.getElementById("networkStatus").textContent="Serve this page over HTTPS/HTTP for real phone play.";return}hostPeer=new Peer(hostPeerId(roomCode),WHF_NETWORK.peerOptions());WHF_NETWORK.watchPeer(hostPeer,"classic-host-peer");WHF_NETWORK.peerOpenTimeout(hostPeer,"classic-host-peer",stage=>{document.getElementById("networkStatus").textContent=`Phone service unavailable: ${stage}`},10000);hostPeer.on("open",()=>{document.getElementById("networkStatus").textContent="Phone service ready — scan the QR or copy the link."});hostPeer.on("connection",attachHostConnection);hostPeer.on("disconnected",()=>{document.getElementById("networkStatus").textContent="Phone service reconnecting…";try{hostPeer.reconnect()}catch{}});hostPeer.on("error",err=>{document.getElementById("networkStatus").textContent=`Phone service error: ${WHF_NETWORK.errorText(err)}`})}
 
 function initAvatarPicker(){const grid=document.getElementById("joinAvatarGrid");grid.innerHTML="";AVATARS.forEach((a,i)=>{const b=document.createElement("button");b.type="button";b.className=`join-avatar ${i===phoneSelectedAvatar?"selected":""}`;b.title=a.name;b.textContent=a.icon;b.onclick=()=>{phoneSelectedAvatar=i;initAvatarPicker()};grid.appendChild(b)})}
 function phoneTokenForRoom(room){const key=String(room).toUpperCase();try{const saved=JSON.parse(localStorage.getItem(PHONE_TOKEN_KEY)||"{}");const token=safeToken(saved[key]);if(token)return token}catch{}try{return safeToken(sessionStorage.getItem(`${PHONE_TOKEN_KEY}-${key}`))}catch{return ""}}
 function savePhoneToken(room,token){try{const saved=JSON.parse(localStorage.getItem(PHONE_TOKEN_KEY)||"{}");saved[String(room).toUpperCase()]=token;localStorage.setItem(PHONE_TOKEN_KEY,JSON.stringify(saved))}catch{try{sessionStorage.setItem(`${PHONE_TOKEN_KEY}-${String(room).toUpperCase()}`,token)}catch{}}}
+function clearPhoneToken(room){const key=String(room).toUpperCase();try{const saved=JSON.parse(localStorage.getItem(PHONE_TOKEN_KEY)||"{}");delete saved[key];localStorage.setItem(PHONE_TOKEN_KEY,JSON.stringify(saved))}catch{}try{sessionStorage.removeItem(`${PHONE_TOKEN_KEY}-${key}`)}catch{}}
 function actionEnvelope(type,extra={}){return{type,gameEpoch:phoneState?.gameEpoch,actionNonce:phoneState?.actionNonce,...extra}}
+function leaveClassicGame(){if(!phoneConn?.open||!phoneState?.playerIndex&&phoneState?.playerIndex!==0)return;if(!confirm("Leave this game?"))return;phoneLeaving=true;document.getElementById("joinStatus").textContent="Leaving game…";phoneConn.send(actionEnvelope("leave"))}
 function joinGame(){if(!phoneConn?.open){document.getElementById("joinStatus").textContent="Still connecting…";recoverPhoneConnection(false);return}const name=document.getElementById("nameInput").value.trim();if(!name){document.getElementById("joinStatus").textContent="Enter your name.";return}let token=phoneTokenForRoom(phoneRoom);if(!token){token=(crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`);savePhoneToken(phoneRoom,token)}phoneConn.send({type:"join",name,avatar:phoneSelectedAvatar,token});document.getElementById("joinStatus").textContent="Joining…"}
 function phoneSelect(ci,qi){if(phoneState?.mode!=="choose"||!phoneConn?.open)return;phoneConn.send(actionEnvelope("select",{ci,qi}))}
 function submitPhoneDailyWager(){if(phoneState?.mode!=="daily-wager"||!phoneConn?.open)return;const wager=Number(document.getElementById("phoneDailyWager")?.value);if(!Number.isFinite(wager)||wager<100||wager>phoneState.maxWager)return;phoneConn.send(actionEnvelope("daily-wager",{wager}))}
@@ -373,8 +403,8 @@ function renderPhone(){
   if(phoneState.mode==="reveal"){view.innerHTML=`<div class="phone-q">${escapeHtml(phoneState.current.question)}</div><div class="phone-reveal">${escapeHtml(phoneState.correctAnswer)}</div><div class="phone-small">Your answer: ${escapeHtml(phoneState.yourAnswer)}</div><div class="phone-result ${phoneState.correct?"good":"bad"}">${phoneState.correct?`CORRECT • ${phoneState.delta>=0?"+":""}${money(phoneState.delta)}`:`INCORRECT${phoneState.delta?` • ${money(phoneState.delta)}`:""}`}</div><div class="phone-small">Host is reviewing results.</div>`;return}
   if(phoneState.mode==="final"){const top=phoneState.ranking?.[0]?.score;view.innerHTML=`<div class="waiting"><div class="big">FINAL RANKING</div>${(phoneState.ranking||[]).map((p,i)=>`<div style="margin:8px 0;font-weight:1000;color:${p.score===top?'#ffd166':'#fff'}">#${i+1} ${avatarIcon(p.avatar)} ${escapeHtml(p.name)} — ${money(p.score)}</div>`).join("")}</div>`;return}
 }
-let phoneReconnectTimer=null,phoneReconnectAttempt=0,phoneConnectionGeneration=0;
-function schedulePhoneReconnect(room,message="Connection lost — reconnecting…"){
+let phoneReconnectTimer=null,phoneReconnectAttempt=0,phoneConnectionGeneration=0,phoneLeaving=false;
+function schedulePhoneReconnect(room,message="Connection lost — reconnecting…"){if(phoneLeaving)return;
   clearTimeout(phoneReconnectTimer);document.getElementById("joinStatus").textContent=message;const delay=Math.min(12000,700*(2**Math.min(phoneReconnectAttempt++,4)))+Math.floor(Math.random()*350);phoneReconnectTimer=setTimeout(()=>recoverPhoneConnection(false),delay);
 }
 function connectPhoneToHost(room,force=false){
@@ -382,13 +412,13 @@ function connectPhoneToHost(room,force=false){
   const stale=()=>generation!==phoneConnectionGeneration||phoneConn!==conn;
   WHF_NETWORK.watchConnection(conn,"classic-phone-data");WHF_NETWORK.connectionTimeout(conn,"classic-phone-data",stage=>{if(!stale())schedulePhoneReconnect(room,`Could not reach host: ${stage} • retrying…`)},15000);
   conn.on("open",()=>{if(stale())return;phoneReconnectAttempt=0;document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connected`;document.getElementById("joinStatus").textContent="";const token=phoneTokenForRoom(room);if(token)conn.send({type:"rejoin",token});else conn.send({type:"sync"})});
-  conn.on("data",msg=>{if(stale())return;if(msg?.type==="state"){phoneState=msg;renderPhone()}else if(msg?.type==="joined"){if(msg.token)savePhoneToken(room,msg.token)}else if(msg?.type==="join-error")document.getElementById("joinStatus").textContent=msg.message||"Could not join."});
+  conn.on("data",msg=>{if(stale())return;if(msg?.type==="state"){phoneState=msg;renderPhone()}else if(msg?.type==="joined"){if(msg.token)savePhoneToken(room,msg.token)}else if(msg?.type==="left"){clearPhoneToken(room);phoneLeaving=true;phoneState=null;document.getElementById("gameCard").style.display="none";document.getElementById("joinCard").style.display="block";document.getElementById("joinStatus").textContent="You left this game.";try{conn.close();phonePeer?.destroy()}catch{}}else if(msg?.type==="join-error")document.getElementById("joinStatus").textContent=msg.message||"Could not join."});
   conn.on("close",()=>{if(stale())return;phoneConn=null;schedulePhoneReconnect(room)});conn.on("error",()=>{if(stale())return;schedulePhoneReconnect(room)});
 }
 function createPhonePeer(room){
   if(typeof Peer==="undefined")return;const peer=new Peer(undefined,WHF_NETWORK.peerOptions());phonePeer=peer;WHF_NETWORK.watchPeer(peer,"classic-phone-peer");const current=()=>phonePeer===peer;WHF_NETWORK.peerOpenTimeout(peer,"classic-phone-peer",stage=>{if(!current())return;phonePeer=null;try{peer.destroy()}catch{}schedulePhoneReconnect(room,`Could not register phone: ${stage} • retrying…`)},10000);peer.on("open",()=>{if(current())connectPhoneToHost(room,true)});peer.on("disconnected",()=>{if(!current())return;try{peer.reconnect()}catch{}schedulePhoneReconnect(room)});peer.on("close",()=>{if(!current())return;phonePeer=null;schedulePhoneReconnect(room)});peer.on("error",err=>{if(!current())return;const missing=err?.type==="peer-unavailable";schedulePhoneReconnect(room,missing?"Host not found yet — retrying…":`Connection error: ${WHF_NETWORK.errorText(err)} — retrying…`)})
 }
-function recoverPhoneConnection(force=false){
+function recoverPhoneConnection(force=false){if(phoneLeaving)return;
   if(!phoneRoom)return;if(!phonePeer||phonePeer.destroyed){createPhonePeer(phoneRoom);return}if(phonePeer.disconnected){try{phonePeer.reconnect()}catch{}schedulePhoneReconnect(phoneRoom);return}if(phonePeer.open)connectPhoneToHost(phoneRoom,force)
 }
 function initPhone(room){document.body.classList.add("phone-mode");document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connecting…`;initAvatarPicker();if(typeof Peer==="undefined"){document.getElementById("joinStatus").textContent="Phone networking failed to load.";return}createPhonePeer(room)}

@@ -29,13 +29,17 @@ Primary file: `outputs/classic-jeopardy.html`
 - 2× and 3× endgame phases, streak visuals, player avatars, manual host score adjustment, fullscreen board, New Game/Reset Game behavior, large QR joining, used-clue review, and animated final ranking mirror the timeline game's design language.
 - New Game resets board/scores while keeping the roster. Reset Game clears the roster after confirmation.
 
-## Swappable Classic question packs
+## Swappable question packs
 
-Classic content is intentionally separated from its engine.
+Both games use manifest-backed, data-only question packs. `packs/timeline/manifest.js`
+and `packs/classic/manifest.js` list installed packs and their default. Hosts may
+switch packs in place: the new pack is loaded and checked first, then a fresh
+game starts with the roster, room, connections, and settings preserved. New Game
+keeps the selected pack and roster; Reset Game clears the roster.
 
-- Current pack: `packs/classic/current.js`
+- Pack workflow: `PACK_WORKFLOW.md`
 - Pack instructions/schema: `packs/classic/README.md`
-- Changing only the Classic theme/genre/questions should normally require editing **only** `packs/classic/current.js`.
+- A content-only pack change must not edit an HTML engine.
 - The engine reads pack title, subtitle, genre, categories, clue values, questions, canonical answers, accepted aliases, hints, and scoring rule multipliers.
 - This separation is specifically intended so the user can tell ChatGPT something like “make Classic Jeopardy Disney-themed” without risking game-flow or networking code.
 
@@ -48,6 +52,10 @@ Classic content is intentionally separated from its engine.
 - A session-scoped phone token lets a refreshed phone reclaim its player in the current host session.
 - The host owns an explicit lobby phase. Players may join before **Start Game**; once started, only a known session token may reclaim an existing seat.
 - Phone identities are persisted per room with a local-storage preference and session-storage fallback. Duplicate live connections for one identity are superseded instead of creating duplicate players.
+- A normal disconnect is temporary and retains a reclaimable seat. Leave Game is
+  an explicit authenticated intent: only the connection's own player can be
+  removed, its token binding is revoked, and remaining players continue with
+  reindexed authoritative state.
 - Phones recover in place after connection errors, app/background resume, browser page restoration, and network return. Reconnects receive a complete authoritative state snapshot.
 - Timeline snapshots carry monotonic revisions and remote intents carry replay IDs. Classic actions carry the current game epoch and phase nonce. These guards prevent delayed messages from an earlier question or game from mutating current state.
 - Timeline host peer ID: `what-happened-first-<room code in lowercase>`.
@@ -58,7 +66,7 @@ Classic content is intentionally separated from its engine.
 - `index.html` — game-mode selector.
 - `outputs/dog-jeopardy.html` — timeline game.
 - `outputs/classic-jeopardy.html` — Classic open-ended game.
-- `packs/classic/current.js` — swappable Classic content.
+- `packs/timeline/manifest.js` and `packs/classic/manifest.js` — installed pack registries.
 - `work/audit-game.js` — timeline static audit.
 - `work/audit-classic.js` — Classic engine + pack static audit.
 

@@ -1,6 +1,8 @@
 # Classic Jeopardy question packs
 
-`current.js` contains the content currently loaded by Classic Jeopardy. The game engine is separate, so changing the genre should normally require editing only this file.
+`manifest.js` registers every installed Classic pack. Each pack is a separate
+content file, and the game engine is separate. Read
+[`PACK_WORKFLOW.md`](../../PACK_WORKFLOW.md) before a content change.
 
 ## Fastest ChatGPT workflow
 
@@ -8,7 +10,8 @@ Ask ChatGPT something like:
 
 > Replace the Classic Jeopardy question pack with a Disney theme. Keep 5 categories with 5 clues each, values 100–500, include a concise hint for every clue, and provide accepted answer aliases for fuzzy judging. Do not change the Classic game engine.
 
-ChatGPT should update only `packs/classic/current.js` unless you explicitly request game-mechanic changes.
+ChatGPT should follow `PACK_WORKFLOW.md` and change only Classic pack, manifest,
+and history files unless you explicitly request a game-mechanic change.
 
 ## Pack schema
 

@@ -1,8 +1,9 @@
 # Timeline question packs
 
-`current.js` is the complete question source for **What Happened First?**. The
-HTML game only loads `window.TIMELINE_JEOPARDY_PACK`; it does not contain a
-second normal-question bank.
+`manifest.js` is the Timeline registry; each registered `.js` file is one
+complete question pack. The HTML discovers packs through the manifest and does
+not contain a normal-question bank. Read [`PACK_WORKFLOW.md`](../../PACK_WORKFLOW.md)
+before adding or changing content.
 
 Keep exactly five categories with five clues each. A normal clue is:
 

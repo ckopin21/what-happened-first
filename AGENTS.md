@@ -15,7 +15,7 @@ Mode-specific rules:
 
 - Timeline mode: only the active player selects and answers a normal clue.
 - Classic mode: only the active player selects the clue, but every joined player may answer that clue once. Answers reveal automatically when all players submit, with a host early-reveal override.
-- Classic question/genre content lives in `packs/classic/current.js`. When the user asks only to change the Classic genre/questions, edit that pack and leave the engine alone unless a mechanic change is explicitly requested.
+- Content-only pack work must not edit either game engine. Read `PACK_WORKFLOW.md`, the relevant manifest, every installed pack's metadata, and the matching history ledger; then edit only pack/manifest/history files.
 
 Run both static audits after relevant edits:
 

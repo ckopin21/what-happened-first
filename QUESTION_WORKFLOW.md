@@ -1,9 +1,10 @@
 # Question pack workflow
 
-Questions are content, not game logic. The two production packs are:
+Questions are content, not game logic. See the definitive multi-pack guide in
+[`PACK_WORKFLOW.md`](PACK_WORKFLOW.md). The two production pack registries are:
 
-- Timeline: `packs/timeline/current.js`
-- Classic: `packs/classic/current.js`
+- Timeline: `packs/timeline/manifest.js`
+- Classic: `packs/classic/manifest.js`
 
 Their permanent ledgers are `packs/history/timeline-used.json` and
 `packs/history/classic-used.json`. A history entry records its stable ID,

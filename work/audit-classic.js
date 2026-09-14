@@ -29,7 +29,7 @@ const twoPartCount=pack.categories.flatMap(category=>category.clues).filter(clue
 if(twoPartCount<5)throw new Error('Classic pack must include at least five two-part clues');
 
 const required=[
-  '../packs/classic/current.js','Confirm & Submit','Reveal Now','fuzzyMatch','setJudgement',
+  '../packs/classic/manifest.js','Confirm & Submit','Reveal Now','fuzzyMatch','setJudgement',
   'applyScores','allSubmitted','classic-jeopardy-','QRCode','Peer','usedWinners','reviewClue',
   'showFinale','phaseMultiplier','Use Hint','New Game','Reset Game','toggleFullscreen',
   'Developer Mode','devPreview','devPanel','fullscreenExitBtn','devForcedMultiplier','CLASSIC_DEVTOOLS_V1',
@@ -51,6 +51,11 @@ const regressionIssues=[];
 const requirePattern=(name,pattern)=>{if(!pattern.test(html))regressionIssues.push(name)};
 requirePattern('explicit lobby/start state',/(?:gameStarted|gamePhase|lobbyState)/);
 requirePattern('host start action',/function\s+(?:startGame|hostStartGame)\s*\(/);
+requirePattern('Classic manifest',/CLASSIC_PACK_MANIFEST/);
+requirePattern('Classic pack selector',/classicPackSelect/);
+requirePattern('host Classic pack switch',/async function switchClassicPack/);
+requirePattern('explicit Classic leave intent',/action\.type===\"leave\"[\s\S]{0,500}removeClassicPlayer/);
+requirePattern('Classic disconnect remains distinct from leave',/phoneLeaving[\s\S]{0,300}schedulePhoneReconnect/);
 const remoteSelectDirectGate=/action\.type\s*===\s*["']select["'][\s\S]{0,240}(?:gameStarted|gamePhase|lobbyState)/.test(html);
 const remoteSelectDelegatedGate=/action\.type\s*===\s*["']select["'][^\n]*openClue\(/.test(html)&&/function\s+openClue\s*\([^)]*\)\s*\{[^\n]*(?:gameStarted|gamePhase|lobbyState)/.test(html);
 const remoteSelectCentralGate=/function\s+handleRemoteAction[\s\S]{0,2200}if\s*\(\s*!gameStarted[\s\S]{0,1000}action\.type\s*===\s*["']select["']/.test(html);

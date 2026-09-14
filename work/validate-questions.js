@@ -6,8 +6,8 @@
 const fs=require("fs"), path=require("path"), vm=require("vm");
 const ROOT=path.resolve(__dirname,"..");
 const DEFINITIONS={
-  timeline:{pack:"packs/timeline/current.js",history:"packs/history/timeline-used.json",global:"TIMELINE_JEOPARDY_PACK"},
-  classic:{pack:"packs/classic/current.js",history:"packs/history/classic-used.json",global:"CLASSIC_JEOPARDY_PACK"}
+  timeline:{directory:"packs/timeline",manifest:"manifest.js",history:"packs/history/timeline-used.json",global:"TIMELINE_PACK_MANIFEST",packsGlobal:"TIMELINE_QUESTION_PACKS"},
+  classic:{directory:"packs/classic",manifest:"manifest.js",history:"packs/history/classic-used.json",global:"CLASSIC_PACK_MANIFEST",packsGlobal:"CLASSIC_QUESTION_PACKS"}
 };
 
 function clean(value){return String(value||"").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
@@ -25,11 +25,32 @@ function similar(a,b){
   if((score>=.72&&common>=2) || (binaryA&&binaryB&&score>=.55&&common>=2))return `near match (${Math.round(score*100)}% shared terms)`;
   return null;
 }
-function loadPack(kind,file){
+function loadManifest(kind){
   const def=DEFINITIONS[kind]; if(!def)throw new Error(`Unknown pack kind: ${kind}`);
-  const source=fs.readFileSync(file||path.join(ROOT,def.pack),"utf8"), sandbox={window:{}};
-  vm.runInNewContext(source,sandbox,{filename:file||def.pack,timeout:1000});
+  const file=path.join(ROOT,def.directory,def.manifest), source=fs.readFileSync(file,"utf8"), sandbox={window:{},document:{write(){}}};
+  vm.runInNewContext(source,sandbox,{filename:file,timeout:1000});
   return sandbox.window[def.global];
+}
+function loadRegisteredPacks(kind){
+  const def=DEFINITIONS[kind],manifest=loadManifest(kind), errors=[];
+  if(!manifest||typeof manifest!=="object"||!Array.isArray(manifest.packs)){return{manifest,packs:[],errors:[`${kind} manifest is malformed`]}}
+  const packs=[];
+  manifest.packs.forEach((entry,index)=>{
+    if(!entry||typeof entry!=="object"||!hasText(entry.id)||!hasText(entry.name)||!hasText(entry.genre)||!hasText(entry.file)){errors.push(`${kind} manifest entry ${index+1} needs id, name, genre, and file`);return}
+    const file=path.resolve(ROOT,def.directory,entry.file);
+    if(!file.startsWith(path.resolve(ROOT,def.directory)+path.sep)||!fs.existsSync(file)){errors.push(`${kind} manifest entry '${entry.id}' points to a missing pack '${entry.file}'`);return}
+    const sandbox={window:{}};try{vm.runInNewContext(fs.readFileSync(file,"utf8"),sandbox,{filename:file,timeout:1000})}catch(error){errors.push(`${kind} pack '${entry.id}' cannot load: ${error.message}`);return}
+    const pack=sandbox.window[def.packsGlobal]?.[entry.id];
+    if(!pack){errors.push(`${kind} manifest entry '${entry.id}' did not register matching pack metadata`);return}
+    packs.push({entry,pack,file});
+  });
+  const registered=new Set(manifest.packs.map(entry=>entry?.file));
+  fs.readdirSync(path.join(ROOT,def.directory)).filter(name=>name.endsWith(".js")&&name!==def.manifest).forEach(name=>{if(!registered.has(name))errors.push(`${kind} pack file '${name}' exists but is not registered in its manifest`)});
+  return{manifest,packs,errors};
+}
+function loadPack(kind,id){
+  const loaded=loadRegisteredPacks(kind), wanted=id||loaded.manifest?.defaultPackId;
+  return loaded.packs.find(item=>item.entry.id===wanted)?.pack;
 }
 function loadHistory(kind){return JSON.parse(fs.readFileSync(path.join(ROOT,DEFINITIONS[kind].history),"utf8"))}
 function issue(errors,message){errors.push(message)}
@@ -53,8 +74,8 @@ function recordsFor(kind,pack){
 function validatePack(kind,pack,history){
   const errors=[], warnings=[], def=DEFINITIONS[kind];
   if(!pack||typeof pack!=="object"){issue(errors,`${kind} pack did not assign window.${def.global}`);return {errors,warnings,records:[]}}
-  fieldCheck(errors,pack,new Set(["id","title","subtitle","genre","rules","categories"]),`${kind} pack`);
-  if(!hasText(pack.id))issue(errors,`${kind} pack needs a stable id`);
+  fieldCheck(errors,pack,new Set(["id","name","title","subtitle","genre","rules","categories"]),`${kind} pack`);
+  if(!hasText(pack.id)||!hasText(pack.name)||!hasText(pack.genre))issue(errors,`${kind} pack needs stable id, name, and genre metadata`);
   if(!Array.isArray(pack.categories)||pack.categories.length!==5)issue(errors,`${kind} pack must have exactly 5 categories`);
   const categoryNames=new Set();
   (pack.categories||[]).forEach((category,categoryIndex)=>{
@@ -117,9 +138,23 @@ function validatePack(kind,pack,history){
   return {errors,warnings,records};
 }
 
-function validateCurrentPacks(kinds=Object.keys(DEFINITIONS)){
-  const result={errors:[],warnings:[],packs:{}};
-  kinds.forEach(kind=>{const check=validatePack(kind,loadPack(kind),loadHistory(kind));result.errors.push(...check.errors);result.warnings.push(...check.warnings);result.packs[kind]=check});
+function validateCurrentPacks(kinds=Object.keys(DEFINITIONS),packId=""){
+  const result={errors:[],warnings:[],packs:{}};let foundPack=!packId;
+  kinds.forEach(kind=>{
+    const loaded=loadRegisteredPacks(kind),history=loadHistory(kind);result.errors.push(...loaded.errors);
+    const ids=new Set(),names=new Set(),allRecords=[];
+    if(!loaded.manifest?.defaultPackId||!loaded.packs.some(x=>x.entry.id===loaded.manifest.defaultPackId))result.errors.push(`${kind} manifest defaultPackId is not registered`);
+    const selectedPacks=packId?loaded.packs.filter(item=>item.entry.id===packId):loaded.packs;
+    if(selectedPacks.length)foundPack=true;
+    selectedPacks.forEach(({entry,pack})=>{
+      if(ids.has(entry.id))result.errors.push(`${kind} manifest duplicates pack id '${entry.id}'`);ids.add(entry.id);
+      if(names.has(clean(entry.name)))result.errors.push(`${kind} manifest duplicates display name '${entry.name}'`);names.add(clean(entry.name));
+      if(pack.id!==entry.id||pack.name!==entry.name||pack.genre!==entry.genre)result.errors.push(`${kind} pack '${entry.id}' metadata does not match its manifest entry`);
+      const check=validatePack(kind,pack,history);result.errors.push(...check.errors.map(e=>`[${entry.id}] ${e}`));result.warnings.push(...check.warnings);result.packs[`${kind}:${entry.id}`]=check;allRecords.push(...check.records.map(record=>({...record,packId:entry.id})));
+    });
+    for(let i=0;i<allRecords.length;i++)for(let j=0;j<i;j++){const match=similar(allRecords[i].question,allRecords[j].question);if(match&&!allRecords[i].allowReuse)result.errors.push(`${kind} pack '${allRecords[i].packId}' question '${allRecords[i].id}' duplicates ${match} in installed pack '${allRecords[j].packId}' question '${allRecords[j].id}'`)}
+  });
+  if(!foundPack)result.errors.push(`No registered pack has id '${packId}'`);
   return result;
 }
 function recordCurrent(kind){
@@ -130,12 +165,12 @@ function recordCurrent(kind){
   const temporary=`${historyPath}.tmp`; fs.writeFileSync(temporary,`${JSON.stringify(history,null,2)}\n`);fs.renameSync(temporary,historyPath);
 }
 function cli(){
-  const args=process.argv.slice(2), selected=args.filter(arg=>arg==="timeline"||arg==="classic");
+  const args=process.argv.slice(2), gameIndex=args.indexOf("--game"), packIndex=args.indexOf("--pack"), selected=gameIndex>=0?[args[gameIndex+1]]:args.filter(arg=>arg==="timeline"||arg==="classic"), packId=packIndex>=0?args[packIndex+1]:"";
   if(args.includes("--record-current")){(selected.length?selected:Object.keys(DEFINITIONS)).forEach(recordCurrent);console.log("Question history recorded.");return}
-  const result=validateCurrentPacks(selected.length?selected:Object.keys(DEFINITIONS));
+  const result=validateCurrentPacks(selected.length?selected:Object.keys(DEFINITIONS),packId);
   result.warnings.forEach(message=>console.warn(`WARNING: ${message}`));
   if(result.errors.length){result.errors.forEach(message=>console.error(`ERROR: ${message}`));process.exitCode=1;return}
   console.log(`Question packs valid: ${(selected.length?selected:Object.keys(DEFINITIONS)).join(", ")}.`);
 }
 if(require.main===module)cli();
-module.exports={DEFINITIONS,clean,fingerprint,similar,loadPack,loadHistory,recordsFor,validatePack,validateCurrentPacks};
+module.exports={DEFINITIONS,clean,fingerprint,similar,loadManifest,loadRegisteredPacks,loadPack,loadHistory,recordsFor,validatePack,validateCurrentPacks};

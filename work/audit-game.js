@@ -10,12 +10,10 @@ const script = html.split("<script>")[1]?.split("</script>")[0];
 if (!script) throw new Error("Inline game script not found");
 new Function(script);
 
-if (!html.includes('../packs/timeline/current.js')) throw new Error("Timeline question pack script is not loaded");
-if (!/const\s+categories\s*=\s*TIMELINE_PACK\.categories\s*;/.test(script)) throw new Error("Timeline engine is not using the external question pack");
-const packFile = path.resolve(__dirname, "../packs/timeline/current.js");
-const packSandbox = { window: {} };
-vm.runInNewContext(fs.readFileSync(packFile, "utf8"), packSandbox, { filename: packFile });
-const timelinePack = packSandbox.window.TIMELINE_JEOPARDY_PACK;
+if (!html.includes('../packs/timeline/manifest.js')) throw new Error("Timeline pack manifest is not loaded");
+if (!/TIMELINE_PACK\.categories/.test(script)) throw new Error("Timeline engine is not using the external question pack");
+const { loadPack } = require("./validate-questions");
+const timelinePack = loadPack("timeline");
 if (!timelinePack || !Array.isArray(timelinePack.categories)) throw new Error("Timeline question pack is invalid");
 const categories = timelinePack.categories;
 const questionPackValidation = validateCurrentPacks();
@@ -107,6 +105,11 @@ const requirePattern = (name, pattern) => {
 };
 requirePattern("explicit lobby/start state", /(?:gameStarted|gamePhase|lobbyState)/);
 requirePattern("host start action", /function\s+(?:startGame|hostStartGame)\s*\(/);
+requirePattern("Timeline manifest", /TIMELINE_PACK_MANIFEST/);
+requirePattern("Timeline pack selector", /timelinePackSelect/);
+requirePattern("host Timeline pack switch", /async function switchTimelinePack/);
+requirePattern("explicit Timeline leave intent", /action===\"leave\"[\s\S]{0,500}removeTimelinePlayer/);
+requirePattern("Timeline disconnect remains distinct from leave", /remoteLeaving[\s\S]{0,300}scheduleRemoteReconnect/);
 requirePattern("start gate on remote clue selection", /action\s*===\s*["']select["'][\s\S]{0,240}(?:gameStarted|gamePhase|lobbyState)/);
 requirePattern("persistent reconnect token", /localStorage\.getItem\([\s\S]{0,160}(?:token|TOKEN)/i);
 requirePattern("token validation", /function\s+(?:safeToken|validToken|normalizeToken)\s*\(/);
