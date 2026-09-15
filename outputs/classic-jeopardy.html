@@ -238,7 +238,7 @@ function showDailyDouble(ci,qi){actionNonce=freshNonce();pendingDaily={ci,qi,pla
 function beginClassicClue(ci,qi,playerIndex,wager=null){
   if(!gameStarted||current||!players.length)return false;if(Number.isInteger(playerIndex)&&playerIndex!==activePlayer)return false;
   const clue=categories[ci]?.clues?.[qi],id=clueId(ci,qi);if(!clue||used.has(id))return false;
-  const mult=phaseMultiplier(),isDaily=Number.isFinite(wager),effective=isDaily?Number(wager):clue.value*mult;
+  const mult=phaseMultiplier(),isDaily=Number.isFinite(wager),effective=isDaily?Number(wager)*mult:clue.value*mult;
   const lastChanceActive=lastChancePending&&players[activePlayer]?.playerId===lastChancePlayerId;
   actionNonce=freshNonce();current={id,ci,qi,category:categories[ci].name,base:clue.value,mult,effective,question:clue.question,answer:clue.answer,aliases:Array.isArray(clue.aliases)&&clue.aliases.length?clue.aliases:[clue.answer],hint:clue.hint||"No hint available.",followup:clue.followup||null,part:1,partOneResults:null,primaryQuestion:clue.question,primaryAnswer:clue.answer,isDaily,dailyPlayer:isDaily?activePlayer:null,dailyPlayerId:isDaily?players[activePlayer]?.playerId||null:null,lastChancePlayerId:lastChanceActive?lastChancePlayerId:null,lastChanceMult:lastChanceActive?2:1};
   if(devForcedMultiplier){devForcedMultiplier=0;setDevArmed("")}
