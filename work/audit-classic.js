@@ -66,10 +66,16 @@ requirePattern('state resync after reconnect',/(?:rejoin|resume)[\s\S]{0,300}(?:
 requirePattern('lobby state sent to phones',/!gameStarted[^\n]*mode\s*:\s*["']lobby["']/);
 requirePattern('stale action epoch validation',/action\.gameEpoch\s*!==\s*gameEpoch/);
 requirePattern('per-question action nonce validation',/action\.actionNonce\s*!==\s*actionNonce/);
+requirePattern('Daily Double stable owner identity',/dailyPlayerId/);
+requirePattern('Last Chance stable owner identity',/lastChancePlayerId/);
+requirePattern('Last Chance real scoring multiplier',/lastChanceMult|scoreDeltaFor[\s\S]{0,260}lastChance/);
+requirePattern('Last Chance trigger',/function\s+maybeTriggerLastChance\s*\(/);
+requirePattern('owner removal cancels current phase',/cancelCurrent[\s\S]{0,700}questionOverlay/);
 requirePattern('generation guard on reconnect callbacks',/(?:phoneConnectionGeneration|connectionGeneration)[\s\S]{0,500}stale/);
 requirePattern('visibility recovery',/visibilitychange/);
 requirePattern('page restore recovery',/pageshow/);
 requirePattern('online recovery',/addEventListener\(["']online["']/);
+requirePattern('pending join replay',/phonePendingJoin[\s\S]{0,500}type:"join"/);
 requirePattern('stale connection cleanup',/conn\.on\(["']close["'][\s\S]{0,180}(?:delete|cleanup|remove)/);
 requirePattern('duplicate answer prevention',/submissions\.has\(i\)/);
 requirePattern('duplicate scoring prevention',/questionResolved/);

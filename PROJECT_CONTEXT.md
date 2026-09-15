@@ -26,6 +26,7 @@ Primary file: `outputs/classic-jeopardy.html`
 - Fuzzy judging tolerates reasonable spelling differences and accepted aliases. The host can override every player's result before scoring.
 - Used board tiles show which player(s) got the clue correct and can be clicked to review the answers.
 - Per-player hints reveal only on that player's phone and reduce only that player's possible points for the clue.
+- Hidden Daily Doubles keep wager/answer ownership with the active player's stable identity. Real Last Chance awards one trailing player a one-clue 2× opportunity; in Classic only that player's score delta is doubled while everyone still answers simultaneously.
 - 2× and 3× endgame phases, streak visuals, player avatars, manual host score adjustment, fullscreen board, New Game/Reset Game behavior, large QR joining, used-clue review, and animated final ranking mirror the timeline game's design language.
 - New Game resets board/scores while keeping the roster. Reset Game clears the roster after confirmation.
 
@@ -57,6 +58,7 @@ keeps the selected pack and roster; Reset Game clears the roster.
   removed, its token binding is revoked, and remaining players continue with
   reindexed authoritative state.
 - Phones recover in place after connection errors, app/background resume, browser page restoration, and network return. Reconnects receive a complete authoritative state snapshot.
+- A phone that has submitted a join while its first data channel is closing replays that authenticated join on the next connection, avoiding the one-shot join race that can leave the controller stuck at “Connecting to host…”.
 - Timeline snapshots carry monotonic revisions and remote intents carry replay IDs. Classic actions carry the current game epoch and phase nonce. These guards prevent delayed messages from an earlier question or game from mutating current state.
 - Timeline host peer ID: `what-happened-first-<room code in lowercase>`.
 - Classic host peer ID: `classic-jeopardy-<room code in lowercase>`.
