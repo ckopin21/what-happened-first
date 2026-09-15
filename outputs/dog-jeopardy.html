@@ -2479,12 +2479,14 @@ body.remote-phone-mode .phone-follow-choices .phone-action.selected-choice{outli
 
         <div id="phoneFollowOffer" class="phone-follow" style="display:none">
           <div class="phone-info"><b>Two-part question:</b> bank the current points, or risk them on the follow-up for double total points.</div>
+          <div id="phoneFollowOfferWait" class="phone-info" style="display:none"></div>
           <button class="phone-action correct-action" onclick="phoneBankPrimary()">Bank Points</button>
           <button class="phone-action" onclick="phoneStartFollowup()">Take Follow-Up</button>
         </div>
 
         <div id="phoneFollowView" class="phone-follow" style="display:none">
           <div class="phone-question" id="phoneFollowQuestion"></div>
+          <div id="phoneFollowWait" class="phone-info" style="display:none"></div>
           <div class="phone-follow-choices" id="phoneFollowChoices"></div>
           <button class="phone-action submit-action" id="phoneFollowConfirmBtn" onclick="phoneConfirmFollowup()" disabled>Confirm Choice</button>
           <div class="phone-answer" id="phoneFollowAnswer" style="display:none"></div>
@@ -2525,6 +2527,10 @@ let playerCount=0;
 let activePlayer=0;
 let used=new Set();
 let current=null;
+// Stable identity allowed to decide the currently pending optional follow-up.
+// This is deliberately separate from activePlayer because roster seats can
+// be reindexed when another player leaves or is removed.
+let followupOwnerPlayerId=null;
 let primaryBanked=false;
 let reviewMode=false;
 let gameFinished=false;
@@ -2733,12 +2739,23 @@ function avatarIndexFor(src){
   return i<0?0:i;
 }
 
+function followupOwnerForPhone(){
+  const index=remotePhoneMode?joinedPhonePlayerIndex:activePlayer;
+  return Number.isInteger(index)?players[index]?.playerId||null:null;
+}
+function phoneOwnsFollowup(){
+  return !questionResolved&&!!followupOwnerPlayerId&&followupOwnerForPhone()===followupOwnerPlayerId;
+}
+function followupOwnerName(){
+  return players.find(player=>player?.playerId===followupOwnerPlayerId)?.name||"The active player";
+}
+
 function makeNetworkSnapshot(){
   const followOffer=!!document.getElementById("followOffer")?.classList.contains("visible");
   const followVisible=!!document.getElementById("followBox")?.classList.contains("visible");
   const followAnswerVisible=!!document.getElementById("followAnswer")?.classList.contains("visible");
   return {
-    type:"state",revision:networkRevision,gameStarted,playerCount,activePlayer,used:[...used],gameFinished,hintUsed,questionResolved,pack:{id:TIMELINE_PACK.id,name:TIMELINE_PACK.name,genre:TIMELINE_PACK.genre,categories:TIMELINE_PACK.categories},
+    type:"state",revision:networkRevision,gameEpoch,gameStarted,playerCount,activePlayer,used:[...used],gameFinished,hintUsed,questionResolved,followupOwnerPlayerId,pack:{id:TIMELINE_PACK.id,name:TIMELINE_PACK.name,genre:TIMELINE_PACK.genre,categories:TIMELINE_PACK.categories},
     selectedChoice,submittedChoice,choiceLocked,lastChancePending,lastChancePlayerIndex,lastChancePlayerId,
     multiplier:currentMultiplier(),modalShowing:!!document.getElementById("modal")?.classList.contains("showing"),
     players:players.slice(0,playerCount).map(p=>({playerId:p.playerId,name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatarIndex:avatarIndexFor(p.avatar)})),
@@ -2771,7 +2788,7 @@ function sendRemoteAction(action,data={}){
     scheduleRemoteReconnect(true);
     return false;
   }
-  try{hostConnection.send({type:"action",action,intentId:`${remotePageId}:${++remoteIntentSequence}`,...data});return true}
+  try{hostConnection.send({type:"action",action,intentId:`${remotePageId}:${++remoteIntentSequence}`,gameEpoch,questionKey:current?.key||null,...data});return true}
   catch(e){scheduleRemoteReconnect(true);return false}
 }
 
@@ -2786,14 +2803,16 @@ function safeRemotePlayer(entry){
 
 function removeTimelinePlayer(index,entry){
   if(!Number.isInteger(index)||index<0||index>=playerCount)return false;
-  const wasActive=index===activePlayer,leavesTie=tiePlayers.some(player=>player.playerId===players[index]?.playerId);
+  const removed=players[index],wasActive=index===activePlayer,leavesTie=tiePlayers.some(player=>player.playerId===removed?.playerId),ownsPendingFollowup=removed?.playerId===followupOwnerPlayerId&&!!current;
   // An unresolved active turn is restored to the board; no score is applied.
-  if((wasActive&&(current||pendingDaily))||leavesTie){
+  if((wasActive&&(current||pendingDaily))||ownsPendingFollowup||leavesTie){
     current=null;pendingDaily=null;primaryBanked=false;reviewMode=false;hintUsed=false;questionResolved=false;selectedChoice=null;submittedChoice=null;choiceLocked=false;
+    followupOwnerPlayerId=null;
     document.getElementById("modal")?.classList.remove("showing");document.getElementById("dailyModal")?.classList.remove("showing");document.getElementById("tiebreaker")?.classList.remove("showing");
+    document.getElementById("followOffer")?.classList.remove("visible");document.getElementById("followBox")?.classList.remove("visible");document.getElementById("followAnswer")?.classList.remove("visible");
     tiePlayers=[];tieActive=false;tieResolved=false;tieAnswered=new Set();tieWinnerIndex=null;tieWinnerId=null;lastChancePending=false;lastChancePlayerIndex=null;lastChancePlayerId=null;
   }
-  const removed=players[index];
+  if(removed?.playerId===followupOwnerPlayerId)followupOwnerPlayerId=null;
   for(let i=index;i<playerCount-1;i++)players[i]=players[i+1];
   players[playerCount-1]=makePlayer({name:`Player ${playerCount}`,score:0,streak:0,lossStreak:0,avatar:""});
   playerCount--;
@@ -2916,11 +2935,11 @@ function handleRemoteAction(entry,msg){
   }else if(action==="hint"){
     if(gameStarted&&i===activePlayer&&current&&!questionResolved&&!hintUsed)useHint();
   }else if(action==="bank"){
-    if(gameStarted&&i===activePlayer&&document.getElementById("followOffer")?.classList.contains("visible"))bankPrimary();
+    if(gameStarted&&entry.playerId===followupOwnerPlayerId&&players[activePlayer]?.playerId===followupOwnerPlayerId&&msg.gameEpoch===gameEpoch&&msg.questionKey===current?.key&&!questionResolved&&document.getElementById("followOffer")?.classList.contains("visible"))bankPrimary();
   }else if(action==="follow-start"){
-    if(gameStarted&&i===activePlayer&&document.getElementById("followOffer")?.classList.contains("visible"))startFollowup();
+    if(gameStarted&&entry.playerId===followupOwnerPlayerId&&players[activePlayer]?.playerId===followupOwnerPlayerId&&msg.gameEpoch===gameEpoch&&msg.questionKey===current?.key&&!questionResolved&&document.getElementById("followOffer")?.classList.contains("visible"))startFollowup();
   }else if(action==="follow-choice"){
-    if(!gameStarted||i!==activePlayer||!document.getElementById("followBox")?.classList.contains("visible")||!current)return;
+    if(!gameStarted||entry.playerId!==followupOwnerPlayerId||players[activePlayer]?.playerId!==followupOwnerPlayerId||msg.gameEpoch!==gameEpoch||msg.questionKey!==current?.key||questionResolved||!document.getElementById("followBox")?.classList.contains("visible")||!current)return;
     const choice=Number(msg.choice);
     if(Number.isInteger(choice))chooseFollowup(choice);
   }else if(action==="tie"){
@@ -2938,13 +2957,14 @@ function applyRemoteSnapshot(s){
     const remotePack={id:String(s.pack.id),name:String(s.pack.name||""),genre:String(s.pack.genre||""),categories:s.pack.categories};
     if(validateTimelineRuntimePack(remotePack,{id:remotePack.id,name:remotePack.name,genre:remotePack.genre})){TIMELINE_PACK=remotePack;categories=JSON.parse(JSON.stringify(remotePack.categories))}
   }
-  gameStarted=!!s.gameStarted;playerCount=s.playerCount;activePlayer=s.activePlayer;used=new Set(s.used||[]);gameFinished=!!s.gameFinished;
+  gameEpoch=Number.isFinite(Number(s.gameEpoch))?Number(s.gameEpoch):gameEpoch;gameStarted=!!s.gameStarted;playerCount=s.playerCount;activePlayer=s.activePlayer;used=new Set(s.used||[]);gameFinished=!!s.gameFinished;
   hintUsed=!!s.hintUsed;questionResolved=!!s.questionResolved;selectedChoice=s.selectedChoice||null;
   submittedChoice=s.submittedChoice||null;choiceLocked=!!s.choiceLocked;lastChancePending=!!s.lastChancePending;lastChancePlayerIndex=s.lastChancePlayerIndex;
   remotePhaseMultiplier=Number(s.multiplier)||1;
   (s.players||[]).forEach((p,i)=>{players[i]=makePlayer({playerId:p.playerId,name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatar:avatarOptions[p.avatarIndex]?.src||""})});
   lastChancePlayerId=s.lastChancePlayerId||players[lastChancePlayerIndex]?.playerId||null;
   current=s.current?{...s.current,item:{...s.current.item}}:null;
+  followupOwnerPlayerId=s.followupOwnerPlayerId||((s.followOffer||s.followVisible)?players[activePlayer]?.playerId||null:null);
   pendingDaily=s.pendingDaily?{...s.pendingDaily}:null;
   tieActive=!!s.tie?.active;tieResolved=!!s.tie?.resolved;tieQuestionIndex=s.tie?.questionIndex??-1;
   tiePlayers=(s.tie?.players||[]).map(value=>{const playerId=Number.isInteger(value)?players[value]?.playerId:value,seat=players.findIndex(p=>p.playerId===playerId);return seat>=0?{i:seat,p:players[seat],playerId}:null}).filter(Boolean);
@@ -3488,6 +3508,8 @@ function setPhoneView(view){
 function syncPhoneQuestionView(){
   if(!current){
     setPhoneView("phoneBoardView");
+    document.getElementById("phoneFollowOffer")?.style.setProperty("display","none");
+    document.getElementById("phoneFollowView")?.style.setProperty("display","none");
     return;
   }
 
@@ -3535,7 +3557,11 @@ function syncPhoneQuestionView(){
   if(offer){
     const offerVisible=!!document.getElementById("followOffer")?.classList.contains("visible");
     const offerWasVisible=offer.style.display==="block";
+    const owner=phoneOwnsFollowup();
     offer.style.display=offerVisible ? "block" : "none";
+    offer.querySelectorAll("button").forEach(button=>{button.style.display=owner?"":"none";button.disabled=!owner});
+    const wait=document.getElementById("phoneFollowOfferWait");
+    if(wait){wait.style.display=offerVisible&&!owner?"block":"none";wait.textContent=offerVisible&&!owner?`${followupOwnerName()} is deciding whether to continue to the follow-up.`:""}
     if(remotePhoneMode && offerVisible && !offerWasVisible){
       requestAnimationFrame(()=>requestAnimationFrame(()=>offer.scrollIntoView({behavior:"smooth",block:"center"})));
     }
@@ -3545,6 +3571,7 @@ function syncPhoneQuestionView(){
   if(follow){
     const visible=document.getElementById("followBox")?.classList.contains("visible");
     const followWasVisible=follow.style.display==="block";
+    const owner=phoneOwnsFollowup();
     follow.style.display=visible ? "block" : "none";
     if(visible){
       if(remotePhoneMode && !followWasVisible){
@@ -3555,6 +3582,11 @@ function syncPhoneQuestionView(){
       const followAnswerEl=document.getElementById("phoneFollowAnswer");
       followAnswerEl.style.display=Number.isInteger(current.followChoice)||document.getElementById("followAnswer")?.classList.contains("visible")?"block":"none";
       renderPhoneFollowupChoices();
+      document.getElementById("phoneFollowChoices")?.querySelectorAll("button").forEach(button=>{button.style.display=owner?"":"none";button.disabled=!owner||button.disabled});
+      const confirm=document.getElementById("phoneFollowConfirmBtn");
+      if(confirm){confirm.style.display=owner?"block":"none";confirm.disabled=!owner||confirm.disabled}
+      const wait=document.getElementById("phoneFollowWait");
+      if(wait){wait.style.display=owner?"none":"block";wait.textContent=owner?"":Number.isInteger(current.followChoice)?`${followupOwnerName()} has answered the follow-up.`:`${followupOwnerName()} is answering the follow-up.`}
       if(remotePhoneMode && Number.isInteger(current.followChoice)){
         requestAnimationFrame(()=>followAnswerEl?.scrollIntoView({behavior:"smooth",block:"nearest"}));
       }
@@ -3847,12 +3879,14 @@ function phoneUseHint(){
 
 
 function phoneBankPrimary(){
+  if(!current||!phoneOwnsFollowup())return;
   haptic(14);
   if(remotePhoneMode){sendRemoteAction("bank");return}
   bankPrimary();
 }
 
 function phoneStartFollowup(){
+  if(!current||!phoneOwnsFollowup())return;
   haptic(14);
   if(remotePhoneMode){sendRemoteAction("follow-start");return}
   startFollowup();
@@ -3860,7 +3894,7 @@ function phoneStartFollowup(){
 }
 
 function phoneChooseFollowup(index){
-  if(!current||Number.isInteger(current.followChoice))return;
+  if(!current||!phoneOwnsFollowup()||Number.isInteger(current.followChoice))return;
   const choices=current.followOrder||current.item.fc||followupChoicesFor(current.item);
   if(!Number.isInteger(index)||index<0||index>=choices.length)return;
   haptic(12);
@@ -3870,7 +3904,7 @@ function phoneChooseFollowup(index){
   requestAnimationFrame(()=>confirm?.scrollIntoView({behavior:"smooth",block:"nearest"}));
 }
 function phoneConfirmFollowup(){
-  if(!current||Number.isInteger(current.followChoice)||!Number.isInteger(pendingPhoneFollowChoice))return;
+  if(!current||!phoneOwnsFollowup()||Number.isInteger(current.followChoice)||!Number.isInteger(pendingPhoneFollowChoice))return;
   const index=pendingPhoneFollowChoice;
   const confirm=document.getElementById("phoneFollowConfirmBtn");
   if(confirm){confirm.disabled=true;confirm.textContent="Submitting…"}
@@ -4076,6 +4110,7 @@ function confirmDailyWager(wagerOverride){
 
 function openClue(key,item,base,isReview){
   reviewMode=isReview;
+  followupOwnerPlayerId=null;
   primaryBanked=false;
   hintUsed=false;
   questionResolved=false;
@@ -4186,6 +4221,7 @@ function primaryResult(correct){
   if(reviewMode||!current)return;
   if(correct){
     if(current.item.special){
+      followupOwnerPlayerId=players[activePlayer]?.playerId||null;
       document.getElementById("normalControls").style.display="none";
       document.getElementById("followOffer").classList.add("visible");
       syncPhoneQuestionView();
@@ -4201,7 +4237,7 @@ function primaryResult(correct){
 }
 
 function bankPrimary(){
-  if(!current)return;
+  if(!current||!followupOwnerPlayerId||players[activePlayer]?.playerId!==followupOwnerPlayerId)return;
   primaryBanked=true;
   finalizeQuestion(current.value,true,"banked");
 }
@@ -4254,6 +4290,7 @@ function renderPhoneFollowupChoices(){
   }
 }
 function startFollowup(){
+  if(!current||!followupOwnerPlayerId||players[activePlayer]?.playerId!==followupOwnerPlayerId)return;
   pendingPhoneFollowChoice=null;
   document.getElementById("followOffer").classList.remove("visible");
   document.getElementById("followBox").classList.add("visible");
@@ -4853,6 +4890,7 @@ function resetGameState(keepPlayers){
   gameFinished=false;
   activePlayer=0;
   current=null;
+  followupOwnerPlayerId=null;
   primaryBanked=false;
   reviewMode=false;
   hintUsed=false;
@@ -4925,6 +4963,7 @@ function closeModal(){
   const restoreDaily=!questionResolved && !reviewMode && !!current?.devDaily;
   document.getElementById("modal").classList.remove("showing");
   current=null;
+  followupOwnerPlayerId=null;
   reviewMode=false;
   selectedChoice=null;
   submittedChoice=null;
