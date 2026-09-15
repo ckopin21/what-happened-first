@@ -379,6 +379,7 @@ function handleRemoteAction(ctx,action){
   if(!action||typeof action!=="object")return;
   if(action.type==="rejoin"){const token=safeToken(action.token);const idx=players.findIndex(p=>p.token===token);if(idx>=0){bindContextToPlayer(ctx,idx);sendState(ctx);renderHost();broadcastState()}else sendState(ctx);return}
   if(action.type==="join"){const name=String(action.name||"").trim().slice(0,24),token=safeToken(action.token);let idx=token?players.findIndex(p=>p.token===token):-1;if(idx<0){if(gameStarted||!name||players.length>=MAX_PLAYERS){ctx.conn.send({type:"join-error",message:gameStarted?"This game has already started.":players.length>=MAX_PLAYERS?"Game is full.":"Enter a name."});return}if(!uniquePlayerName(players,name)){ctx.conn.send({type:"join-error",message:"That player name is already in this room."});return}idx=players.length;players.push(makePlayer({name,score:0,token:token||crypto.randomUUID?.()||Math.random().toString(36).slice(2),avatar:Math.max(0,Math.min(AVATARS.length-1,Number(action.avatar)||0)),correctStreak:0,wrongStreak:0}))}bindContextToPlayer(ctx,idx);ctx.conn.send({type:"joined",token:players[idx].token,playerId:players[idx].playerId});renderHost();broadcastState();return}
+  if(action.type==="sync"){sendState(ctx);return}
   const i=ctx.playerIndex;if(!Number.isInteger(i)||!players[i]||players[i].playerId!==ctx.playerId)return;
   if(action.type==="leave"){const removed=removeClassicPlayer(i,ctx);if(removed){try{ctx.conn.send({type:"left"})}catch{}setTimeout(()=>{try{ctx.conn.close()}catch{}},80);toast(`${removed.name} left the game`,"neutral")}return}
   if(action.type==="profile-update"){if(current||pendingDaily){ctx.conn.send({type:"profile-error",message:"Profiles can be changed between questions."});return}const player=players[i],name=String(action.name||"").trim().slice(0,24),avatar=Math.max(0,Math.min(AVATARS.length-1,Number(action.avatar)||0));if(!name||!uniquePlayerName(players,name,player.playerId)){ctx.conn.send({type:"profile-error",message:"Choose a unique player name."});return}player.name=name;player.avatar=avatar;renderHost();broadcastState();return}
@@ -502,24 +503,64 @@ function renderPhone(){
   if(phoneState.mode==="reveal"){view.innerHTML=`<div class="phone-q">${escapeHtml(phoneState.current.question)}</div><div class="phone-reveal">${escapeHtml(phoneState.correctAnswer)}</div><div class="phone-small">Your answer: ${escapeHtml(phoneState.yourAnswer)}</div><div class="phone-result ${phoneState.correct?"good":"bad"}">${phoneState.correct?`CORRECT • ${phoneState.delta>=0?"+":""}${money(phoneState.delta)}`:`INCORRECT${phoneState.delta?` • ${money(phoneState.delta)}`:""}`}</div><div class="phone-small">Host is reviewing results.</div>`;return}
   if(phoneState.mode==="final"){const top=phoneState.ranking?.[0]?.score;view.innerHTML=`<div class="waiting"><div class="big">FINAL RANKING</div>${(phoneState.ranking||[]).map((p,i)=>`<div style="margin:8px 0;font-weight:1000;color:${p.score===top?'#ffd166':'#fff'}">#${i+1} ${avatarIcon(p.avatar)} ${escapeHtml(p.name)} — ${money(p.score)}</div>`).join("")}</div>`;return}
 }
-let phoneReconnectTimer=null,phoneReconnectAttempt=0,phoneConnectionGeneration=0,phoneLeaving=false,phonePendingJoin=null;
-function schedulePhoneReconnect(room,message="Connection lost — reconnecting…"){if(phoneLeaving)return;
-  clearTimeout(phoneReconnectTimer);document.getElementById("joinStatus").textContent=message;const delay=Math.min(12000,700*(2**Math.min(phoneReconnectAttempt++,4)))+Math.floor(Math.random()*350);phoneReconnectTimer=setTimeout(()=>recoverPhoneConnection(false),delay);
+let phoneReconnectTimer=null,phoneSyncTimer=null,phoneReconnectAttempt=0,phoneConnectionGeneration=0,phoneLeaving=false,phonePendingJoin=null;
+function classicPhoneLifecycle(event,detail=""){try{WHF_NETWORK.record("classic-phone-lifecycle",event,detail)}catch{}}
+function classicPhoneStatus(message,bad=false){const status=document.getElementById("joinStatus");if(status)status.textContent=message||"";if(status)status.style.color=bad?"#ff9cae":""}
+function disposeClassicPhoneConnection(destroyPeer=false){
+  phoneConnectionGeneration++;
+  clearTimeout(phoneSyncTimer);phoneSyncTimer=null;
+  const conn=phoneConn;phoneConn=null;try{conn?.close()}catch{}
+  if(destroyPeer){const peer=phonePeer;phonePeer=null;try{peer?.destroy()}catch{}}
+}
+function schedulePhoneReconnect(room,message="Connection lost — reconnecting…",immediate=false){
+  if(phoneLeaving||!phoneRoom||navigator.onLine===false)return;
+  if(message)classicPhoneStatus(message,true);
+  if(phoneReconnectTimer)return;
+  const delay=immediate?0:Math.min(12000,700*(2**Math.min(phoneReconnectAttempt++,4)))+Math.floor(Math.random()*350);
+  phoneReconnectTimer=setTimeout(()=>{phoneReconnectTimer=null;recoverPhoneConnection(false,"retry")},delay);
 }
 function connectPhoneToHost(room,force=false){
-  if(!phonePeer||phonePeer.destroyed||!phonePeer.open)return;if(phoneConn?.open&&!force)return;clearTimeout(phoneReconnectTimer);const generation=++phoneConnectionGeneration;document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connecting…`;document.getElementById("joinStatus").textContent="Connecting to host…";const old=phoneConn;phoneConn=null;try{old?.close()}catch{}const conn=phonePeer.connect(hostPeerId(room),{reliable:true,metadata:{game:GAME_VERSION}});phoneConn=conn;
-  const stale=()=>generation!==phoneConnectionGeneration||phoneConn!==conn;
-  WHF_NETWORK.watchConnection(conn,"classic-phone-data");WHF_NETWORK.connectionTimeout(conn,"classic-phone-data",stage=>{if(!stale())schedulePhoneReconnect(room,`Could not reach host: ${stage} • retrying…`)},15000);
-  conn.on("open",()=>{if(stale())return;phoneReconnectAttempt=0;document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connected`;document.getElementById("joinStatus").textContent="";if(phonePendingJoin?.room===room){try{conn.send({type:"join",name:phonePendingJoin.name,avatar:phonePendingJoin.avatar,token:phonePendingJoin.token})}catch{schedulePhoneReconnect(room)}}else{const token=phoneTokenForRoom(room);if(token)conn.send({type:"rejoin",token});else conn.send({type:"sync"})}});
-  conn.on("data",msg=>{if(stale())return;if(msg?.type==="state"){phoneState=msg;renderPhone()}else if(msg?.type==="joined"){if(msg.token)savePhoneToken(room,msg.token);phonePendingJoin=null}else if(msg?.type==="left"||msg?.type==="removed-from-game"){clearPhoneToken(room);phonePendingJoin=null;phoneLeaving=true;phoneState=null;document.getElementById("gameCard").style.display="none";document.getElementById("joinCard").style.display="block";document.getElementById("joinStatus").textContent=msg?.type==="removed-from-game"?"You were removed from this game.":"You left this game.";try{conn.close();phonePeer?.destroy()}catch{}}else if(msg?.type==="profile-error"||msg?.type==="join-error"){phonePendingJoin=null;document.getElementById("joinStatus").textContent=msg.message||"Could not update profile."}});
-  conn.on("close",()=>{if(stale())return;phoneConn=null;schedulePhoneReconnect(room)});conn.on("error",()=>{if(stale())return;schedulePhoneReconnect(room)});
+  if(phoneLeaving||navigator.onLine===false||!phonePeer||phonePeer.destroyed||!phonePeer.open)return;
+  if(phoneConn&&!force)return;
+  clearTimeout(phoneReconnectTimer);phoneReconnectTimer=null;
+  const peer=phonePeer,generation=++phoneConnectionGeneration;
+  document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connecting…`;classicPhoneStatus("Connecting to host…");
+  const old=phoneConn;phoneConn=null;try{old?.close()}catch{}
+  const conn=peer.connect(hostPeerId(room),{reliable:true,metadata:{game:GAME_VERSION}});phoneConn=conn;
+  const stale=()=>generation!==phoneConnectionGeneration||phoneConn!==conn||phonePeer!==peer;
+  WHF_NETWORK.watchConnection(conn,"classic-phone-data");
+  WHF_NETWORK.connectionTimeout(conn,"classic-phone-data",stage=>{if(stale())return;disposeClassicPhoneConnection();schedulePhoneReconnect(room,`Could not reach host: ${stage} • retrying…`)},15000);
+  conn.on("open",()=>{
+    if(stale())return;phoneReconnectAttempt=0;document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connected`;classicPhoneStatus("");
+    try{if(phonePendingJoin?.room===room)conn.send({type:"join",name:phonePendingJoin.name,avatar:phonePendingJoin.avatar,token:phonePendingJoin.token});else{const token=phoneTokenForRoom(room);if(token)conn.send({type:"rejoin",token});else conn.send({type:"sync"})}}
+    catch{disposeClassicPhoneConnection();schedulePhoneReconnect(room,"Connection interrupted • rejoining…")}
+  });
+  conn.on("data",msg=>{if(stale())return;if(msg?.type==="state"){clearTimeout(phoneSyncTimer);phoneSyncTimer=null;phoneState=msg;renderPhone()}else if(msg?.type==="joined"){if(msg.token)savePhoneToken(room,msg.token);phonePendingJoin=null}else if(msg?.type==="left"||msg?.type==="removed-from-game"){clearPhoneToken(room);phonePendingJoin=null;phoneLeaving=true;phoneState=null;document.getElementById("gameCard").style.display="none";document.getElementById("joinCard").style.display="block";classicPhoneStatus(msg?.type==="removed-from-game"?"You were removed from this game.":"You left this game.",true);disposeClassicPhoneConnection(true)}else if(msg?.type==="profile-error"||msg?.type==="join-error"){phonePendingJoin=null;classicPhoneStatus(msg.message||"Could not update profile.",true)}});
+  conn.on("close",()=>{if(stale())return;disposeClassicPhoneConnection();schedulePhoneReconnect(room)});
+  conn.on("error",error=>{if(stale())return;classicPhoneLifecycle("connection-error",WHF_NETWORK.errorText(error));disposeClassicPhoneConnection();schedulePhoneReconnect(room,`Connection error: ${WHF_NETWORK.errorText(error)} • retrying…`)})
 }
 function createPhonePeer(room){
-  if(typeof Peer==="undefined")return;const peer=new Peer(undefined,WHF_NETWORK.peerOptions());phonePeer=peer;WHF_NETWORK.watchPeer(peer,"classic-phone-peer");const current=()=>phonePeer===peer;WHF_NETWORK.peerOpenTimeout(peer,"classic-phone-peer",stage=>{if(!current())return;phonePeer=null;try{peer.destroy()}catch{}schedulePhoneReconnect(room,`Could not register phone: ${stage} • retrying…`)},10000);peer.on("open",()=>{if(current())connectPhoneToHost(room,true)});peer.on("disconnected",()=>{if(!current())return;try{peer.reconnect()}catch{}schedulePhoneReconnect(room)});peer.on("close",()=>{if(!current())return;phonePeer=null;schedulePhoneReconnect(room)});peer.on("error",err=>{if(!current())return;const missing=err?.type==="peer-unavailable";schedulePhoneReconnect(room,missing?"Host not found yet — retrying…":`Connection error: ${WHF_NETWORK.errorText(err)} — retrying…`)})
+  if(typeof Peer==="undefined"||phoneLeaving||navigator.onLine===false)return;
+  if(phonePeer&&!phonePeer.destroyed)return;
+  const peer=new Peer(undefined,WHF_NETWORK.peerOptions());phonePeer=peer;WHF_NETWORK.watchPeer(peer,"classic-phone-peer");const current=()=>phonePeer===peer;
+  WHF_NETWORK.peerOpenTimeout(peer,"classic-phone-peer",stage=>{if(!current())return;phonePeer=null;try{peer.destroy()}catch{}schedulePhoneReconnect(room,`Could not register phone: ${stage} • retrying…`)} ,10000);
+  peer.on("open",()=>{if(current())connectPhoneToHost(room,true)});
+  peer.on("disconnected",()=>{if(!current())return;classicPhoneLifecycle("peer-disconnected");disposeClassicPhoneConnection(true);schedulePhoneReconnect(room,"Phone service disconnected • retrying…")});
+  peer.on("close",()=>{if(!current())return;phonePeer=null;classicPhoneLifecycle("peer-close");schedulePhoneReconnect(room)});
+  peer.on("error",err=>{if(!current())return;const detail=WHF_NETWORK.errorText(err),missing=err?.type==="peer-unavailable";classicPhoneLifecycle("peer-error",detail);schedulePhoneReconnect(room,missing?"Host not found yet — retrying…":`Connection error: ${detail} — retrying…`)})
 }
-function recoverPhoneConnection(force=false){if(phoneLeaving)return;
-  if(!phoneRoom)return;if(!phonePeer||phonePeer.destroyed){createPhonePeer(phoneRoom);return}if(phonePeer.disconnected){try{phonePeer.reconnect()}catch{}schedulePhoneReconnect(phoneRoom);return}if(phonePeer.open)connectPhoneToHost(phoneRoom,force)
+function recoverPhoneConnection(force=false,reason="lifecycle"){
+  if(phoneLeaving||!phoneRoom)return;
+  classicPhoneLifecycle("recover",reason||"unspecified");
+  if(navigator.onLine===false){classicPhoneStatus("Phone is offline • waiting for internet…",true);return}
+  const peer=phonePeer,conn=phoneConn,healthy=!!peer&&!peer.destroyed&&!peer.disconnected&&peer.open&&!!conn?.open;
+  if(healthy&&!force){try{clearTimeout(phoneSyncTimer);conn.send({type:"sync"});phoneSyncTimer=setTimeout(()=>{if(phoneConn===conn&&!phoneLeaving){disposeClassicPhoneConnection();schedulePhoneReconnect(phoneRoom,"Connection interrupted • rejoining…")}},4500);classicPhoneStatus("")}catch{disposeClassicPhoneConnection();schedulePhoneReconnect(phoneRoom,"Connection interrupted • rejoining…")}return}
+  if(force){clearTimeout(phoneReconnectTimer);phoneReconnectTimer=null;disposeClassicPhoneConnection(true);createPhonePeer(phoneRoom);return}
+  if(!peer||peer.destroyed){createPhonePeer(phoneRoom);return}
+  if(peer.disconnected){disposeClassicPhoneConnection(true);createPhonePeer(phoneRoom);return}
+  if(peer.open)connectPhoneToHost(phoneRoom,false);
 }
+function recoverClassicPhoneAfterPageRestore(persisted){recoverPhoneConnection(!!persisted,persisted?"pageshow:bfcache":"pageshow")}
 function initPhone(room){document.body.classList.add("phone-mode");document.getElementById("phoneRoomLabel").textContent=`Room ${room} • Connecting…`;initAvatarPicker();if(typeof Peer==="undefined"){document.getElementById("joinStatus").textContent="Phone networking failed to load.";return}createPhonePeer(room)}
 
 
@@ -585,9 +626,10 @@ function updatePhoneViewport(){const vv=window.visualViewport;if(vv){document.do
 window.visualViewport?.addEventListener("resize",updatePhoneViewport);window.visualViewport?.addEventListener("scroll",updatePhoneViewport);window.addEventListener("resize",updatePhoneViewport);updatePhoneViewport();
 
 const rawPhoneRoom=new URLSearchParams(location.search).get("phone"),phoneRoom=rawPhoneRoom?rawPhoneRoom.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4):"";if(phoneRoom)initPhone(phoneRoom);else initHost();
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){if(phoneRoom)recoverPhoneConnection(true);else if(hostPeer?.disconnected)try{hostPeer.reconnect()}catch{}}});
-window.addEventListener("pageshow",event=>{if(phoneRoom)recoverPhoneConnection(!!event.persisted);else if(hostPeer?.disconnected)try{hostPeer.reconnect()}catch{}});
-window.addEventListener("online",()=>{if(phoneRoom)recoverPhoneConnection(true);else if(hostPeer?.disconnected)try{hostPeer.reconnect()}catch{}});
+document.addEventListener("visibilitychange",()=>{classicPhoneLifecycle("visibilitychange",document.visibilityState);if(document.visibilityState==="visible"){if(phoneRoom)recoverPhoneConnection(false,"visible");else if(hostPeer?.disconnected)try{hostPeer.reconnect()}catch{}}});
+window.addEventListener("pageshow",event=>{classicPhoneLifecycle("pageshow",event.persisted?"persisted":"normal");if(phoneRoom)recoverClassicPhoneAfterPageRestore(event.persisted);else if(hostPeer?.disconnected)try{hostPeer.reconnect()}catch{}});
+window.addEventListener("online",()=>{classicPhoneLifecycle("online");if(phoneRoom)recoverPhoneConnection(false,"online");else if(hostPeer?.disconnected)try{hostPeer.reconnect()}catch{}});
+window.addEventListener("offline",()=>{classicPhoneLifecycle("offline");if(phoneRoom)classicPhoneStatus("Phone is offline • waiting for internet…",true)});
 </script>
 </body>
 </html>

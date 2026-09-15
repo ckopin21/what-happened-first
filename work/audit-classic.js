@@ -51,7 +51,7 @@ requirePattern('Classic manifest',/CLASSIC_PACK_MANIFEST/);
 requirePattern('Classic pack selector',/classicPackSelect/);
 requirePattern('host Classic pack switch',/async function switchClassicPack/);
 requirePattern('explicit Classic leave intent',/action\.type===\"leave\"[\s\S]{0,500}removeClassicPlayer/);
-requirePattern('Classic disconnect remains distinct from leave',/phoneLeaving[\s\S]{0,300}schedulePhoneReconnect/);
+requirePattern('Classic disconnect remains distinct from leave',/function\s+schedulePhoneReconnect[\s\S]{0,220}phoneLeaving/);
 const remoteSelectDirectGate=/action\.type\s*===\s*["']select["'][\s\S]{0,240}(?:gameStarted|gamePhase|lobbyState)/.test(html);
 const remoteSelectDelegatedGate=/action\.type\s*===\s*["']select["'][^\n]*openClue\(/.test(html)&&/function\s+openClue\s*\([^)]*\)\s*\{[^\n]*(?:gameStarted|gamePhase|lobbyState)/.test(html);
 const remoteSelectCentralGate=/function\s+handleRemoteAction[\s\S]{0,2200}if\s*\(\s*!gameStarted[\s\S]{0,1000}action\.type\s*===\s*["']select["']/.test(html);
@@ -75,6 +75,8 @@ requirePattern('generation guard on reconnect callbacks',/(?:phoneConnectionGene
 requirePattern('visibility recovery',/visibilitychange/);
 requirePattern('page restore recovery',/pageshow/);
 requirePattern('online recovery',/addEventListener\(["']online["']/);
+requirePattern('offline status',/addEventListener\(["']offline["']/);
+requirePattern('authoritative state sync',/action\.type===["']sync["'][\s\S]{0,120}sendState/);
 requirePattern('pending join replay',/phonePendingJoin[\s\S]{0,500}type:"join"/);
 requirePattern('stale connection cleanup',/conn\.on\(["']close["'][\s\S]{0,180}(?:delete|cleanup|remove)/);
 requirePattern('duplicate answer prevention',/submissions\.has\(i\)/);

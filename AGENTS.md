@@ -15,6 +15,7 @@ Mode-specific rules:
 
 - Timeline mode: only the active player selects and answers a normal clue.
 - Classic mode: only the active player selects the clue, but every joined player may answer that clue once. Answers reveal automatically when all players submit, with a host early-reveal override. Daily Double and Last Chance ownership is keyed by stable `playerId`; Last Chance doubles only its owner's Classic score delta.
+- Browser Back/Forward, bfcache restoration, refresh, and app resume are temporary disconnects; preserve the room token and recover the same Classic player unless an acknowledged explicit Leave Game or host removal revoked that identity.
 - Content-only pack work must not edit either game engine. Read `PACK_WORKFLOW.md`, `packs/schema/question-pack.schema.json`, the relevant manifest, every installed pack's metadata, and the matching history ledger; then edit only pack/manifest/history files. New catalog packs must be pure JSON and pass `node work/validate-packs.js`.
 
 Run both static audits after relevant edits:

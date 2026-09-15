@@ -59,6 +59,7 @@ keeps the selected pack and roster; Reset Game clears the roster.
   reindexed authoritative state.
 - Phones recover in place after connection errors, app/background resume, browser page restoration, and network return. Reconnects receive a complete authoritative state snapshot.
 - A phone that has submitted a join while its first data channel is closing replays that authenticated join on the next connection, avoiding the one-shot join race that can leave the controller stuck at “Connecting to host…”.
+- Classic also handles Back/Forward and bfcache restoration as temporary disconnects: stale PeerJS objects are rebuilt, a saved room token is rejoined, and only an acknowledged Leave Game suppresses future recovery.
 - Timeline snapshots carry monotonic revisions and remote intents carry replay IDs. Classic actions carry the current game epoch and phase nonce. These guards prevent delayed messages from an earlier question or game from mutating current state.
 - Timeline host peer ID: `what-happened-first-<room code in lowercase>`.
 - Classic host peer ID: `classic-jeopardy-<room code in lowercase>`.
