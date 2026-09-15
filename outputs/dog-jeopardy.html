@@ -2738,7 +2738,7 @@ function makeNetworkSnapshot(){
   const followVisible=!!document.getElementById("followBox")?.classList.contains("visible");
   const followAnswerVisible=!!document.getElementById("followAnswer")?.classList.contains("visible");
   return {
-    type:"state",revision:networkRevision,gameStarted,playerCount,activePlayer,used:[...used],gameFinished,hintUsed,questionResolved,pack:{id:TIMELINE_PACK.id,name:TIMELINE_PACK.name,genre:TIMELINE_PACK.genre},
+    type:"state",revision:networkRevision,gameStarted,playerCount,activePlayer,used:[...used],gameFinished,hintUsed,questionResolved,pack:{id:TIMELINE_PACK.id,name:TIMELINE_PACK.name,genre:TIMELINE_PACK.genre,categories:TIMELINE_PACK.categories},
     selectedChoice,submittedChoice,choiceLocked,lastChancePending,lastChancePlayerIndex,lastChancePlayerId,
     multiplier:currentMultiplier(),modalShowing:!!document.getElementById("modal")?.classList.contains("showing"),
     players:players.slice(0,playerCount).map(p=>({playerId:p.playerId,name:p.name,score:p.score,streak:p.streak,lossStreak:p.lossStreak,avatarIndex:avatarIndexFor(p.avatar)})),
@@ -2934,6 +2934,10 @@ function applyRemoteSnapshot(s){
   const revision=Number(s.revision);
   if(Number.isFinite(revision)&&revision<appliedNetworkRevision)return;
   if(Number.isFinite(revision))appliedNetworkRevision=revision;
+  if(s.pack?.id&&Array.isArray(s.pack.categories)){
+    const remotePack={id:String(s.pack.id),name:String(s.pack.name||""),genre:String(s.pack.genre||""),categories:s.pack.categories};
+    if(validateTimelineRuntimePack(remotePack,{id:remotePack.id,name:remotePack.name,genre:remotePack.genre})){TIMELINE_PACK=remotePack;categories=JSON.parse(JSON.stringify(remotePack.categories))}
+  }
   gameStarted=!!s.gameStarted;playerCount=s.playerCount;activePlayer=s.activePlayer;used=new Set(s.used||[]);gameFinished=!!s.gameFinished;
   hintUsed=!!s.hintUsed;questionResolved=!!s.questionResolved;selectedChoice=s.selectedChoice||null;
   submittedChoice=s.submittedChoice||null;choiceLocked=!!s.choiceLocked;lastChancePending=!!s.lastChancePending;lastChancePlayerIndex=s.lastChancePlayerIndex;
@@ -5000,7 +5004,8 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 }
 
-chooseDailyDoubles();populateTimelinePackSelector();
+chooseDailyDoubles();
+populateTimelinePackSelector();
 renderJoinAvatars();
 updateHostPlayerCount();
 applyPlayerSetup();
