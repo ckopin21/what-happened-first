@@ -36,3 +36,11 @@ jobs:
         run: node work/audit-game.js outputs/dog-jeopardy.html
       - name: Audit classic mode
         run: node work/audit-classic.js
+      - name: Classic multiplayer browser playtest
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node work/classic-stability-browser-diagnostic.js https://ckopin21.github.io/what-happened-first/outputs
+      - name: Classic Back/Forward recovery playtest
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node work/classic-history-recovery-browser-diagnostic.js https://ckopin21.github.io/what-happened-first/outputs
