@@ -632,12 +632,14 @@ body.fullscreen-game .board{
 body.fullscreen-game .category,
 body.fullscreen-game .clue{
   min-height:0;
+  padding:4px 6px;
+  line-height:1.05;
 }
 body.fullscreen-game .category{
-  font-size:clamp(15px,1.8vw,24px);
+  font-size:clamp(12px,min(1.8vw,2.8vh),22px);
 }
 body.fullscreen-game .clue{
-  font-size:clamp(26px,3vw,44px);
+  font-size:clamp(22px,min(3vw,4.5vh),40px);
 }
 body.fullscreen-game .player.on-fire:before,
 body.fullscreen-game .player.on-cold:before{
