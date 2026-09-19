@@ -36,3 +36,11 @@ jobs:
         run: node work/audit-game.js outputs/dog-jeopardy.html
       - name: Audit classic mode
         run: node work/audit-classic.js
+      - name: Audit responsive UI layout
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          python3 -m http.server 4173 >/tmp/whf-layout-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID' EXIT
+          node work/audit-layout.js http://127.0.0.1:4173/outputs
