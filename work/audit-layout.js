@@ -41,20 +41,20 @@ class Cdp{
 }
 async function listTargets(port){
   for(let i=0;i<100;i++){
-    try{const r=await fetch(\`http://127.0.0.1:\${port}/json/list\`);if(r.ok)return r.json()}catch{}
+    try{const r=await fetch(`http://127.0.0.1:${port}/json/list`);if(r.ok)return r.json()}catch{}
     await delay(100);
   }
-  throw Error(\`Chrome \${port} did not start\`);
+  throw Error(`Chrome ${port} did not start`);
 }
 async function launch(port,label,width,height){
-  const profile=fs.mkdtempSync(path.join(os.tmpdir(),\`whf-layout-\${label}-\`));
+  const profile=fs.mkdtempSync(path.join(os.tmpdir(),`whf-layout-${label}-`));
   const child=spawn(CHROME,[
-    \`--remote-debugging-port=\${port}\`,\`--user-data-dir=\${profile}\`,
+    `--remote-debugging-port=${port}`,`--user-data-dir=${profile}`,
     "--headless=new","--disable-gpu","--no-first-run","--no-default-browser-check",
-    \`--window-size=\${width},\${height}\`,"about:blank"
+    `--window-size=${width},${height}`,"about:blank"
   ],{stdio:"ignore",windowsHide:true});
   const target=(await listTargets(port)).find(x=>x.type==="page");
-  if(!target)throw Error(\`No page target for \${label}\`);
+  if(!target)throw Error(`No page target for ${label}`);
   const cdp=new Cdp(target.webSocketDebuggerUrl,label);await cdp.open();
   await setViewport(cdp,width,height);
   return{child,profile,cdp};
@@ -73,16 +73,16 @@ async function waitFor(cdp,expression,timeout=18000){
 }
 async function navigate(cdp,url){
   await cdp.send("Page.navigate",{url});
-  if(!await waitFor(cdp,"document.readyState==='complete'",20000))throw Error(\`Navigation timed out: \${url}\`);
+  if(!await waitFor(cdp,"document.readyState==='complete'",20000))throw Error(`Navigation timed out: ${url}`);
 }
 function eventText(event){
   const p=event.params||{};
   if(event.method==="Runtime.exceptionThrown")return p.exceptionDetails?.exception?.description||p.exceptionDetails?.text||"exception";
-  if(event.method==="Runtime.consoleAPICalled")return \`\${p.type||"log"}: \${(p.args||[]).map(a=>a.value??a.description??"").join(" ")}\`;
-  return \`\${p.entry?.level||"log"}: \${p.entry?.text||""}\`;
+  if(event.method==="Runtime.consoleAPICalled")return `${p.type||"log"}: ${(p.args||[]).map(a=>a.value??a.description??"").join(" ")}`;
+  return `${p.entry?.level||"log"}: ${p.entry?.text||""}`;
 }
 async function audit(cdp,label){
-  const result=await cdp.eval(\`(()=>{
+  const result=await cdp.eval(`(()=>{
     const issues=[];
     const visible=el=>{
       const cs=getComputedStyle(el),r=el.getBoundingClientRect();
@@ -139,99 +139,99 @@ async function audit(cdp,label){
       const key=JSON.stringify(issue);if(!seen.has(key)){seen.add(key);dedup.push(issue)}
     }
     return {viewport:[window.innerWidth,window.innerHeight],scroll:[document.documentElement.scrollWidth,document.documentElement.scrollHeight],issues:dedup.slice(0,80)};
-  })()\`);
+  })()`);
   console.log(JSON.stringify({label,...result},null,2));
   return result.issues.map(issue=>({label,...issue}));
 }
 async function addTimelinePlayers(cdp){
   for(const name of LONG_TIMELINE_NAMES){
-    await cdp.eval(\`openComputerJoin();document.getElementById("hostJoinName").value=\${JSON.stringify(name)};addComputerPlayer();true\`);
+    await cdp.eval(`openComputerJoin();document.getElementById("hostJoinName").value=${JSON.stringify(name)};addComputerPlayer();true`);
   }
 }
 async function addClassicPlayers(cdp){
   for(const name of LONG_CLASSIC_NAMES){
-    await cdp.eval(\`openClassicAddPlayer();document.getElementById("classicAddName").value=\${JSON.stringify(name)};addClassicLocalPlayer();true\`);
+    await cdp.eval(`openClassicAddPlayer();document.getElementById("classicAddName").value=${JSON.stringify(name)};addClassicLocalPlayer();true`);
   }
 }
 async function hostVisualAudit(cdp,kind,file){
   const issues=[];
   await setViewport(cdp,1280,720);
-  await navigate(cdp,\`\${BASE}/\${file}?layout-host=\${Date.now()}\`);
+  await navigate(cdp,`${BASE}/${file}?layout-host=${Date.now()}`);
   await waitFor(cdp,"typeof roomCode==='string'&&roomCode.length===4");
   if(kind==="timeline")await addTimelinePlayers(cdp);else await addClassicPlayers(cdp);
-  issues.push(...await audit(cdp,\`\${kind}-host-lobby-1280x720\`));
+  issues.push(...await audit(cdp,`${kind}-host-lobby-1280x720`));
   await setViewport(cdp,1024,600);
-  issues.push(...await audit(cdp,\`\${kind}-host-lobby-1024x600\`));
+  issues.push(...await audit(cdp,`${kind}-host-lobby-1024x600`));
   await setViewport(cdp,1280,720);
   await cdp.eval("startGame();true");
-  issues.push(...await audit(cdp,\`\${kind}-host-board-1280x720\`));
+  issues.push(...await audit(cdp,`${kind}-host-board-1280x720`));
   if(kind==="timeline"){
-    await cdp.eval(\`(()=>{const id="0-0";used.add(id);categories[0].clues[0].winnerName=players[0].name;buildBoard();return true})()\`);
+    await cdp.eval(`(()=>{const id="0-0";used.add(id);categories[0].clues[0].winnerName=players[0].name;buildBoard();return true})()`);
   }else{
-    await cdp.eval(\`(()=>{const id=clueId(0,0);used.add(id);history.set(id,{winners:[players[0].name,players[1].name]});renderHost();return true})()\`);
+    await cdp.eval(`(()=>{const id=clueId(0,0);used.add(id);history.set(id,{winners:[players[0].name,players[1].name]});renderHost();return true})()`);
   }
-  issues.push(...await audit(cdp,\`\${kind}-host-used-tile-long-name\`));
+  issues.push(...await audit(cdp,`${kind}-host-used-tile-long-name`));
   if(kind==="timeline"){
-    await cdp.eval(\`(()=>{let best=null;for(let ci=0;ci<categories.length;ci++)for(let qi=0;qi<categories[ci].clues.length;qi++){const item=categories[ci].clues[qi],key=ci+"-"+qi;if(used.has(key)||dailyDoubleKeys.has(key))continue;if(!best||String(item.q||"").length>String(best.item.q||"").length)best={key,item,base:(qi+1)*100};}if(best)openClue(best.key,best.item,best.base,false);return !!best})()\`);
+    await cdp.eval(`(()=>{let best=null;for(let ci=0;ci<categories.length;ci++)for(let qi=0;qi<categories[ci].clues.length;qi++){const item=categories[ci].clues[qi],key=ci+"-"+qi;if(used.has(key)||dailyDoubleKeys.has(key))continue;if(!best||String(item.q||"").length>String(best.item.q||"").length)best={key,item,base:(qi+1)*100};}if(best)openClue(best.key,best.item,best.base,false);return !!best})()`);
   }else{
-    await cdp.eval(\`(()=>{let best=null;for(let ci=0;ci<categories.length;ci++)for(let qi=0;qi<categories[ci].clues.length;qi++){const clue=categories[ci].clues[qi],id=clueId(ci,qi);if(used.has(id)||dailyDoubleIds.has(id))continue;if(!best||String(clue.question||"").length>String(best.clue.question||"").length)best={ci,qi,clue};}return best?openClue(best.ci,best.qi,activePlayer):false})()\`);
+    await cdp.eval(`(()=>{let best=null;for(let ci=0;ci<categories.length;ci++)for(let qi=0;qi<categories[ci].clues.length;qi++){const clue=categories[ci].clues[qi],id=clueId(ci,qi);if(used.has(id)||dailyDoubleIds.has(id))continue;if(!best||String(clue.question||"").length>String(best.clue.question||"").length)best={ci,qi,clue};}return best?openClue(best.ci,best.qi,activePlayer):false})()`);
   }
   await delay(150);
-  issues.push(...await audit(cdp,\`\${kind}-host-long-question-1280x720\`));
+  issues.push(...await audit(cdp,`${kind}-host-long-question-1280x720`));
   if(kind==="timeline"){
     await cdp.eval("joinedPhonePlayerIndex=0;document.getElementById('modal')?.classList.remove('showing');current=null;openControllerPreview();true");
   }else{
     await cdp.eval("document.getElementById('questionOverlay')?.classList.remove('showing');current=null;openClassicPhonePreview();true");
   }
-  issues.push(...await audit(cdp,\`\${kind}-host-phone-preview-1280x720\`));
+  issues.push(...await audit(cdp,`${kind}-host-phone-preview-1280x720`));
   if(kind==="timeline")await cdp.eval("closeControllerPreview();document.body.classList.add('fullscreen-game');true");
   else await cdp.eval("closeClassicPhonePreview();document.body.classList.add('fullscreen-game');true");
   await setViewport(cdp,1280,720);
-  issues.push(...await audit(cdp,\`\${kind}-fullscreen-1280x720\`));
+  issues.push(...await audit(cdp,`${kind}-fullscreen-1280x720`));
   await setViewport(cdp,1024,600);
-  issues.push(...await audit(cdp,\`\${kind}-fullscreen-1024x600\`));
+  issues.push(...await audit(cdp,`${kind}-fullscreen-1024x600`));
   return issues;
 }
 async function remotePhoneAudit(host,phone,kind,file){
   const issues=[];
   await setViewport(host.cdp,1280,720);
-  await navigate(host.cdp,\`\${BASE}/\${file}?layout-net=\${Date.now()}\`);
+  await navigate(host.cdp,`${BASE}/${file}?layout-net=${Date.now()}`);
   await waitFor(host.cdp,"typeof roomCode==='string'&&roomCode.length===4");
   const peerOpen=kind==="timeline"?"networkPeer?.open===true":"hostPeer?.open===true";
-  if(!await waitFor(host.cdp,peerOpen,15000))throw Error(\`\${kind}: host PeerJS did not open\`);
+  if(!await waitFor(host.cdp,peerOpen,15000))throw Error(`${kind}: host PeerJS did not open`);
   const room=await host.cdp.eval("roomCode");
   await setViewport(phone.cdp,390,844);
-  await navigate(phone.cdp,\`\${BASE}/\${file}?phone=\${room}&layout-net=\${Date.now()}\`);
+  await navigate(phone.cdp,`${BASE}/${file}?phone=${room}&layout-net=${Date.now()}`);
   const phonePeer=kind==="timeline"?"networkPeer?.open===true&&hostConnection?.open===true":"phonePeer?.open===true&&phoneConn?.open===true";
-  if(!await waitFor(phone.cdp,phonePeer,18000))throw Error(\`\${kind}: phone connection did not open\`);
+  if(!await waitFor(phone.cdp,phonePeer,18000))throw Error(`${kind}: phone connection did not open`);
   if(kind==="timeline")await phone.cdp.eval("document.getElementById('joinName').value='Alexandria Weston';joinPhoneGame();true");
   else await phone.cdp.eval("document.getElementById('nameInput').value='Alexandria Montgomery';joinGame();true");
   const joined=kind==="timeline"?"playerCount===1":"players.length===1";
-  if(!await waitFor(host.cdp,joined,10000))throw Error(\`\${kind}: phone player did not join\`);
-  issues.push(...await audit(phone.cdp,\`\${kind}-phone-lobby-390x844\`));
+  if(!await waitFor(host.cdp,joined,10000))throw Error(`${kind}: phone player did not join`);
+  issues.push(...await audit(phone.cdp,`${kind}-phone-lobby-390x844`));
   await host.cdp.eval("startGame();true");
   const choose=kind==="timeline"?"joinedPhonePlayerIndex===0&&gameStarted":"phoneState?.mode==='choose'";
   await waitFor(phone.cdp,choose,10000);
-  issues.push(...await audit(phone.cdp,\`\${kind}-phone-board-390x844\`));
+  issues.push(...await audit(phone.cdp,`${kind}-phone-board-390x844`));
   await setViewport(phone.cdp,360,740);
-  issues.push(...await audit(phone.cdp,\`\${kind}-phone-board-360x740\`));
+  issues.push(...await audit(phone.cdp,`${kind}-phone-board-360x740`));
   await setViewport(phone.cdp,390,844);
   if(kind==="timeline"){
-    await host.cdp.eval(\`(()=>{let best=null;for(let ci=0;ci<categories.length;ci++)for(let qi=0;qi<categories[ci].clues.length;qi++){const item=categories[ci].clues[qi],key=ci+"-"+qi;if(dailyDoubleKeys.has(key))continue;if(!best||String(item.q||"").length>String(best.item.q||"").length)best={key,item,base:(qi+1)*100};}if(best)openClue(best.key,best.item,best.base,false);return !!best})()\`);
+    await host.cdp.eval(`(()=>{let best=null;for(let ci=0;ci<categories.length;ci++)for(let qi=0;qi<categories[ci].clues.length;qi++){const item=categories[ci].clues[qi],key=ci+"-"+qi;if(dailyDoubleKeys.has(key))continue;if(!best||String(item.q||"").length>String(best.item.q||"").length)best={key,item,base:(qi+1)*100};}if(best)openClue(best.key,best.item,best.base,false);return !!best})()`);
     await waitFor(phone.cdp,"!!current||document.querySelector('.phone-question')",8000);
   }else{
-    await host.cdp.eval(\`(()=>{let best=null;for(let ci=0;ci<categories.length;ci++)for(let qi=0;qi<categories[ci].clues.length;qi++){const clue=categories[ci].clues[qi],id=clueId(ci,qi);if(dailyDoubleIds.has(id))continue;if(!best||String(clue.question||"").length>String(best.clue.question||"").length)best={ci,qi,clue};}return best?openClue(best.ci,best.qi,activePlayer):false})()\`);
+    await host.cdp.eval(`(()=>{let best=null;for(let ci=0;ci<categories.length;ci++)for(let qi=0;qi<categories[ci].clues.length;qi++){const clue=categories[ci].clues[qi],id=clueId(ci,qi);if(dailyDoubleIds.has(id))continue;if(!best||String(clue.question||"").length>String(best.clue.question||"").length)best={ci,qi,clue};}return best?openClue(best.ci,best.qi,activePlayer):false})()`);
     await waitFor(phone.cdp,"phoneState?.mode==='answer'",8000);
   }
   await delay(150);
-  issues.push(...await audit(phone.cdp,\`\${kind}-phone-long-question-390x844\`));
+  issues.push(...await audit(phone.cdp,`${kind}-phone-long-question-390x844`));
   await setViewport(phone.cdp,360,740);
-  issues.push(...await audit(phone.cdp,\`\${kind}-phone-long-question-360x740\`));
+  issues.push(...await audit(phone.cdp,`${kind}-phone-long-question-360x740`));
   return issues;
 }
 
 (async()=>{
-  if(!fs.existsSync(CHROME))throw Error(\`Chrome not found: \${CHROME}\`);
+  if(!fs.existsSync(CHROME))throw Error(`Chrome not found: ${CHROME}`);
   const host=await launch(9380,"host",1280,720);
   const phone=await launch(9381,"phone",390,844);
   const allIssues=[];
