@@ -35,6 +35,7 @@ jobs:
       - run: node work/validate-questions.js
       - run: node work/audit-game.js outputs/dog-jeopardy.html
       - run: node work/audit-classic.js
+      - run: node work/test-timeline-pack-switch.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

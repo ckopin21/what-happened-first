@@ -60,6 +60,7 @@ const jsonEquivalent = value => JSON.parse(JSON.stringify(value));
 const toasts = [];
 const resets = [];
 const errors = [];
+const phoneCategories = [];
 const windowObject = {
   TIMELINE_PACK_MANIFEST: manifest,
   TIMELINE_QUESTION_PACKS: packs,
@@ -87,8 +88,35 @@ const context = {
   XMLHttpRequest: FakeXHR,
   TIMELINE_PACK: v3,
   categories: JSON.parse(JSON.stringify(v3.categories)),
+  networkRevision: 0,
+  gameEpoch: 0,
+  followupOwnerPlayerId: null,
+  appliedNetworkRevision: 0,
+  playerCount: 0,
+  activePlayer: 0,
+  players: [],
   used: new Set(),
   current: null,
+  pendingDaily: null,
+  gameFinished: false,
+  hintUsed: false,
+  questionResolved: false,
+  selectedChoice: null,
+  submittedChoice: null,
+  choiceLocked: false,
+  lastChancePending: false,
+  lastChancePlayerIndex: null,
+  lastChancePlayerId: "test-player",
+  remotePhaseMultiplier: 1,
+  tieActive: false,
+  tieResolved: false,
+  tieQuestionIndex: -1,
+  tiePlayers: [],
+  tieAnswered: new Set(),
+  tieWinnerId: null,
+  tieWinnerIndex: null,
+  joinedPhonePlayerIndex: null,
+  currentMultiplier: () => 1,
   gameStarted: false,
   remotePhoneMode: false,
   confirm: () => true,
@@ -99,6 +127,9 @@ const context = {
     context.used = new Set();
     context.current = null;
     context.gameStarted = false;
+  },
+  renderPhoneController() {
+    phoneCategories.splice(0, phoneCategories.length, ...context.categories.map(category => category.name));
   },
   document: {
     getElementById(id) { return id === "timelinePackSelect" ? select : null; },
@@ -131,6 +162,13 @@ const functionsStart = inlineScript.indexOf("function timelineManifestEntry");
 const functionsEnd = inlineScript.indexOf("\nfunction leavePhoneGame", functionsStart);
 if (functionsStart < 0 || functionsEnd < 0) throw new Error("Timeline pack functions not found");
 vm.runInContext(inlineScript.slice(functionsStart, functionsEnd), context, { filename: "outputs/dog-jeopardy.html" });
+const networkFunctionsStart = inlineScript.indexOf("function makeNetworkSnapshot");
+const networkFunctionsEnd = inlineScript.indexOf("\nfunction attachHostConnection", networkFunctionsStart);
+if (networkFunctionsStart < 0 || networkFunctionsEnd < 0) throw new Error("Timeline network functions not found");
+vm.runInContext(inlineScript.slice(networkFunctionsStart, networkFunctionsEnd), context, { filename: "outputs/dog-jeopardy.html" });
+context.renderPhoneController = () => {
+  phoneCategories.splice(0, phoneCategories.length, ...context.categories.map(category => category.name));
+};
 
 vm.runInContext("populateTimelinePackSelector()", context);
 assert.deepEqual(options.map(option => option.value), [v3.id, v4.id]);
@@ -152,6 +190,15 @@ assert.equal(select.value, v3.id);
   await vm.runInContext(`switchTimelinePack(${JSON.stringify(v4.id)})`, context);
   assert.equal(context.TIMELINE_PACK.id, v4.id, "repeated switching must keep the selected pack authoritative");
   assert.equal(resets.length, 3);
+
+  const phoneSnapshot = vm.runInContext("makeNetworkSnapshot()", context);
+  assert.deepEqual(jsonEquivalent(phoneSnapshot.pack.categories), jsonEquivalent(v4.categories));
+  vm.runInContext(`applyRemoteSnapshot({type:"state",revision:99,gameStarted:false,playerCount:0,activePlayer:0,used:[],pack:{id:${JSON.stringify(v3.id)},name:${JSON.stringify(v3.name)},genre:${JSON.stringify(v3.genre)},categories:${JSON.stringify(v3.categories)}}})`, context);
+  assert.equal(context.TIMELINE_PACK.id, v3.id, "a connected phone must receive the active Timeline pack");
+  assert.deepEqual(phoneCategories, v3.categories.map(category => category.name));
+  vm.runInContext(`applyRemoteSnapshot({type:"state",revision:100,gameStarted:false,playerCount:0,activePlayer:0,used:[],pack:{id:${JSON.stringify(v4.id)},name:${JSON.stringify(v4.name)},genre:${JSON.stringify(v4.genre)},categories:${JSON.stringify(v4.categories)}}})`, context);
+  assert.equal(context.TIMELINE_PACK.id, v4.id);
+  assert.deepEqual(phoneCategories, v4.categories.map(category => category.name));
 
   manifest.packs.push({ id: "timeline-invalid", name: "Invalid Test Pack", genre: "Timeline", file: "invalid-test.js" });
   const beforeInvalid = context.TIMELINE_PACK;

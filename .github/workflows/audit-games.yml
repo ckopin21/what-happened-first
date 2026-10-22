@@ -36,6 +36,8 @@ jobs:
         run: node work/audit-game.js outputs/dog-jeopardy.html
       - name: Audit classic mode
         run: node work/audit-classic.js
+      - name: Timeline pack switching and phone sync
+        run: node work/test-timeline-pack-switch.js
       - name: Audit responsive UI layout
         env:
           CHROME_PATH: /usr/bin/google-chrome
