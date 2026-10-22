@@ -12,5 +12,8 @@ In GitHub, open **Settings → Pages → Build and deployment → Source**, choo
 source can publish `main` independently of the validation gate. Do this once
 after the workflow reaches the repository.
 
+Done 2026-10-22: the Pages source is GitHub Actions (`gh api repos/ckopin21/what-happened-first/pages`
+reports `build_type: workflow`), so only this workflow publishes.
+
 After that, inspect the `Deploy validated GitHub Pages` run for the deployed
 URL. Pack-only edits trigger it automatically.
